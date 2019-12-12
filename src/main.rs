@@ -21,7 +21,7 @@ struct Form<'a> {
     _query_button: MutPtr<QPushButton>,
     _pkg_line_edit: MutPtr<QLineEdit>,
     _vpin_table: MutPtr<QTableWidget>,
-    _grpbox: MutPtr<QGroupBox>,
+    //_grpbox: MutPtr<QGroupBox>,
     _pkg_header_items: Vec<MutPtr<QTableWidgetItem>>,
     _qspacer: MutPtr<QSpacerItem>,
     button_clicked: Slot<'a>,
@@ -110,9 +110,9 @@ impl<'a> Form<'a> {
             // top vertical layout
             let mut layout = QVBoxLayout::new_1a(&mut widget).into_ptr();
             // groupbox for comboboxes
-            let mut grpbox = QGroupBox::new();
-            layout.add_widget(&mut grpbox);
-            let mut grpbox = grpbox.into_ptr();
+            //let mut grpbox = QGroupBox::new();
+            //layout.add_widget(&mut grpbox);
+            //let mut grpbox = grpbox.into_ptr();
             // layout for combo boxes
             let mut hlayout = QHBoxLayout::new_0a().into_ptr();
             let (level, role, platform, site, direction, qspacer) =
@@ -122,14 +122,13 @@ impl<'a> Form<'a> {
             let platform_ptr = platform.into_ptr();
             let site_ptr = site.into_ptr();
             let dir_ptr = direction.into_ptr();
-
-            grpbox.set_layout(hlayout);
+            layout.add_layout_1a(hlayout);
+            // grpbox.set_layout(hlayout);
             let mut line_edit = QLineEdit::new();
 
             layout.add_widget(&mut line_edit);
             let line_edit = line_edit.into_ptr();
             let mut vpin_tablewidget = QTableWidget::new_2a(0, COLUMNS);
-            //let mut tablemod = vpin_tablewidget.model();
             vpin_tablewidget.vertical_header().hide();
             vpin_tablewidget.set_selection_behavior(SelectionBehavior::SelectRows);
             vpin_tablewidget.set_edit_triggers(QFlags::from(EditTrigger::NoEditTriggers));
@@ -170,10 +169,6 @@ impl<'a> Form<'a> {
 
             layout.add_widget(vpin_tablewidget);
             let mut vpin_tablewidget_ptr = vpin_tablewidget.clone();
-            // let mut button = QPushButton::from_q_string(&QString::from_std_str("Query"));
-
-            // layout.add_widget(&mut button);
-            // let button = button.into_ptr();
 
             widget.show();
 
@@ -290,7 +285,7 @@ impl<'a> Form<'a> {
                 _pkg_header_items: pkg_header_items_vec,
                 _query_button: button,
                 _pkg_line_edit: line_edit,
-                _grpbox: grpbox,
+                //_grpbox: grpbox,
                 _qspacer: qspacer.into_ptr(),
                 //_boxes: boxes,
             };
