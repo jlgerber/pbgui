@@ -8,10 +8,11 @@ use qt_widgets::{
     q_header_view::ResizeMode,
     q_size_policy::Policy,
     qt_core::QString,
+    qt_core::QStringList,
     qt_core::Slot,
     qt_core::SlotOfIntInt,
-    QApplication, QComboBox, QGroupBox, QHBoxLayout, QLineEdit, QPushButton, QSpacerItem,
-    QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget,
+    QApplication, QComboBox, QGroupBox, QHBoxLayout, QInputDialog, QLineEdit, QPushButton,
+    QSpacerItem, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget,
 };
 use std::str::FromStr;
 
@@ -282,6 +283,7 @@ impl<'a> Form<'a> {
         unsafe {
             // parent root_widget
             let mut root_widget = QWidget::new_0a();
+            let root_widget_ptr = root_widget.as_mut_ptr();
             // top vertical layout
             let mut root_layout = QVBoxLayout::new_0a();
             let mut root_layout_ptr = root_layout.as_mut_ptr();
@@ -322,9 +324,19 @@ impl<'a> Form<'a> {
                         .package(pieces[0])
                         .query()
                         .unwrap();
+                    let mut qsl = QStringList::new();
                     for r in results {
                         println!("version: {}", r.version);
+                        qsl.append_q_string(&QString::from_std_str(r.version));
                     }
+                    let new_version = QInputDialog::get_item_4a(
+                        root_widget_ptr,
+                        &QString::from_std_str("Pick Version"),
+                        &QString::from_std_str(pieces[0]),
+                        &qsl,
+                    );
+                    let value = new_version.to_std_string();
+                    println!("value: {}", value);
                 }),
                 button_clicked: Slot::new(move || {
                     let dirtxt = dir_ptr.current_text().to_std_string();
