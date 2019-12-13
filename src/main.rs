@@ -9,6 +9,7 @@ use qt_widgets::{
     q_size_policy::Policy,
     qt_core::QString,
     qt_core::Slot,
+    qt_core::SlotOfIntInt,
     QApplication, QComboBox, QGroupBox, QHBoxLayout, QLineEdit, QPushButton, QSpacerItem,
     QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget,
 };
@@ -48,6 +49,7 @@ struct Form<'a> {
     _pkg_line_edit: MutPtr<QLineEdit>,
     _vpin_table: MutPtr<QTableWidget>,
     button_clicked: Slot<'a>,
+    row_double_clicked: SlotOfIntInt<'a>,
 }
 
 impl<'a> Form<'a> {
@@ -302,6 +304,12 @@ impl<'a> Form<'a> {
             root_widget.show();
 
             let form = Form {
+                row_double_clicked: SlotOfIntInt::new(move |r: i32, c: i32| {
+                    println!("Cell double clicked: {} {}", r, c);
+                    let dist_item = vpin_tablewidget_ptr.item(r, 1);
+                    let text = dist_item.text().to_std_string();
+                    println!("distribution: {}", text);
+                }),
                 button_clicked: Slot::new(move || {
                     let dirtxt = dir_ptr.current_text().to_std_string();
                     let line_edit_txt = line_edit_ptr.text().to_std_string();
@@ -394,6 +402,9 @@ impl<'a> Form<'a> {
             };
             button_ptr.clicked().connect(&form.button_clicked);
             //line_edit.text_edited().connect(&form.line_edit_edited);
+            vpin_tablewidget_ptr
+                .cell_double_clicked()
+                .connect(&form.row_double_clicked);
             form
         }
     }
