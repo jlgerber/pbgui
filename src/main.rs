@@ -308,7 +308,23 @@ impl<'a> Form<'a> {
                     println!("Cell double clicked: {} {}", r, c);
                     let dist_item = vpin_tablewidget_ptr.item(r, 1);
                     let text = dist_item.text().to_std_string();
-                    println!("distribution: {}", text);
+                    let pieces = text.split("-").collect::<Vec<_>>();
+                    assert_eq!(pieces.len(), 2);
+                    println!("package: {} version: {}", pieces[0], pieces[1]);
+                    let client = Client::connect(
+                        "host=127.0.0.1 user=postgres dbname=packrat password=example port=5432",
+                        NoTls,
+                    )
+                    .unwrap();
+                    let mut packratdb = PackratDb::new(client);
+                    let results = packratdb
+                        .find_all_distributions()
+                        .package(pieces[0])
+                        .query()
+                        .unwrap();
+                    for r in results {
+                        println!("version: {}", r.version);
+                    }
                 }),
                 button_clicked: Slot::new(move || {
                     let dirtxt = dir_ptr.current_text().to_std_string();
