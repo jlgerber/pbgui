@@ -2,6 +2,7 @@
 use packybara::packrat::{Client, NoTls, PackratDb};
 use packybara::LtreeSearchMode;
 use qt_core::{AlignmentFlag, QFlags};
+use qt_gui::{QBrush, QColor};
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr},
     q_abstract_item_view::{EditTrigger, SelectionBehavior, SelectionMode},
@@ -308,7 +309,7 @@ impl<'a> Form<'a> {
             let form = Form {
                 row_double_clicked: SlotOfIntInt::new(move |r: i32, c: i32| {
                     println!("Cell double clicked: {} {}", r, c);
-                    let dist_item = vpin_tablewidget_ptr.item(r, 1);
+                    let mut dist_item = vpin_tablewidget_ptr.item(r, 1);
                     let text = dist_item.text().to_std_string();
                     let pieces = text.split("-").collect::<Vec<_>>();
                     assert_eq!(pieces.len(), 2);
@@ -351,6 +352,11 @@ impl<'a> Form<'a> {
                     } else {
                         let value = new_version.to_std_string();
                         println!("value: {}", value);
+                        let new_value = format!("{}-{}", pieces[0], value);
+                        dist_item.set_text(&QString::from_std_str(new_value));
+                        let red = QColor::from_rgb_3a(255, 100, 100);
+                        dist_item.set_foreground(&QBrush::from_q_color(red.as_ref()));
+                        dist_item.table_widget().clear_selection();
                     }
                 }),
                 button_clicked: Slot::new(move || {
