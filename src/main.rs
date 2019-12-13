@@ -335,15 +335,23 @@ impl<'a> Form<'a> {
                         cnt += 1;
                         qsl.append_q_string(&QString::from_std_str(r.version));
                     }
-                    let new_version = QInputDialog::get_item_5a(
+                    let mut tf = false;
+                    let tf_ptr = MutPtr::from_raw(&mut tf);
+                    let new_version = QInputDialog::get_item_7a(
                         root_widget_ptr,
                         &QString::from_std_str("Pick Version"),
                         &QString::from_std_str(pieces[0]),
                         &qsl,
                         idx,
+                        false,
+                        tf_ptr,
                     );
-                    let value = new_version.to_std_string();
-                    println!("value: {}", value);
+                    if *tf_ptr == false {
+                        println!("cancelled");
+                    } else {
+                        let value = new_version.to_std_string();
+                        println!("value: {}", value);
+                    }
                 }),
                 button_clicked: Slot::new(move || {
                     let dirtxt = dir_ptr.current_text().to_std_string();
