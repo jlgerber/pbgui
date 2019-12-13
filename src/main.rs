@@ -182,7 +182,7 @@ impl<'a> Form<'a> {
     }
 
     unsafe fn setup_headers(
-        mut vpin_tablewidget: MutPtr<QTableWidget>,
+        vpin_tablewidget: &mut MutPtr<QTableWidget>,
         headers: Vec<&'static str>,
     ) {
         for (cnt, val) in headers.into_iter().enumerate() {
@@ -192,7 +192,42 @@ impl<'a> Form<'a> {
                 .set_horizontal_header_item(cnt as i32, vpin_table_widget_item.into_ptr());
         }
     }
-    unsafe fn setup_table() {}
+    // Setup the TableWidget
+    unsafe fn setup_table(vpin_tablewidget: &mut MutPtr<QTableWidget>) {
+        vpin_tablewidget.vertical_header().hide();
+        vpin_tablewidget.set_selection_behavior(SelectionBehavior::SelectRows);
+        vpin_tablewidget.set_edit_triggers(QFlags::from(EditTrigger::NoEditTriggers));
+        vpin_tablewidget.set_selection_mode(SelectionMode::SingleSelection);
+        vpin_tablewidget
+            .horizontal_header()
+            .set_stretch_last_section(true);
+        vpin_tablewidget
+            .horizontal_header()
+            .set_section_resize_mode_1a(ResizeMode::Stretch);
+        vpin_tablewidget.set_show_grid(false);
+        vpin_tablewidget.set_alternating_row_colors(true);
+        vpin_tablewidget.set_style_sheet(&QString::from_std_str(
+            "alternate-background-color: rgb(50,50,50);color: rgb(200,200,200);background-color: rgb(40,40,40);",
+        ));
+        vpin_tablewidget.horizontal_header()
+            .set_style_sheet(&QString::from_std_str(
+                "background-color: rgb(80,80,80); color:white; border:none;outline:none;border-left: 0px; border-right: 0px;",
+            ));
+        Self::setup_headers(
+            //vpin_tw_ptr,
+            vpin_tablewidget,
+            vec![
+                "Id",
+                "Distribution",
+                "Level",
+                "Role",
+                "Platform",
+                "Site",
+                "Withs",
+            ],
+        );
+    }
+    // New up a Form
     fn new(mut db: &'a mut PackratDb) -> Form<'a> {
         unsafe {
             // parent root_widget
@@ -218,39 +253,10 @@ impl<'a> Form<'a> {
             hlayout_ptr.add_widget(button.into_ptr());
             // setup table widget
             let mut vpin_tablewidget = QTableWidget::new_2a(0, COLUMNS);
-            let vpin_tw_ptr = vpin_tablewidget.as_mut_ptr();
-            vpin_tablewidget.vertical_header().hide();
-            vpin_tablewidget.set_selection_behavior(SelectionBehavior::SelectRows);
-            vpin_tablewidget.set_edit_triggers(QFlags::from(EditTrigger::NoEditTriggers));
-            vpin_tablewidget.set_selection_mode(SelectionMode::SingleSelection);
-            vpin_tablewidget
-                .horizontal_header()
-                .set_stretch_last_section(true);
-            vpin_tablewidget
-                .horizontal_header()
-                .set_section_resize_mode_1a(ResizeMode::Stretch);
-            vpin_tablewidget.set_show_grid(false);
-            vpin_tablewidget.set_alternating_row_colors(true);
-            vpin_tablewidget.set_style_sheet(&QString::from_std_str(
-                "alternate-background-color: rgb(50,50,50);color: rgb(200,200,200);background-color: rgb(40,40,40);",
-            ));
-            vpin_tablewidget.horizontal_header()
-                .set_style_sheet(&QString::from_std_str(
-                    "background-color: rgb(80,80,80); color:white; border:none;outline:none;border-left: 0px; border-right: 0px;",
-                ));
+            let mut vpin_tw_ptr = vpin_tablewidget.as_mut_ptr();
+            Self::setup_table(&mut vpin_tw_ptr);
             let mut vpin_tablewidget_ptr = vpin_tw_ptr.clone();
-            Self::setup_headers(
-                vpin_tw_ptr,
-                vec![
-                    "Id",
-                    "Distribution",
-                    "Level",
-                    "Role",
-                    "Platform",
-                    "Site",
-                    "Withs",
-                ],
-            );
+            // assign table to the root layout
             root_layout_ptr.add_widget(vpin_tablewidget.into_ptr());
             root_widget.show();
 
