@@ -14,6 +14,31 @@ use qt_widgets::{
 };
 use std::str::FromStr;
 
+macro_rules! dark_grey_stripe {
+    () => {
+        "rgb(40,40,40)"
+    };
+}
+macro_rules! light_grey_stripe {
+    () => {
+        "rgb(50,50,50)"
+    };
+}
+macro_rules! table_text_color {
+    () => {
+        "rgb(200,200,200)"
+    };
+}
+macro_rules! table_header_bg_color {
+    () => {
+        "rgb(80,80,80)"
+    };
+}
+macro_rules! table_header_text_color {
+    () => {
+        "white"
+    };
+}
 const COLUMNS: i32 = 7;
 
 struct Form<'a> {
@@ -172,6 +197,7 @@ impl<'a> Form<'a> {
 
         let qspacer = QSpacerItem::new_3a(30, 10, Policy::Expanding);
         layout.add_item(qspacer.into_ptr());
+        // return tuple
         (
             level_cb_ptr,
             role_cb_ptr,
@@ -180,11 +206,17 @@ impl<'a> Form<'a> {
             dir_cb_ptr,
         )
     }
-
-    unsafe fn setup_headers(
-        vpin_tablewidget: &mut MutPtr<QTableWidget>,
-        headers: Vec<&'static str>,
-    ) {
+    // setup the headers matching the provided header vector
+    unsafe fn setup_table_headers(vpin_tablewidget: &mut MutPtr<QTableWidget>) {
+        let headers = vec![
+            "Id",
+            "Distribution",
+            "Level",
+            "Role",
+            "Platform",
+            "Site",
+            "Withs",
+        ];
         for (cnt, val) in headers.into_iter().enumerate() {
             let vpin_table_widget_item =
                 QTableWidgetItem::from_q_string(&QString::from_std_str(val));
@@ -193,40 +225,56 @@ impl<'a> Form<'a> {
         }
     }
     // Setup the TableWidget
-    unsafe fn setup_table(vpin_tablewidget: &mut MutPtr<QTableWidget>) {
-        vpin_tablewidget.vertical_header().hide();
-        vpin_tablewidget.set_selection_behavior(SelectionBehavior::SelectRows);
-        vpin_tablewidget.set_edit_triggers(QFlags::from(EditTrigger::NoEditTriggers));
-        vpin_tablewidget.set_selection_mode(SelectionMode::SingleSelection);
-        vpin_tablewidget
+    unsafe fn setup_table(root_layout_ptr: &mut MutPtr<QVBoxLayout>) -> MutPtr<QTableWidget> {
+        // create the tablewidget
+        let mut vpin_tablewidget = QTableWidget::new_2a(0, COLUMNS);
+        let mut vpin_tw_ptr = vpin_tablewidget.as_mut_ptr();
+        root_layout_ptr.add_widget(vpin_tablewidget.into_ptr());
+        // assign table to the root layout
+        vpin_tw_ptr.vertical_header().hide();
+        vpin_tw_ptr.set_selection_behavior(SelectionBehavior::SelectRows);
+        vpin_tw_ptr.set_edit_triggers(QFlags::from(EditTrigger::NoEditTriggers));
+        vpin_tw_ptr.set_selection_mode(SelectionMode::SingleSelection);
+        vpin_tw_ptr
             .horizontal_header()
             .set_stretch_last_section(true);
-        vpin_tablewidget
+        vpin_tw_ptr
             .horizontal_header()
             .set_section_resize_mode_1a(ResizeMode::Stretch);
-        vpin_tablewidget.set_show_grid(false);
-        vpin_tablewidget.set_alternating_row_colors(true);
-        vpin_tablewidget.set_style_sheet(&QString::from_std_str(
-            "alternate-background-color: rgb(50,50,50);color: rgb(200,200,200);background-color: rgb(40,40,40);",
-        ));
-        vpin_tablewidget.horizontal_header()
-            .set_style_sheet(&QString::from_std_str(
-                "background-color: rgb(80,80,80); color:white; border:none;outline:none;border-left: 0px; border-right: 0px;",
-            ));
-        Self::setup_headers(
-            //vpin_tw_ptr,
-            vpin_tablewidget,
-            vec![
-                "Id",
-                "Distribution",
-                "Level",
-                "Role",
-                "Platform",
-                "Site",
-                "Withs",
-            ],
-        );
+        vpin_tw_ptr.set_show_grid(false);
+        vpin_tw_ptr.set_alternating_row_colors(true);
+        vpin_tw_ptr.set_style_sheet(&QString::from_std_str(concat!(
+            "alternate-background-color:",
+            light_grey_stripe!(),
+            ";color:",
+            table_text_color!(),
+            ";background-color:",
+            dark_grey_stripe!(),
+            ";"
+        )));
+        vpin_tw_ptr
+            .horizontal_header()
+            .set_style_sheet(&QString::from_std_str(concat!(
+                "background-color:",
+                table_header_bg_color!(),
+                ";color:",
+                table_header_text_color!(),
+                ";border: none; outline:none; border-left: 0px; border-right: 0px;"
+            )));
+        Self::setup_table_headers(&mut vpin_tw_ptr);
+
+        vpin_tw_ptr
     }
+
+    unsafe fn create_query_button(hlayout_ptr: &mut MutPtr<QHBoxLayout>) -> MutPtr<QPushButton> {
+        let mut button = QPushButton::from_q_string(&QString::from_std_str("Query"));
+        let button_ptr = button.as_mut_ptr();
+        button.set_minimum_width(70);
+        button.set_maximum_width(70);
+        hlayout_ptr.add_widget(button.into_ptr());
+        button_ptr
+    }
+
     // New up a Form
     fn new(mut db: &'a mut PackratDb) -> Form<'a> {
         unsafe {
@@ -236,28 +284,21 @@ impl<'a> Form<'a> {
             let mut root_layout = QVBoxLayout::new_0a();
             let mut root_layout_ptr = root_layout.as_mut_ptr();
             root_widget.set_layout(root_layout.into_ptr());
+            // header layout
             let mut hlayout = QHBoxLayout::new_0a();
             let mut hlayout_ptr = hlayout.as_mut_ptr();
             root_layout_ptr.add_layout_1a(hlayout.into_ptr());
+            // setup comboboxes in header
             let (level_ptr, role_ptr, platform_ptr, site_ptr, dir_ptr) =
                 Self::combo_boxes(&mut db, &mut hlayout_ptr);
             // LINE EDIT
             let mut line_edit = QLineEdit::new();
             let line_edit_ptr = line_edit.as_mut_ptr();
             root_layout_ptr.add_widget(line_edit.into_ptr());
-            // setup button
-            let mut button = QPushButton::from_q_string(&QString::from_std_str("Query"));
-            let button_ptr = button.as_mut_ptr();
-            button.set_minimum_width(70);
-            button.set_maximum_width(70);
-            hlayout_ptr.add_widget(button.into_ptr());
+            // create query button
+            let button_ptr = Self::create_query_button(&mut hlayout_ptr);
             // setup table widget
-            let mut vpin_tablewidget = QTableWidget::new_2a(0, COLUMNS);
-            let mut vpin_tw_ptr = vpin_tablewidget.as_mut_ptr();
-            Self::setup_table(&mut vpin_tw_ptr);
-            let mut vpin_tablewidget_ptr = vpin_tw_ptr.clone();
-            // assign table to the root layout
-            root_layout_ptr.add_widget(vpin_tablewidget.into_ptr());
+            let mut vpin_tablewidget_ptr = Self::setup_table(&mut root_layout_ptr);
             root_widget.show();
 
             let form = Form {
