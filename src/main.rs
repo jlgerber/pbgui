@@ -42,6 +42,19 @@ macro_rules! table_header_text_color {
         "white"
     };
 }
+
+macro_rules! qcolor_red {
+    () => {
+        QColor::from_rgb_3a(255, 100, 100)
+    };
+}
+
+macro_rules! qcolor_blue {
+    () => {
+        QColor::from_rgb_3a(100, 150, 255)
+    };
+}
+
 const COLUMNS: i32 = 7;
 
 struct Form<'a> {
@@ -275,6 +288,7 @@ impl<'a> Form<'a> {
         let button_ptr = button.as_mut_ptr();
         button.set_minimum_width(70);
         button.set_maximum_width(70);
+        button.set_minimum_height(60);
         hlayout_ptr.add_widget(button.into_ptr());
         button_ptr
     }
@@ -308,12 +322,10 @@ impl<'a> Form<'a> {
 
             let form = Form {
                 row_double_clicked: SlotOfIntInt::new(move |r: i32, c: i32| {
-                    //println!("Cell double clicked: {} {}", r, c);
                     let mut dist_item = vpin_tablewidget_ptr.item(r, 1);
                     let text = dist_item.text().to_std_string();
                     let pieces = text.split("-").collect::<Vec<_>>();
                     assert_eq!(pieces.len(), 2);
-                    //println!("package: {} version: {}", pieces[0], pieces[1]);
                     let client = Client::connect(
                         "host=127.0.0.1 user=postgres dbname=packrat password=example port=5432",
                         NoTls,
@@ -329,7 +341,6 @@ impl<'a> Form<'a> {
                     let mut idx = 0;
                     let mut cnt = 0;
                     for r in results {
-                        //println!("version: {}", r.version);
                         if r.version == pieces[1] {
                             idx = cnt;
                         }
@@ -351,11 +362,11 @@ impl<'a> Form<'a> {
                         println!("cancelled");
                     } else {
                         let value = new_version.to_std_string();
-                        println!("value: {}", value);
                         let new_value = format!("{}-{}", pieces[0], value);
                         dist_item.set_text(&QString::from_std_str(new_value));
-                        let red = QColor::from_rgb_3a(255, 100, 100);
-                        dist_item.set_foreground(&QBrush::from_q_color(red.as_ref()));
+                        //let update_color = QColor::from_rgb_3a(255, 100, 100);
+                        let update_color = qcolor_blue!();
+                        dist_item.set_foreground(&QBrush::from_q_color(update_color.as_ref()));
                         dist_item.table_widget().clear_selection();
                     }
                 }),
