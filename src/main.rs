@@ -308,12 +308,12 @@ impl<'a> Form<'a> {
 
             let form = Form {
                 row_double_clicked: SlotOfIntInt::new(move |r: i32, c: i32| {
-                    println!("Cell double clicked: {} {}", r, c);
+                    //println!("Cell double clicked: {} {}", r, c);
                     let mut dist_item = vpin_tablewidget_ptr.item(r, 1);
                     let text = dist_item.text().to_std_string();
                     let pieces = text.split("-").collect::<Vec<_>>();
                     assert_eq!(pieces.len(), 2);
-                    println!("package: {} version: {}", pieces[0], pieces[1]);
+                    //println!("package: {} version: {}", pieces[0], pieces[1]);
                     let client = Client::connect(
                         "host=127.0.0.1 user=postgres dbname=packrat password=example port=5432",
                         NoTls,
@@ -329,7 +329,7 @@ impl<'a> Form<'a> {
                     let mut idx = 0;
                     let mut cnt = 0;
                     for r in results {
-                        println!("version: {}", r.version);
+                        //println!("version: {}", r.version);
                         if r.version == pieces[1] {
                             idx = cnt;
                         }
