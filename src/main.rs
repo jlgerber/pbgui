@@ -325,15 +325,22 @@ impl<'a> Form<'a> {
                         .query()
                         .unwrap();
                     let mut qsl = QStringList::new();
+                    let mut idx = 0;
+                    let mut cnt = 0;
                     for r in results {
                         println!("version: {}", r.version);
+                        if r.version == pieces[1] {
+                            idx = cnt;
+                        }
+                        cnt += 1;
                         qsl.append_q_string(&QString::from_std_str(r.version));
                     }
-                    let new_version = QInputDialog::get_item_4a(
+                    let new_version = QInputDialog::get_item_5a(
                         root_widget_ptr,
                         &QString::from_std_str("Pick Version"),
                         &QString::from_std_str(pieces[0]),
                         &qsl,
+                        idx,
                     );
                     let value = new_version.to_std_string();
                     println!("value: {}", value);
