@@ -21,31 +21,26 @@ struct Form<'a> {
     _query_button: MutPtr<QPushButton>,
     _pkg_line_edit: MutPtr<QLineEdit>,
     _vpin_table: MutPtr<QTableWidget>,
-    _grpbox: Vec<CppBox<QGroupBox>>,
-    _pkg_header_items: Vec<MutPtr<QTableWidgetItem>>,
-    _qspacer: MutPtr<QSpacerItem>,
     button_clicked: Slot<'a>,
 }
 
 impl<'a> Form<'a> {
     unsafe fn combo_boxes<'b>(
         db: &'b mut PackratDb,
-        mut layout: MutPtr<QHBoxLayout>,
+        layout: &mut MutPtr<QHBoxLayout>,
     ) -> (
-        CppBox<QComboBox>,
-        CppBox<QComboBox>,
-        CppBox<QComboBox>,
-        CppBox<QComboBox>,
-        CppBox<QComboBox>,
-        CppBox<QSpacerItem>,
-        Vec<CppBox<QGroupBox>>,
+        MutPtr<QComboBox>,
+        MutPtr<QComboBox>,
+        MutPtr<QComboBox>,
+        MutPtr<QComboBox>,
+        MutPtr<QComboBox>,
     ) {
         // fn setup<T>(results: T, mut combobox: CppBox<QComboBox>, item: &str, lqbel:&str) -> CppBox<QComboBox> {
 
         // }
         //results
-        let mut grpboxes = Vec::new();
         let mut level_combobox = QComboBox::new_0a();
+        let level_cb_ptr = level_combobox.as_mut_ptr();
         // LEVELs
         let results = db.find_all_levels().query().unwrap();
         level_combobox.add_item_q_string(&QString::from_std_str("facility"));
@@ -56,18 +51,20 @@ impl<'a> Form<'a> {
             }
         }
         let mut grpbox = QGroupBox::new();
-        //grpbox.set_parent(layout); //does not work
-        let mut hlayout = QHBoxLayout::new_1a(&mut grpbox).into_ptr();
+        let mut hlayout = QHBoxLayout::new_0a();
+        // assign owner of level
         hlayout.add_widget_3a(
-            &mut level_combobox,
+            level_combobox.into_ptr(),
             1,
             QFlags::from(AlignmentFlag::AlignBottom),
         );
+        grpbox.set_layout(hlayout.into_ptr());
         grpbox.set_title(&QString::from_std_str("Show"));
-        layout.add_widget(&mut grpbox);
-        grpboxes.push(grpbox);
+        layout.add_widget(grpbox.into_ptr());
+
         // Roles
         let mut role_combobox = QComboBox::new_0a();
+        let role_cb_ptr = role_combobox.as_mut_ptr();
         let results = db.find_all_roles().query().unwrap();
         role_combobox.add_item_q_string(&QString::from_std_str("any"));
         for r in results {
@@ -77,34 +74,37 @@ impl<'a> Form<'a> {
             }
         }
         let mut grpbox = QGroupBox::new();
-        let mut hlayout = QHBoxLayout::new_1a(&mut grpbox).into_ptr();
+        let mut hlayout = QHBoxLayout::new_0a();
         hlayout.add_widget_3a(
-            &mut role_combobox,
+            role_combobox.into_ptr(),
             1,
             QFlags::from(AlignmentFlag::AlignBottom),
         );
+        grpbox.set_layout(hlayout.into_ptr());
         grpbox.set_title(&QString::from_std_str("Role"));
-        layout.add_widget(&mut grpbox);
-        grpboxes.push(grpbox);
+        layout.add_widget(grpbox.into_ptr());
         // Platforms
         let mut platform_combobox = QComboBox::new_0a();
+        let platform_cb_ptr = platform_combobox.as_mut_ptr();
         let results = db.find_all_platforms().query().unwrap();
         for r in results {
             let platform_str = r.name.as_str();
             platform_combobox.add_item_q_string(&QString::from_std_str(platform_str));
         }
         let mut grpbox = QGroupBox::new();
-        let mut hlayout = QHBoxLayout::new_1a(&mut grpbox).into_ptr();
+        let mut hlayout = QHBoxLayout::new_0a();
         hlayout.add_widget_3a(
-            &mut platform_combobox,
+            platform_combobox.into_ptr(),
             1,
             QFlags::from(AlignmentFlag::AlignBottom),
         );
         grpbox.set_title(&QString::from_std_str("Platform"));
-        layout.add_widget(&mut grpbox);
-        grpboxes.push(grpbox);
+        grpbox.set_layout(hlayout.into_ptr());
+        layout.add_widget(grpbox.into_ptr());
+
         // Site
         let mut site_combobox = QComboBox::new_0a();
+        let mut site_cb_ptr = site_combobox.as_mut_ptr();
         let results = db.find_all_sites().query().unwrap();
         site_combobox.add_item_q_string(&QString::from_std_str("any"));
         for r in results {
@@ -112,81 +112,76 @@ impl<'a> Form<'a> {
             site_combobox.add_item_q_string(&QString::from_std_str(site_str));
         }
         let mut grpbox = QGroupBox::new();
-        let mut hlayout = QHBoxLayout::new_1a(&mut grpbox).into_ptr();
+        let mut hlayout = QHBoxLayout::new_0a();
         hlayout.add_widget_3a(
-            &mut site_combobox,
+            site_combobox.into_ptr(),
             1,
             QFlags::from(AlignmentFlag::AlignBottom),
         );
+        grpbox.set_layout(hlayout.into_ptr());
         grpbox.set_title(&QString::from_std_str("Site"));
-        layout.add_widget(&mut grpbox);
-        grpboxes.push(grpbox);
+        layout.add_widget(grpbox.into_ptr());
         // Direction
         let mut dir_combobox = QComboBox::new_0a();
-        site_combobox.add_item_q_string(&QString::from_std_str("any"));
+        let dir_cb_ptr = dir_combobox.as_mut_ptr();
+        site_cb_ptr.add_item_q_string(&QString::from_std_str("any"));
         for r in &["ancestor", "exact", "descendant"] {
             dir_combobox.add_item_q_string(&QString::from_std_str(r));
         }
         let mut grpbox = QGroupBox::new();
-        let mut hlayout = QHBoxLayout::new_1a(&mut grpbox).into_ptr();
+        let mut hlayout = QHBoxLayout::new_0a();
         hlayout.add_widget_3a(
-            &mut dir_combobox,
+            dir_combobox.into_ptr(),
             1,
             QFlags::from(AlignmentFlag::AlignBottom),
         );
+        grpbox.set_layout(hlayout.into_ptr());
         grpbox.set_title(&QString::from_std_str("Direction"));
-        layout.add_widget(&mut grpbox);
-        grpboxes.push(grpbox);
+        layout.add_widget(grpbox.into_ptr());
 
-        let mut qspacer = QSpacerItem::new_3a(30, 10, Policy::Expanding);
-        layout.add_item(&mut qspacer);
+        let qspacer = QSpacerItem::new_3a(30, 10, Policy::Expanding);
+        layout.add_item(qspacer.into_ptr());
         (
-            level_combobox,
-            role_combobox,
-            platform_combobox,
-            site_combobox,
-            dir_combobox,
-            qspacer,
-            grpboxes,
+            level_cb_ptr,
+            role_cb_ptr,
+            platform_cb_ptr,
+            site_cb_ptr,
+            dir_cb_ptr,
         )
     }
 
     unsafe fn setup_headers(
         mut vpin_tablewidget: MutPtr<QTableWidget>,
         headers: Vec<&'static str>,
-    ) -> (MutPtr<QTableWidget>, Vec<MutPtr<QTableWidgetItem>>) {
-        let mut pkg_header_items_vec = Vec::new();
+    ) {
         for (cnt, val) in headers.into_iter().enumerate() {
-            let mut vpin_table_widget_item =
+            let vpin_table_widget_item =
                 QTableWidgetItem::from_q_string(&QString::from_std_str(val));
-            vpin_tablewidget.set_horizontal_header_item(cnt as i32, &mut vpin_table_widget_item);
-            pkg_header_items_vec.push(vpin_table_widget_item.into_ptr());
+            vpin_tablewidget
+                .set_horizontal_header_item(cnt as i32, vpin_table_widget_item.into_ptr());
         }
-        (vpin_tablewidget, pkg_header_items_vec)
     }
 
     fn new(mut db: &'a mut PackratDb) -> Form<'a> {
         unsafe {
-            // parent widget
-            let mut widget = QWidget::new_0a();
+            // parent root_widget
+            let mut root_widget = QWidget::new_0a();
             // top vertical layout
-            let mut layout = QVBoxLayout::new_1a(&mut widget).into_ptr();
-            // groupbox for comboboxes
-            // layout for combo boxes
-            let mut hlayout = QHBoxLayout::new_0a().into_ptr();
-            let (level, role, platform, site, dir_combobox, qspacer, grpboxes) =
-                Self::combo_boxes(&mut db, hlayout.clone());
-            let level_ptr = level.into_ptr();
-            let role_ptr = role.into_ptr();
-            let platform_ptr = platform.into_ptr();
-            let site_ptr = site.into_ptr();
-            let dir_ptr = dir_combobox.into_ptr();
-            layout.add_layout_1a(hlayout);
+            let mut root_layout = QVBoxLayout::new_0a();
+            let mut root_layout_ptr = root_layout.as_mut_ptr();
+            root_widget.set_layout(root_layout.into_ptr());
+            let mut hlayout = QHBoxLayout::new_0a();
+            let mut hlayout_ptr = hlayout.as_mut_ptr();
+            root_layout_ptr.add_layout_1a(hlayout.into_ptr());
+            let (level_ptr, role_ptr, platform_ptr, site_ptr, dir_ptr) =
+                Self::combo_boxes(&mut db, &mut hlayout_ptr);
+            // LINE EDIT
             let mut line_edit = QLineEdit::new();
+            let line_edit_ptr = line_edit.as_mut_ptr();
+            root_layout_ptr.add_widget(line_edit.into_ptr());
 
-            layout.add_widget(&mut line_edit);
-            let line_edit = line_edit.into_ptr();
             let mut vpin_tablewidget = QTableWidget::new_2a(0, COLUMNS);
+            let vpin_tw_ptr = vpin_tablewidget.as_mut_ptr();
             vpin_tablewidget.vertical_header().hide();
             vpin_tablewidget.set_selection_behavior(SelectionBehavior::SelectRows);
             vpin_tablewidget.set_edit_triggers(QFlags::from(EditTrigger::NoEditTriggers));
@@ -206,9 +201,9 @@ impl<'a> Form<'a> {
                 .set_style_sheet(&QString::from_std_str(
                     "background-color: rgb(80,80,80); color:white; border:none;outline:none;border-left: 0px; border-right: 0px;",
                 ));
-
-            let (vpin_tablewidget, pkg_header_items_vec) = Self::setup_headers(
-                vpin_tablewidget.into_ptr(),
+            let mut vpin_tablewidget_ptr = vpin_tw_ptr.clone();
+            Self::setup_headers(
+                vpin_tw_ptr,
                 vec![
                     "Id",
                     "Distribution",
@@ -220,44 +215,41 @@ impl<'a> Form<'a> {
                 ],
             );
             let mut button = QPushButton::from_q_string(&QString::from_std_str("Query"));
+            let button_ptr = button.as_mut_ptr();
             button.set_minimum_width(70);
             button.set_maximum_width(70);
-            hlayout.add_widget(&mut button);
-            let button = button.into_ptr();
-
-            layout.add_widget(vpin_tablewidget);
-            let mut vpin_tablewidget_ptr = vpin_tablewidget.clone();
-
-            widget.show();
+            hlayout_ptr.add_widget(button.into_ptr());
+            root_layout_ptr.add_widget(vpin_tablewidget.into_ptr());
+            root_widget.show();
 
             let form = Form {
                 button_clicked: Slot::new(move || {
                     let dirtxt = dir_ptr.current_text();
-                    let line_edit_txt = line_edit.text().to_std_string();
+                    let line_edit_txt = line_edit_ptr.text().to_std_string();
 
                     let showtxt = level_ptr.current_text();
-                    let mut vpin_table_widget_item = QTableWidgetItem::new();
-                    vpin_table_widget_item.set_text(&showtxt);
+                    // let mut vpin_table_widget_item = QTableWidgetItem::new();
+                    // vpin_table_widget_item.set_text(&showtxt);
                     let showtxt = showtxt.to_std_string();
-                    vpin_tablewidget_ptr.set_item(0, 1, vpin_table_widget_item.into_ptr());
+                    // vpin_tablewidget_ptr.set_item(0, 1, vpin_table_widget_item.into_ptr());
 
                     let roletxt = role_ptr.current_text();
-                    let mut vpin_table_widget_item = QTableWidgetItem::new();
-                    vpin_table_widget_item.set_text(&roletxt);
+                    // let mut vpin_table_widget_item = QTableWidgetItem::new();
+                    // vpin_table_widget_item.set_text(&roletxt);
                     let roletxt = roletxt.to_std_string();
-                    vpin_tablewidget_ptr.set_item(0, 2, vpin_table_widget_item.into_ptr());
+                    // vpin_tablewidget_ptr.set_item(0, 2, vpin_table_widget_item.into_ptr());
 
                     let platformtxt = platform_ptr.current_text();
-                    let mut vpin_table_widget_item = QTableWidgetItem::new();
-                    vpin_table_widget_item.set_text(&platformtxt);
+                    // let mut vpin_table_widget_item = QTableWidgetItem::new();
+                    // vpin_table_widget_item.set_text(&platformtxt);
                     let platformtxt = platformtxt.to_std_string();
-                    vpin_tablewidget_ptr.set_item(0, 3, vpin_table_widget_item.into_ptr());
+                    // vpin_tablewidget_ptr.set_item(0, 3, vpin_table_widget_item.into_ptr());
 
                     let sitetxt = site_ptr.current_text();
-                    let mut vpin_table_widget_item = QTableWidgetItem::new();
-                    vpin_table_widget_item.set_text(&sitetxt);
+                    // let mut vpin_table_widget_item = QTableWidgetItem::new();
+                    // vpin_table_widget_item.set_text(&sitetxt);
                     let sitetxt = sitetxt.to_std_string();
-                    vpin_tablewidget_ptr.set_item(0, 4, vpin_table_widget_item.into_ptr());
+                    // vpin_tablewidget_ptr.set_item(0, 4, vpin_table_widget_item.into_ptr());
                     // for now
                     let client = Client::connect(
                         "host=127.0.0.1 user=postgres dbname=packrat password=example port=5432",
@@ -338,16 +330,12 @@ impl<'a> Form<'a> {
                     vpin_tablewidget_ptr.set_sorting_enabled(true);
                 }),
                 _db: db,
-                _widget: widget,
-                _vpin_table: vpin_tablewidget,
-                _pkg_header_items: pkg_header_items_vec,
-                _query_button: button,
-                _pkg_line_edit: line_edit,
-                _grpbox: grpboxes,
-                _qspacer: qspacer.into_ptr(),
-                //_boxes: boxes,
+                _widget: root_widget,
+                _vpin_table: vpin_tablewidget_ptr,
+                _query_button: button_ptr,
+                _pkg_line_edit: line_edit_ptr,
             };
-            button.clicked().connect(&form.button_clicked);
+            button_ptr.clicked().connect(&form.button_clicked);
             //line_edit.text_edited().connect(&form.line_edit_edited);
             form
         }
