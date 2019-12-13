@@ -12,9 +12,10 @@ use qt_widgets::{
     QApplication, QComboBox, QGroupBox, QHBoxLayout, QLineEdit, QPushButton, QSpacerItem,
     QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget,
 };
-
 use std::str::FromStr;
+
 const COLUMNS: i32 = 7;
+
 struct Form<'a> {
     _db: &'a mut PackratDb,
     _widget: CppBox<QWidget>,
@@ -25,31 +26,22 @@ struct Form<'a> {
 }
 
 impl<'a> Form<'a> {
-    unsafe fn combo_boxes<'b>(
+    unsafe fn setup_levels_cb<'b>(
         db: &'b mut PackratDb,
         layout: &mut MutPtr<QHBoxLayout>,
-    ) -> (
-        MutPtr<QComboBox>,
-        MutPtr<QComboBox>,
-        MutPtr<QComboBox>,
-        MutPtr<QComboBox>,
-        MutPtr<QComboBox>,
-    ) {
-        // fn setup<T>(results: T, mut combobox: CppBox<QComboBox>, item: &str, lqbel:&str) -> CppBox<QComboBox> {
-
-        // }
+    ) -> MutPtr<QComboBox> {
         //results
         let mut level_combobox = QComboBox::new_0a();
         let level_cb_ptr = level_combobox.as_mut_ptr();
-        // LEVELs
+        // LEVELS
         let results = db.find_all_levels().query().unwrap();
         level_combobox.add_item_q_string(&QString::from_std_str("facility"));
-        for r in results {
-            let level_str = r.level.as_str();
-            if level_str != "facility" {
-                level_combobox.add_item_q_string(&QString::from_std_str(level_str));
-            }
-        }
+        results
+            .iter()
+            .filter(|s| s.level.as_str() != "facility")
+            .for_each(|s| {
+                level_combobox.add_item_q_string(&QString::from_std_str(s.level.as_str()))
+            });
         let mut grpbox = QGroupBox::new();
         let mut hlayout = QHBoxLayout::new_0a();
         // assign owner of level
@@ -61,18 +53,21 @@ impl<'a> Form<'a> {
         grpbox.set_layout(hlayout.into_ptr());
         grpbox.set_title(&QString::from_std_str("Show"));
         layout.add_widget(grpbox.into_ptr());
-
-        // Roles
+        level_cb_ptr
+    }
+    // set up the roles combobox
+    unsafe fn setup_roles_cb<'b>(
+        db: &'b mut PackratDb,
+        layout: &mut MutPtr<QHBoxLayout>,
+    ) -> MutPtr<QComboBox> {
         let mut role_combobox = QComboBox::new_0a();
         let role_cb_ptr = role_combobox.as_mut_ptr();
         let results = db.find_all_roles().query().unwrap();
         role_combobox.add_item_q_string(&QString::from_std_str("any"));
-        for r in results {
-            let role_str = r.role.as_str();
-            if role_str != "any" {
-                role_combobox.add_item_q_string(&QString::from_std_str(role_str));
-            }
-        }
+        results
+            .iter()
+            .filter(|s| s.role.as_str() != "any")
+            .for_each(|s| role_combobox.add_item_q_string(&QString::from_std_str(s.role.as_str())));
         let mut grpbox = QGroupBox::new();
         let mut hlayout = QHBoxLayout::new_0a();
         hlayout.add_widget_3a(
@@ -83,7 +78,13 @@ impl<'a> Form<'a> {
         grpbox.set_layout(hlayout.into_ptr());
         grpbox.set_title(&QString::from_std_str("Role"));
         layout.add_widget(grpbox.into_ptr());
-        // Platforms
+        role_cb_ptr
+    }
+    // Platforms
+    unsafe fn setup_platforms_cb<'b>(
+        db: &'b mut PackratDb,
+        layout: &mut MutPtr<QHBoxLayout>,
+    ) -> MutPtr<QComboBox> {
         let mut platform_combobox = QComboBox::new_0a();
         let platform_cb_ptr = platform_combobox.as_mut_ptr();
         let results = db.find_all_platforms().query().unwrap();
@@ -101,10 +102,15 @@ impl<'a> Form<'a> {
         grpbox.set_title(&QString::from_std_str("Platform"));
         grpbox.set_layout(hlayout.into_ptr());
         layout.add_widget(grpbox.into_ptr());
-
-        // Site
+        platform_cb_ptr
+    }
+    // Site
+    unsafe fn setup_sites_cb<'b>(
+        db: &'b mut PackratDb,
+        layout: &mut MutPtr<QHBoxLayout>,
+    ) -> MutPtr<QComboBox> {
         let mut site_combobox = QComboBox::new_0a();
-        let mut site_cb_ptr = site_combobox.as_mut_ptr();
+        let site_cb_ptr = site_combobox.as_mut_ptr();
         let results = db.find_all_sites().query().unwrap();
         site_combobox.add_item_q_string(&QString::from_std_str("any"));
         for r in results {
@@ -121,10 +127,12 @@ impl<'a> Form<'a> {
         grpbox.set_layout(hlayout.into_ptr());
         grpbox.set_title(&QString::from_std_str("Site"));
         layout.add_widget(grpbox.into_ptr());
-        // Direction
+        site_cb_ptr
+    }
+    // Set up the directions combobox
+    unsafe fn setup_directions_cb<'b>(layout: &mut MutPtr<QHBoxLayout>) -> MutPtr<QComboBox> {
         let mut dir_combobox = QComboBox::new_0a();
         let dir_cb_ptr = dir_combobox.as_mut_ptr();
-        site_cb_ptr.add_item_q_string(&QString::from_std_str("any"));
         for r in &["ancestor", "exact", "descendant"] {
             dir_combobox.add_item_q_string(&QString::from_std_str(r));
         }
@@ -138,6 +146,29 @@ impl<'a> Form<'a> {
         grpbox.set_layout(hlayout.into_ptr());
         grpbox.set_title(&QString::from_std_str("Direction"));
         layout.add_widget(grpbox.into_ptr());
+        dir_cb_ptr
+    }
+    // build the combo boxes
+    unsafe fn combo_boxes<'b>(
+        db: &'b mut PackratDb,
+        layout: &mut MutPtr<QHBoxLayout>,
+    ) -> (
+        MutPtr<QComboBox>,
+        MutPtr<QComboBox>,
+        MutPtr<QComboBox>,
+        MutPtr<QComboBox>,
+        MutPtr<QComboBox>,
+    ) {
+        //results
+        let level_cb_ptr = Self::setup_levels_cb(db, layout);
+        // Roles
+        let role_cb_ptr = Self::setup_roles_cb(db, layout);
+        // Platform
+        let platform_cb_ptr = Self::setup_platforms_cb(db, layout);
+        // Site
+        let site_cb_ptr = Self::setup_sites_cb(db, layout);
+        // Direction
+        let dir_cb_ptr = Self::setup_directions_cb(layout);
 
         let qspacer = QSpacerItem::new_3a(30, 10, Policy::Expanding);
         layout.add_item(qspacer.into_ptr());
@@ -161,7 +192,7 @@ impl<'a> Form<'a> {
                 .set_horizontal_header_item(cnt as i32, vpin_table_widget_item.into_ptr());
         }
     }
-
+    unsafe fn setup_table() {}
     fn new(mut db: &'a mut PackratDb) -> Form<'a> {
         unsafe {
             // parent root_widget
@@ -179,7 +210,13 @@ impl<'a> Form<'a> {
             let mut line_edit = QLineEdit::new();
             let line_edit_ptr = line_edit.as_mut_ptr();
             root_layout_ptr.add_widget(line_edit.into_ptr());
-
+            // setup button
+            let mut button = QPushButton::from_q_string(&QString::from_std_str("Query"));
+            let button_ptr = button.as_mut_ptr();
+            button.set_minimum_width(70);
+            button.set_maximum_width(70);
+            hlayout_ptr.add_widget(button.into_ptr());
+            // setup table widget
             let mut vpin_tablewidget = QTableWidget::new_2a(0, COLUMNS);
             let vpin_tw_ptr = vpin_tablewidget.as_mut_ptr();
             vpin_tablewidget.vertical_header().hide();
@@ -214,42 +251,17 @@ impl<'a> Form<'a> {
                     "Withs",
                 ],
             );
-            let mut button = QPushButton::from_q_string(&QString::from_std_str("Query"));
-            let button_ptr = button.as_mut_ptr();
-            button.set_minimum_width(70);
-            button.set_maximum_width(70);
-            hlayout_ptr.add_widget(button.into_ptr());
             root_layout_ptr.add_widget(vpin_tablewidget.into_ptr());
             root_widget.show();
 
             let form = Form {
                 button_clicked: Slot::new(move || {
-                    let dirtxt = dir_ptr.current_text();
+                    let dirtxt = dir_ptr.current_text().to_std_string();
                     let line_edit_txt = line_edit_ptr.text().to_std_string();
-
-                    let showtxt = level_ptr.current_text();
-                    // let mut vpin_table_widget_item = QTableWidgetItem::new();
-                    // vpin_table_widget_item.set_text(&showtxt);
-                    let showtxt = showtxt.to_std_string();
-                    // vpin_tablewidget_ptr.set_item(0, 1, vpin_table_widget_item.into_ptr());
-
-                    let roletxt = role_ptr.current_text();
-                    // let mut vpin_table_widget_item = QTableWidgetItem::new();
-                    // vpin_table_widget_item.set_text(&roletxt);
-                    let roletxt = roletxt.to_std_string();
-                    // vpin_tablewidget_ptr.set_item(0, 2, vpin_table_widget_item.into_ptr());
-
-                    let platformtxt = platform_ptr.current_text();
-                    // let mut vpin_table_widget_item = QTableWidgetItem::new();
-                    // vpin_table_widget_item.set_text(&platformtxt);
-                    let platformtxt = platformtxt.to_std_string();
-                    // vpin_tablewidget_ptr.set_item(0, 3, vpin_table_widget_item.into_ptr());
-
-                    let sitetxt = site_ptr.current_text();
-                    // let mut vpin_table_widget_item = QTableWidgetItem::new();
-                    // vpin_table_widget_item.set_text(&sitetxt);
-                    let sitetxt = sitetxt.to_std_string();
-                    // vpin_tablewidget_ptr.set_item(0, 4, vpin_table_widget_item.into_ptr());
+                    let showtxt = level_ptr.current_text().to_std_string();
+                    let roletxt = role_ptr.current_text().to_std_string();
+                    let platformtxt = platform_ptr.current_text().to_std_string();
+                    let sitetxt = site_ptr.current_text().to_std_string();
                     // for now
                     let client = Client::connect(
                         "host=127.0.0.1 user=postgres dbname=packrat password=example port=5432",
@@ -264,9 +276,7 @@ impl<'a> Form<'a> {
                         .role(roletxt.as_str())
                         .platform(platformtxt.as_str())
                         .site(sitetxt.as_str())
-                        .search_mode(
-                            LtreeSearchMode::from_str(dirtxt.to_std_string().as_str()).unwrap(),
-                        );
+                        .search_mode(LtreeSearchMode::from_str(dirtxt.as_str()).unwrap());
                     let filter_package = if line_edit_txt != "" { true } else { false };
                     let results = vpin_finder.query().unwrap();
                     let mut cnt = 0;
