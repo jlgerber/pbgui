@@ -1,7 +1,7 @@
 #![windows_subsystem = "windows"]
 use packybara::packrat::{Client, NoTls, PackratDb};
 use packybara::LtreeSearchMode;
-use qt_core::{AlignmentFlag, QFlags};
+use qt_core::{AlignmentFlag, Orientation, QFlags, QVariant};
 use qt_gui::{QBrush, QColor};
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr},
@@ -12,9 +12,13 @@ use qt_widgets::{
     qt_core::QStringList,
     qt_core::Slot,
     qt_core::SlotOfIntInt,
-    QApplication, QComboBox, QGroupBox, QHBoxLayout, QInputDialog, QLineEdit, QPushButton,
-    QSpacerItem, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget,
+    QAction, QApplication, QComboBox, QGroupBox, QHBoxLayout, QInputDialog, QLineEdit, QListWidget,
+    QPushButton, QSizePolicy, QSpacerItem, QSplitter, QTableWidget, QTableWidgetItem, QToolBar,
+    QVBoxLayout, QWidget,
 };
+use std::cell::{Cell, RefCell};
+use std::collections::HashMap;
+use std::rc::Rc;
 use std::str::FromStr;
 
 macro_rules! dark_grey_stripe {
@@ -43,11 +47,11 @@ macro_rules! table_header_text_color {
     };
 }
 
-macro_rules! qcolor_red {
-    () => {
-        QColor::from_rgb_3a(255, 100, 100)
-    };
-}
+// macro_rules! qcolor_red {
+//     () => {
+//         QColor::from_rgb_3a(255, 100, 100)
+//     };
+// }
 
 macro_rules! qcolor_blue {
     () => {
@@ -63,6 +67,10 @@ struct Form<'a> {
     _query_button: MutPtr<QPushButton>,
     _pkg_line_edit: MutPtr<QLineEdit>,
     _vpin_table: MutPtr<QTableWidget>,
+    _pinchanges_list: MutPtr<QListWidget>,
+    _save_action: MutPtr<QAction>,
+    update_map: Rc<RefCell<HashMap<i32, i32>>>,
+    update_cnt: Rc<Cell<i32>>,
     button_clicked: Slot<'a>,
     row_double_clicked: SlotOfIntInt<'a>,
 }
@@ -242,11 +250,11 @@ impl<'a> Form<'a> {
         }
     }
     // Setup the TableWidget
-    unsafe fn setup_table(root_layout_ptr: &mut MutPtr<QVBoxLayout>) -> MutPtr<QTableWidget> {
+    unsafe fn setup_table(vsplit_ptr: &mut MutPtr<QSplitter>) -> MutPtr<QTableWidget> {
         // create the tablewidget
         let mut vpin_tablewidget = QTableWidget::new_2a(0, COLUMNS);
         let mut vpin_tw_ptr = vpin_tablewidget.as_mut_ptr();
-        root_layout_ptr.add_widget(vpin_tablewidget.into_ptr());
+        vsplit_ptr.add_widget(vpin_tablewidget.into_ptr());
         // assign table to the root layout
         vpin_tw_ptr.vertical_header().hide();
         vpin_tw_ptr.set_selection_behavior(SelectionBehavior::SelectRows);
@@ -316,14 +324,47 @@ impl<'a> Form<'a> {
             root_layout_ptr.add_widget(line_edit.into_ptr());
             // create query button
             let button_ptr = Self::create_query_button(&mut hlayout_ptr);
-            // setup table widget
-            let mut vpin_tablewidget_ptr = Self::setup_table(&mut root_layout_ptr);
-            root_widget.show();
+            let mut pinchanges_widget = QWidget::new_0a();
+            let mut pc_vlayout = QVBoxLayout::new_0a();
+            let mut pc_vlayout_ptr = pc_vlayout.as_mut_ptr();
+            pinchanges_widget.set_layout(pc_vlayout.into_ptr());
 
+            let mut pinchanges_bar = QToolBar::new();
+            let mut pinchanges_bar_ptr = pinchanges_bar.as_mut_ptr();
+            pc_vlayout_ptr.add_widget(pinchanges_bar.into_ptr());
+            let mut spacer = QWidget::new_0a();
+            let sp = QSizePolicy::new_2a(Policy::Expanding, Policy::Fixed);
+            spacer.set_size_policy_1a(sp.as_ref());
+            let save_action = pinchanges_bar_ptr.add_action_1a(&QString::from_std_str("Save"));
+            let mut pinchanges = QListWidget::new_0a();
+            let mut pinchanges_ptr = pinchanges.as_mut_ptr();
+            pc_vlayout_ptr.add_widget(spacer.into_ptr());
+            pc_vlayout_ptr.add_widget(pinchanges.into_ptr());
+            let mut vsplit = QSplitter::new();
+            let mut vsplit_ptr = vsplit.as_mut_ptr();
+            vsplit.set_orientation(Orientation::Vertical);
+            root_layout_ptr.add_widget(vsplit.into_ptr());
+            // create splitter
+            // setup table widget
+            let mut vpin_tablewidget_ptr = Self::setup_table(&mut vsplit_ptr);
+            vsplit_ptr.add_widget(pinchanges_widget.into_ptr());
+
+            root_widget.show();
+            let usage = Rc::new(RefCell::new(HashMap::<i32, i32>::new()));
+            let usage_ptr = Rc::clone(&usage);
+            let update_cnt = Rc::new(Cell::new(0));
+            let update_cnt_ptr = Rc::clone(&update_cnt);
             let form = Form {
-                row_double_clicked: SlotOfIntInt::new(move |r: i32, c: i32| {
+                row_double_clicked: SlotOfIntInt::new(move |r: i32, _c: i32| {
                     let mut dist_item = vpin_tablewidget_ptr.item(r, 1);
-                    let text = dist_item.text().to_std_string();
+                    let dist_id = vpin_tablewidget_ptr
+                        .item(r, 0)
+                        .text()
+                        .to_std_string()
+                        .parse::<i32>()
+                        .expect("should have id");
+                    let mut orig_text = dist_item.text();
+                    let text = orig_text.to_std_string();
                     let pieces = text.split("-").collect::<Vec<_>>();
                     assert_eq!(pieces.len(), 2);
                     let client = Client::connect(
@@ -363,11 +404,26 @@ impl<'a> Form<'a> {
                     } else {
                         let value = new_version.to_std_string();
                         let new_value = format!("{}-{}", pieces[0], value);
-                        dist_item.set_text(&QString::from_std_str(new_value));
-                        //let update_color = QColor::from_rgb_3a(255, 100, 100);
-                        let update_color = qcolor_blue!();
-                        dist_item.set_foreground(&QBrush::from_q_color(update_color.as_ref()));
-                        dist_item.table_widget().clear_selection();
+                        let new_value_txt = QString::from_std_str(new_value);
+                        dist_item.set_text(&new_value_txt);
+                        orig_text.append_q_string(&QString::from_std_str(" -> "));
+                        orig_text.append_q_string(&new_value_txt);
+                        //let usage_ptr = usage_ptr.borrow_mut();
+                        if usage_ptr.borrow().contains_key(&dist_id) {
+                            let row = usage_ptr.borrow();
+                            let row = row.get(&dist_id).unwrap();
+
+                            let mut item = pinchanges_ptr.item(*row);
+                            item.set_text(&orig_text);
+                        } else {
+                            pinchanges_ptr.add_item_q_string(&orig_text);
+                            let update_color = qcolor_blue!();
+                            dist_item.set_foreground(&QBrush::from_q_color(update_color.as_ref()));
+                            dist_item.table_widget().clear_selection();
+                            let idx = update_cnt_ptr.get();
+                            usage_ptr.borrow_mut().insert(dist_id, idx);
+                            update_cnt_ptr.set(idx + 1);
+                        }
                     }
                 }),
                 button_clicked: Slot::new(move || {
@@ -408,11 +464,12 @@ impl<'a> Form<'a> {
                                 continue;
                             }
                         }
-                        // ID TODO: get it sorting correctly... (data)
                         let mut vpin_table_widget_item = QTableWidgetItem::new();
-                        vpin_table_widget_item.set_text(&QString::from_std_str(
-                            result.versionpin_id.to_string().as_str(),
-                        ));
+                        let variant = QVariant::from_int(result.versionpin_id);
+                        vpin_table_widget_item.set_data(
+                            2, // EditRole
+                            variant.as_ref(),
+                        );
                         vpin_tablewidget_ptr.set_item(cnt, 0, vpin_table_widget_item.into_ptr());
                         // DISTRIBUTION
                         let mut vpin_table_widget_item = QTableWidgetItem::new();
@@ -446,9 +503,12 @@ impl<'a> Form<'a> {
                         vpin_tablewidget_ptr.set_item(cnt, 5, vpin_table_widget_item.into_ptr());
                         // WITHS
                         let mut vpin_table_widget_item = QTableWidgetItem::new();
-                        vpin_table_widget_item.set_text(&QString::from_std_str(
-                            result.withs.map_or(0, |x| x.len()).to_string().as_str(),
-                        ));
+                        let variant =
+                            QVariant::from_int(result.withs.unwrap_or(vec![]).len() as i32);
+                        vpin_table_widget_item.set_data(
+                            2, // EditRole
+                            variant.as_ref(),
+                        );
                         vpin_tablewidget_ptr.set_item(cnt, 6, vpin_table_widget_item.into_ptr());
                         cnt += 1;
                     }
@@ -458,7 +518,11 @@ impl<'a> Form<'a> {
                 _widget: root_widget,
                 _vpin_table: vpin_tablewidget_ptr,
                 _query_button: button_ptr,
+                _save_action: save_action,
                 _pkg_line_edit: line_edit_ptr,
+                _pinchanges_list: pinchanges_ptr,
+                update_map: usage,
+                update_cnt: update_cnt,
             };
             button_ptr.clicked().connect(&form.button_clicked);
             //line_edit.text_edited().connect(&form.line_edit_edited);
