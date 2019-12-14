@@ -76,6 +76,9 @@ struct Form<'a> {
 }
 
 impl<'a> Form<'a> {
+    //------------------------//
+    // Setup Levels Combobox  //
+    //------------------------//
     unsafe fn setup_levels_cb<'b>(
         db: &'b mut PackratDb,
         layout: &mut MutPtr<QHBoxLayout>,
@@ -105,7 +108,9 @@ impl<'a> Form<'a> {
         layout.add_widget(grpbox.into_ptr());
         level_cb_ptr
     }
-    // set up the roles combobox
+    //----------------------------//
+    // set up the roles combobox  //
+    //----------------------------//
     unsafe fn setup_roles_cb<'b>(
         db: &'b mut PackratDb,
         layout: &mut MutPtr<QHBoxLayout>,
@@ -130,7 +135,9 @@ impl<'a> Form<'a> {
         layout.add_widget(grpbox.into_ptr());
         role_cb_ptr
     }
-    // Platforms
+    //------------------//
+    // setup Platforms  //
+    //------------------//
     unsafe fn setup_platforms_cb<'b>(
         db: &'b mut PackratDb,
         layout: &mut MutPtr<QHBoxLayout>,
@@ -154,7 +161,9 @@ impl<'a> Form<'a> {
         layout.add_widget(grpbox.into_ptr());
         platform_cb_ptr
     }
-    // Site
+    //----------------//
+    // Site Combobox  //
+    //----------------//
     unsafe fn setup_sites_cb<'b>(
         db: &'b mut PackratDb,
         layout: &mut MutPtr<QHBoxLayout>,
@@ -179,7 +188,9 @@ impl<'a> Form<'a> {
         layout.add_widget(grpbox.into_ptr());
         site_cb_ptr
     }
-    // Set up the directions combobox
+    //---------------------------------//
+    // Set up the directions combobox  //
+    //---------------------------------//
     unsafe fn setup_directions_cb<'b>(layout: &mut MutPtr<QHBoxLayout>) -> MutPtr<QComboBox> {
         let mut dir_combobox = QComboBox::new_0a();
         let dir_cb_ptr = dir_combobox.as_mut_ptr();
@@ -198,7 +209,9 @@ impl<'a> Form<'a> {
         layout.add_widget(grpbox.into_ptr());
         dir_cb_ptr
     }
-    // build the combo boxes
+    //------------------------//
+    // build the combo boxes  //
+    //------------------------//
     unsafe fn combo_boxes<'b>(
         db: &'b mut PackratDb,
         layout: &mut MutPtr<QHBoxLayout>,
@@ -231,7 +244,10 @@ impl<'a> Form<'a> {
             dir_cb_ptr,
         )
     }
-    // setup the headers matching the provided header vector
+    //------------------------------//
+    // setup the headers matching   //
+    // the provided header vector   //
+    //------------------------------//
     unsafe fn setup_table_headers(vpin_tablewidget: &mut MutPtr<QTableWidget>) {
         let headers = vec![
             "Id",
@@ -249,26 +265,28 @@ impl<'a> Form<'a> {
                 .set_horizontal_header_item(cnt as i32, vpin_table_widget_item.into_ptr());
         }
     }
-    // Setup the TableWidget
+    //-----------------------//
+    // Setup the TableWidget //
+    //-----------------------//
     unsafe fn setup_table(vsplit_ptr: &mut MutPtr<QSplitter>) -> MutPtr<QTableWidget> {
         // create the tablewidget
         let mut vpin_tablewidget = QTableWidget::new_2a(0, COLUMNS);
-        let mut vpin_tw_ptr = vpin_tablewidget.as_mut_ptr();
+        let mut tablewidget_ptr = vpin_tablewidget.as_mut_ptr();
         vsplit_ptr.add_widget(vpin_tablewidget.into_ptr());
-        // assign table to the root layout
-        vpin_tw_ptr.vertical_header().hide();
-        vpin_tw_ptr.set_selection_behavior(SelectionBehavior::SelectRows);
-        vpin_tw_ptr.set_edit_triggers(QFlags::from(EditTrigger::NoEditTriggers));
-        vpin_tw_ptr.set_selection_mode(SelectionMode::SingleSelection);
-        vpin_tw_ptr
+        // configure the tablewidget
+        tablewidget_ptr.vertical_header().hide();
+        tablewidget_ptr.set_selection_behavior(SelectionBehavior::SelectRows);
+        tablewidget_ptr.set_edit_triggers(QFlags::from(EditTrigger::NoEditTriggers));
+        tablewidget_ptr.set_selection_mode(SelectionMode::SingleSelection);
+        tablewidget_ptr
             .horizontal_header()
             .set_stretch_last_section(true);
-        vpin_tw_ptr
+        tablewidget_ptr
             .horizontal_header()
             .set_section_resize_mode_1a(ResizeMode::Stretch);
-        vpin_tw_ptr.set_show_grid(false);
-        vpin_tw_ptr.set_alternating_row_colors(true);
-        vpin_tw_ptr.set_style_sheet(&QString::from_std_str(concat!(
+        tablewidget_ptr.set_show_grid(false);
+        tablewidget_ptr.set_alternating_row_colors(true);
+        tablewidget_ptr.set_style_sheet(&QString::from_std_str(concat!(
             "alternate-background-color:",
             light_grey_stripe!(),
             ";color:",
@@ -277,7 +295,7 @@ impl<'a> Form<'a> {
             dark_grey_stripe!(),
             ";"
         )));
-        vpin_tw_ptr
+        tablewidget_ptr
             .horizontal_header()
             .set_style_sheet(&QString::from_std_str(concat!(
                 "background-color:",
@@ -286,11 +304,13 @@ impl<'a> Form<'a> {
                 table_header_text_color!(),
                 ";border: none; outline:none; border-left: 0px; border-right: 0px;"
             )));
-        Self::setup_table_headers(&mut vpin_tw_ptr);
+        Self::setup_table_headers(&mut tablewidget_ptr);
 
-        vpin_tw_ptr
+        tablewidget_ptr
     }
-
+    //----------------------//
+    // Create Query Button  //
+    //----------------------//
     unsafe fn create_query_button(hlayout_ptr: &mut MutPtr<QHBoxLayout>) -> MutPtr<QPushButton> {
         let mut button = QPushButton::from_q_string(&QString::from_std_str("Query"));
         let button_ptr = button.as_mut_ptr();
@@ -300,8 +320,58 @@ impl<'a> Form<'a> {
         hlayout_ptr.add_widget(button.into_ptr());
         button_ptr
     }
+    //---------------------------//
+    // Create pinchanges widget  //
+    //---------------------------//
+    unsafe fn create_pinchanges_widget(
+        splitter: &mut MutPtr<QSplitter>,
+    ) -> (MutPtr<QListWidget>, MutPtr<QAction>) {
+        // create widget
+        let mut pinchanges_widget = QWidget::new_0a();
+        // create vertical layout owned by widger
+        let mut pc_vlayout = QVBoxLayout::new_0a();
+        let mut pc_vlayout_ptr = pc_vlayout.as_mut_ptr();
+        pinchanges_widget.set_layout(pc_vlayout.into_ptr());
+        // create the pinchanges toolbar
+        let mut pinchanges_bar = QToolBar::new();
+        let mut pinchanges_bar_ptr = pinchanges_bar.as_mut_ptr();
+        // add teh pinchanges toolbar to the vertical layout
+        pc_vlayout_ptr.add_widget(pinchanges_bar.into_ptr());
+        // create a spacer widget to attempt to push
+        // future buttons to right side (fail)
+        let mut spacer = QWidget::new_0a();
+        let sp = QSizePolicy::new_2a(Policy::Expanding, Policy::Fixed);
+        spacer.set_size_policy_1a(sp.as_ref());
+        let save_action = pinchanges_bar_ptr.add_action_1a(&QString::from_std_str("Save"));
+        let mut pinchanges = QListWidget::new_0a();
+        let pinchanges_ptr = pinchanges.as_mut_ptr();
+        pc_vlayout_ptr.add_widget(spacer.into_ptr());
+        pc_vlayout_ptr.add_widget(pinchanges.into_ptr());
+        splitter.add_widget(pinchanges_widget.into_ptr());
 
-    // New up a Form
+        (pinchanges_ptr, save_action)
+    }
+    //---------------
+
+    unsafe fn get_coords_from_row(
+        row_widget: &mut MutPtr<QTableWidget>,
+        row: i32,
+    ) -> (
+        CppBox<QString>,
+        CppBox<QString>,
+        CppBox<QString>,
+        CppBox<QString>,
+    ) {
+        //level
+        let level = row_widget.item(row, 2).text();
+        let role = row_widget.item(row, 3).text();
+        let platform = row_widget.item(row, 4).text();
+        let site = row_widget.item(row, 5).text();
+        (level, role, platform, site)
+    }
+    //--------------------//
+    // Create Main Widget //
+    //--------------------//
     fn new(mut db: &'a mut PackratDb) -> Form<'a> {
         unsafe {
             // parent root_widget
@@ -324,30 +394,14 @@ impl<'a> Form<'a> {
             root_layout_ptr.add_widget(line_edit.into_ptr());
             // create query button
             let button_ptr = Self::create_query_button(&mut hlayout_ptr);
-            let mut pinchanges_widget = QWidget::new_0a();
-            let mut pc_vlayout = QVBoxLayout::new_0a();
-            let mut pc_vlayout_ptr = pc_vlayout.as_mut_ptr();
-            pinchanges_widget.set_layout(pc_vlayout.into_ptr());
-
-            let mut pinchanges_bar = QToolBar::new();
-            let mut pinchanges_bar_ptr = pinchanges_bar.as_mut_ptr();
-            pc_vlayout_ptr.add_widget(pinchanges_bar.into_ptr());
-            let mut spacer = QWidget::new_0a();
-            let sp = QSizePolicy::new_2a(Policy::Expanding, Policy::Fixed);
-            spacer.set_size_policy_1a(sp.as_ref());
-            let save_action = pinchanges_bar_ptr.add_action_1a(&QString::from_std_str("Save"));
-            let mut pinchanges = QListWidget::new_0a();
-            let mut pinchanges_ptr = pinchanges.as_mut_ptr();
-            pc_vlayout_ptr.add_widget(spacer.into_ptr());
-            pc_vlayout_ptr.add_widget(pinchanges.into_ptr());
+            // Create Splitter between query results and action logger
             let mut vsplit = QSplitter::new();
             let mut vsplit_ptr = vsplit.as_mut_ptr();
             vsplit.set_orientation(Orientation::Vertical);
             root_layout_ptr.add_widget(vsplit.into_ptr());
-            // create splitter
-            // setup table widget
+            // setup the main table widget
             let mut vpin_tablewidget_ptr = Self::setup_table(&mut vsplit_ptr);
-            vsplit_ptr.add_widget(pinchanges_widget.into_ptr());
+            let (mut pinchanges_ptr, save_action) = Self::create_pinchanges_widget(&mut vsplit_ptr);
 
             root_widget.show();
             let usage = Rc::new(RefCell::new(HashMap::<i32, i32>::new()));
@@ -355,7 +409,12 @@ impl<'a> Form<'a> {
             let update_cnt = Rc::new(Cell::new(0));
             let update_cnt_ptr = Rc::clone(&update_cnt);
             let form = Form {
+                //-----------------------------//
+                // Add row_double_clicked slot //
+                //-----------------------------//
                 row_double_clicked: SlotOfIntInt::new(move |r: i32, _c: i32| {
+                    // get the distribution name from the second column of the
+                    // row that the user has clicked, identified by row: r
                     let mut dist_item = vpin_tablewidget_ptr.item(r, 1);
                     let dist_id = vpin_tablewidget_ptr
                         .item(r, 0)
@@ -363,10 +422,16 @@ impl<'a> Form<'a> {
                         .to_std_string()
                         .parse::<i32>()
                         .expect("should have id");
-                    let mut orig_text = dist_item.text();
-                    let text = orig_text.to_std_string();
-                    let pieces = text.split("-").collect::<Vec<_>>();
-                    assert_eq!(pieces.len(), 2);
+                    let mut orig_qstr = dist_item.text();
+                    let orig_text = orig_qstr.to_std_string();
+                    // split up the distribution into the package name
+                    // and the version
+                    let (package, version) =
+                        if let &[package, version] = &*orig_text.split("-").collect::<Vec<_>>() {
+                            (package, version)
+                        } else {
+                            panic!("unable to extract packge and version from row");
+                        };
                     let client = Client::connect(
                         "host=127.0.0.1 user=postgres dbname=packrat password=example port=5432",
                         NoTls,
@@ -375,48 +440,64 @@ impl<'a> Form<'a> {
                     let mut packratdb = PackratDb::new(client);
                     let results = packratdb
                         .find_all_distributions()
-                        .package(pieces[0])
+                        .package(package)
                         .query()
                         .unwrap();
                     let mut qsl = QStringList::new();
                     let mut idx = 0;
                     let mut cnt = 0;
                     for r in results {
-                        if r.version == pieces[1] {
+                        if r.version == version {
                             idx = cnt;
                         }
                         cnt += 1;
                         qsl.append_q_string(&QString::from_std_str(r.version));
                     }
-                    let mut tf = false;
-                    let tf_ptr = MutPtr::from_raw(&mut tf);
+                    let mut ok_or_cancel = false;
+                    let ok_or_cancel_ptr = MutPtr::from_raw(&mut ok_or_cancel);
+                    // Get New version by popping up a Dialog
                     let new_version = QInputDialog::get_item_7a(
                         root_widget_ptr,
                         &QString::from_std_str("Pick Version"),
-                        &QString::from_std_str(pieces[0]),
+                        &QString::from_std_str(package),
                         &qsl,
                         idx,
                         false,
-                        tf_ptr,
+                        ok_or_cancel_ptr,
                     );
-                    if *tf_ptr == false {
+                    if *ok_or_cancel_ptr == false {
                         println!("cancelled");
                     } else {
                         let value = new_version.to_std_string();
-                        let new_value = format!("{}-{}", pieces[0], value);
-                        let new_value_txt = QString::from_std_str(new_value);
-                        dist_item.set_text(&new_value_txt);
-                        orig_text.append_q_string(&QString::from_std_str(" -> "));
-                        orig_text.append_q_string(&new_value_txt);
-                        //let usage_ptr = usage_ptr.borrow_mut();
+                        let new_value = format!("{}-{}", package, value);
+                        if orig_text == new_value {
+                            println!("new value and old value match. Skipping");
+                            return;
+                        }
+                        //let mut dist_item = vpin_tablewidget_ptr.item(r, 1);
+                        let (level, role, platform, site) =
+                            Self::get_coords_from_row(&mut vpin_tablewidget_ptr, r);
+                        let new_value_qstr = QString::from_std_str(new_value);
+                        // build up new string
+                        dist_item.set_text(&new_value_qstr);
+                        orig_qstr.append_q_string(&QString::from_std_str("   ->   "));
+                        orig_qstr.append_q_string(&new_value_qstr);
+                        orig_qstr.append_q_string(&QString::from_std_str(format!(
+                            "     ({}, {}, {}, {})",
+                            level.to_std_string(),
+                            role.to_std_string(),
+                            platform.to_std_string(),
+                            site.to_std_string()
+                        )));
+
                         if usage_ptr.borrow().contains_key(&dist_id) {
                             let row = usage_ptr.borrow();
                             let row = row.get(&dist_id).unwrap();
 
                             let mut item = pinchanges_ptr.item(*row);
-                            item.set_text(&orig_text);
+                            item.set_text(&orig_qstr);
                         } else {
-                            pinchanges_ptr.add_item_q_string(&orig_text);
+                            pinchanges_ptr.add_item_q_string(&orig_qstr);
                             let update_color = qcolor_blue!();
                             dist_item.set_foreground(&QBrush::from_q_color(update_color.as_ref()));
                             dist_item.table_widget().clear_selection();
@@ -426,6 +507,9 @@ impl<'a> Form<'a> {
                         }
                     }
                 }),
+                //--------------------------//
+                // Add button_clicked Slot  //
+                //--------------------------//
                 button_clicked: Slot::new(move || {
                     let dirtxt = dir_ptr.current_text().to_std_string();
                     let line_edit_txt = line_edit_ptr.text().to_std_string();
