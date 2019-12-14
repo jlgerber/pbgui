@@ -16,4 +16,5 @@ pub const HEADERS: &[(i32, &'static str, bool)] = &[
     (COL_SITE, "Site", false),
     (COL_WITHS, "WIths", false),
     (COL_DISTRIBUTION_ID, "Dist Id", true),
+    (COL_PKGCOORD_ID, "PkdCoord Id", true),
 ];

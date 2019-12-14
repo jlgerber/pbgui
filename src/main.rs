@@ -368,6 +368,7 @@ impl<'a> Form<'a> {
         CppBox<QString>,
         CppBox<QString>,
         i32,
+        i32,
     ) {
         //level
         let level = row_widget.item(row, COL_LEVEL).text();
@@ -375,7 +376,16 @@ impl<'a> Form<'a> {
         let platform = row_widget.item(row, COL_PLATFORM).text();
         let site = row_widget.item(row, COL_SITE).text();
         let dist_id = row_widget.item(row, COL_DISTRIBUTION_ID).data(2);
-        (level, role, platform, site, dist_id.to_int_0a())
+        let pkgcoord_id = row_widget.item(row, COL_PKGCOORD_ID).data(2);
+
+        (
+            level,
+            role,
+            platform,
+            site,
+            dist_id.to_int_0a(),
+            pkgcoord_id.to_int_0a(),
+        )
     }
     //--------------------//
     // Create Main Widget //
@@ -483,7 +493,7 @@ impl<'a> Form<'a> {
                             return;
                         }
                         //let mut dist_item = vpin_tablewidget_ptr.item(r, 1);
-                        let (level, role, platform, site, dist_id) =
+                        let (level, role, platform, site, dist_id, pkgcoord_id) =
                             Self::get_coords_from_row(&mut vpin_tablewidget_ptr, r);
                         let new_value_qstr = QString::from_std_str(new_value);
                         // build up new string
@@ -491,12 +501,13 @@ impl<'a> Form<'a> {
                         orig_qstr.append_q_string(&QString::from_std_str("   ->   "));
                         orig_qstr.append_q_string(&new_value_qstr);
                         orig_qstr.append_q_string(&QString::from_std_str(format!(
-                            "     ({}, {}, {}, {})     distribution id: {}",
+                            "     ({}, {}, {}, {})     distribution id: {}     pkgcoord id: {}",
                             level.to_std_string(),
                             role.to_std_string(),
                             platform.to_std_string(),
                             site.to_std_string(),
-                            dist_id
+                            dist_id,
+                            pkgcoord_id
                         )));
 
                         if usage_ptr.borrow().contains_key(&dist_id) {
@@ -631,6 +642,7 @@ impl<'a> Form<'a> {
                             COL_WITHS,
                             vpin_table_widget_item.into_ptr(),
                         );
+                        // Coord Id
                         let mut vpin_table_widget_item = QTableWidgetItem::new();
                         let variant = QVariant::from_int(result.distribution_id);
                         vpin_table_widget_item.set_data(
@@ -643,6 +655,19 @@ impl<'a> Form<'a> {
                             vpin_table_widget_item.into_ptr(),
                         );
                         vpin_tablewidget_ptr.set_column_hidden(COL_DISTRIBUTION_ID, true);
+                        // Coord Id
+                        let mut vpin_table_widget_item = QTableWidgetItem::new();
+                        let variant = QVariant::from_int(result.pkgcoord_id);
+                        vpin_table_widget_item.set_data(
+                            2, // EditRole
+                            variant.as_ref(),
+                        );
+                        vpin_tablewidget_ptr.set_item(
+                            cnt,
+                            COL_PKGCOORD_ID,
+                            vpin_table_widget_item.into_ptr(),
+                        );
+                        vpin_tablewidget_ptr.set_column_hidden(COL_PKGCOORD_ID, true);
 
                         cnt += 1;
                     }
