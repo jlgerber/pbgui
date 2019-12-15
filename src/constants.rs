@@ -18,3 +18,15 @@ pub const HEADERS: &[(i32, &'static str, bool)] = &[
     (COL_DISTRIBUTION_ID, "Dist Id", true),
     (COL_PKGCOORD_ID, "PkdCoord Id", true),
 ];
+
+pub const COL_PC_VPINID: i32 = 0;
+pub const COL_PC_DISTID: i32 = 1;
+pub const COL_PC_PKGCOORDID: i32 = 2;
+pub const COL_PC_DISPLAY: i32 = 3;
+
+pub const PC_HEADERS: &[(i32, &'static str, bool)] = &[
+    (COL_PC_VPINID, "vpinid", true),
+    (COL_PC_DISTID, "distid", true),
+    (COL_PC_PKGCOORDID, "pkgcoordid", true),
+    (COL_PC_DISPLAY, "display", true),
+];
