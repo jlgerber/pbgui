@@ -2,7 +2,7 @@
 use packybara::db::update::versionpins::VersionPinChange;
 use packybara::packrat::{Client, NoTls, PackratDb};
 use packybara::LtreeSearchMode;
-use qt_core::{AlignmentFlag, Orientation, QFlags, QVariant, ToolButtonStyle};
+use qt_core::{AlignmentFlag, Orientation, QFlags, QVariant};
 use qt_gui::{QBrush, QColor};
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr},
