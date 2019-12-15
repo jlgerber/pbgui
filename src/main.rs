@@ -62,8 +62,6 @@ macro_rules! qcolor_blue {
     };
 }
 
-const COLUMNS: i32 = 7;
-
 struct Form<'a> {
     _db: &'a mut PackratDb,
     _widget: CppBox<QWidget>,
@@ -72,8 +70,8 @@ struct Form<'a> {
     _vpin_table: MutPtr<QTableWidget>,
     _pinchanges_list: MutPtr<QTableWidget>,
     _save_button: MutPtr<QPushButton>,
-    update_map: Rc<RefCell<HashMap<i32, i32>>>,
-    update_cnt: Rc<Cell<i32>>,
+    //update_map: Rc<RefCell<HashMap<i32, i32>>>,
+    //update_cnt: Rc<Cell<i32>>,
     button_clicked: Slot<'a>,
     save_clicked: Slot<'a>,
     row_double_clicked: SlotOfIntInt<'a>,
@@ -333,6 +331,13 @@ impl<'a> Form<'a> {
             .horizontal_header()
             .set_section_resize_mode_1a(ResizeMode::Stretch);
         pinchanges.set_show_grid(false);
+        // The following two statements are responsible for the spacing
+        // between entries in the pinchanges table
+        pinchanges.vertical_header().set_maximum_section_size(20);
+        pinchanges
+            .vertical_header()
+            .set_section_resize_mode_1a(ResizeMode::ResizeToContents);
+
         pinchanges
     }
     //----------------------//
@@ -364,7 +369,7 @@ impl<'a> Form<'a> {
         //pinchanges_bar.set_tool_button_style(ToolButtonStyle::ToolButtonTextBesideIcon);
 
         let mut pinchanges_bar_ptr = pinchanges_bar.as_mut_ptr();
-        // add teh pinchanges toolbar to the vertical layout
+        // add the pinchanges toolbar to the vertical layout
         pc_vlayout_ptr.add_widget(pinchanges_bar.into_ptr());
         // create a spacer widget to attempt to push
         // future buttons to right side (fail)
@@ -417,6 +422,136 @@ impl<'a> Form<'a> {
             pkgcoord_id.to_int_0a(),
         )
     }
+    //Rc::new(RefCell::new(HashMap::<i32, i32>::new()));
+    unsafe fn choose_alternative_distribution(
+        r: i32,
+        mut vpin_tablewidget_ptr: MutPtr<QTableWidget>,
+        usage_ptr: Rc<RefCell<HashMap<i32, i32>>>,
+        root_widget_ptr: MutPtr<QWidget>,
+        mut pinchanges_ptr: MutPtr<QTableWidget>,
+        update_cnt_ptr: Rc<Cell<i32>>,
+    ) {
+        let mut dist_item = vpin_tablewidget_ptr.item(r, COL_DISTRIBUTION);
+        // let dist_id = vpin_tablewidget_ptr
+        //     .item(r, COL_ID)
+        //     .text()
+        //     .to_std_string()
+        //     .parse::<i32>()
+        //     .expect("should have id");
+        let mut orig_qstr = dist_item.text();
+        let orig_text = orig_qstr.to_std_string();
+        // split up the distribution into the package name
+        // and the version
+        let (package, version) =
+            if let &[package, version] = &*orig_text.split("-").collect::<Vec<_>>() {
+                (package, version)
+            } else {
+                panic!("unable to extract packge and version from row");
+            };
+        let client = Client::connect(
+            "host=127.0.0.1 user=postgres dbname=packrat password=example port=5432",
+            NoTls,
+        )
+        .unwrap();
+        let mut packratdb = PackratDb::new(client);
+        let results = packratdb
+            .find_all_distributions()
+            .package(package)
+            .query()
+            .unwrap();
+        let mut qsl = QStringList::new();
+        let mut idx = 0;
+        let mut cnt = 0;
+        for r in results {
+            if r.version == version {
+                idx = cnt;
+            }
+            cnt += 1;
+            qsl.append_q_string(&QString::from_std_str(r.version));
+        }
+        let mut ok_or_cancel = false;
+        let ok_or_cancel_ptr = MutPtr::from_raw(&mut ok_or_cancel);
+        // Get New version by popping up a Dialog
+        let new_version = QInputDialog::get_item_7a(
+            root_widget_ptr,
+            &QString::from_std_str("Pick Version"),
+            &QString::from_std_str(package),
+            &qsl,
+            idx,
+            false,
+            ok_or_cancel_ptr,
+        );
+        if *ok_or_cancel_ptr == false {
+            println!("cancelled");
+        } else {
+            let value = new_version.to_std_string();
+            let new_value = format!("{}-{}", package, value);
+            if orig_text == new_value {
+                println!("new value and old value match. Skipping");
+                return;
+            }
+            let (level, role, platform, site, vpin_id, dist_id, pkgcoord_id) =
+                Self::get_coords_from_row(&mut vpin_tablewidget_ptr, r);
+            let new_value_qstr = QString::from_std_str(new_value);
+            // build up new string
+            dist_item.set_text(&new_value_qstr);
+            orig_qstr.append_q_string(&QString::from_std_str("   ->   "));
+            orig_qstr.append_q_string(&new_value_qstr);
+            orig_qstr.append_q_string(&QString::from_std_str(format!(
+                "     ({}, {}, {}, {})     distribution id: {}     pkgcoord id: {}",
+                level.to_std_string(),
+                role.to_std_string(),
+                platform.to_std_string(),
+                site.to_std_string(),
+                dist_id,
+                pkgcoord_id
+            )));
+
+            if usage_ptr.borrow().contains_key(&dist_id) {
+                let row = usage_ptr.borrow();
+                let row = row.get(&dist_id).unwrap();
+                let mut item = pinchanges_ptr.item(*row, COL_PC_DISPLAY);
+                item.set_text(&orig_qstr);
+            } else {
+                let row_cnt = pinchanges_ptr.row_count() + 1;
+                pinchanges_ptr.set_row_count(row_cnt);
+                // VPIN ID
+                let mut pinchanges_item = QTableWidgetItem::new();
+                let variant = QVariant::from_int(vpin_id);
+                pinchanges_item.set_data(
+                    2, // EditRole
+                    variant.as_ref(),
+                );
+                pinchanges_ptr.set_item(row_cnt - 1, COL_PC_VPINID, pinchanges_item.into_ptr());
+                // DIST ID
+                let mut pinchanges_item = QTableWidgetItem::new();
+                let variant = QVariant::from_int(dist_id);
+                pinchanges_item.set_data(
+                    2, // EditRole
+                    variant.as_ref(),
+                );
+                pinchanges_ptr.set_item(row_cnt - 1, COL_PC_DISTID, pinchanges_item.into_ptr());
+                // PKGCOORD ID
+                let mut pinchanges_item = QTableWidgetItem::new();
+                let variant = QVariant::from_int(pkgcoord_id);
+                pinchanges_item.set_data(
+                    2, // EditRole
+                    variant.as_ref(),
+                );
+                pinchanges_ptr.set_item(row_cnt - 1, COL_PC_PKGCOORDID, pinchanges_item.into_ptr());
+                // DISPLAY
+                let pinchanges_item = QTableWidgetItem::from_q_string(&orig_qstr);
+                pinchanges_ptr.set_item(row_cnt - 1, COL_PC_DISPLAY, pinchanges_item.into_ptr());
+
+                let update_color = qcolor_blue!();
+                dist_item.set_foreground(&QBrush::from_q_color(update_color.as_ref()));
+                dist_item.table_widget().clear_selection();
+                let idx = update_cnt_ptr.get();
+                usage_ptr.borrow_mut().insert(dist_id, idx);
+                update_cnt_ptr.set(idx + 1);
+            }
+        }
+    }
     //--------------------//
     // Create Main Widget //
     //--------------------//
@@ -449,7 +584,7 @@ impl<'a> Form<'a> {
             root_layout_ptr.add_widget(vsplit.into_ptr());
             // setup the main table widget
             let mut vpin_tablewidget_ptr = Self::setup_table(&mut vsplit_ptr);
-            let (mut pinchanges_ptr, save_button) = Self::create_pinchanges_widget(&mut vsplit_ptr);
+            let (pinchanges_ptr, save_button) = Self::create_pinchanges_widget(&mut vsplit_ptr);
 
             root_widget.show();
             let usage = Rc::new(RefCell::new(HashMap::<i32, i32>::new()));
@@ -467,13 +602,22 @@ impl<'a> Form<'a> {
                 row_double_clicked: SlotOfIntInt::new(move |r: i32, _c: i32| {
                     // get the distribution name from the second column of the
                     // row that the user has clicked, identified by row: r
+                    Self::choose_alternative_distribution(
+                        r,
+                        vpin_tablewidget_ptr,
+                        usage_ptr.clone(),
+                        root_widget_ptr,
+                        pinchanges_ptr,
+                        update_cnt_ptr.clone(),
+                    );
+                    /*
                     let mut dist_item = vpin_tablewidget_ptr.item(r, COL_DISTRIBUTION);
-                    let dist_id = vpin_tablewidget_ptr
-                        .item(r, COL_ID)
-                        .text()
-                        .to_std_string()
-                        .parse::<i32>()
-                        .expect("should have id");
+                    // let dist_id = vpin_tablewidget_ptr
+                    //     .item(r, COL_ID)
+                    //     .text()
+                    //     .to_std_string()
+                    //     .parse::<i32>()
+                    //     .expect("should have id");
                     let mut orig_qstr = dist_item.text();
                     let orig_text = orig_qstr.to_std_string();
                     // split up the distribution into the package name
@@ -603,6 +747,7 @@ impl<'a> Form<'a> {
                             update_cnt_ptr.set(idx + 1);
                         }
                     }
+                    */
                 }),
                 //--------------------------//
                 // Add button_clicked Slot  //
@@ -757,8 +902,8 @@ impl<'a> Form<'a> {
                 _save_button: save_button,
                 _pkg_line_edit: line_edit_ptr,
                 _pinchanges_list: pinchanges_ptr,
-                update_map: usage,
-                update_cnt: update_cnt,
+                //update_map: usage,
+                //update_cnt: update_cnt,
             };
             button_ptr.clicked().connect(&form.button_clicked);
             //line_edit.text_edited().connect(&form.line_edit_edited);
