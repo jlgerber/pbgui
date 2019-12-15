@@ -28,5 +28,5 @@ pub const PC_HEADERS: &[(i32, &'static str, bool)] = &[
     (COL_PC_VPINID, "vpinid", true),
     (COL_PC_DISTID, "distid", true),
     (COL_PC_PKGCOORDID, "pkgcoordid", true),
-    (COL_PC_DISPLAY, "display", true),
+    (COL_PC_DISPLAY, "display", false),
 ];

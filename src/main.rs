@@ -314,27 +314,15 @@ impl<'a> Form<'a> {
         Self::setup_table_headers(&mut tablewidget_ptr, &HEADERS);
         tablewidget_ptr
     }
-
-    unsafe fn setup_pinchanges_headers(vpin_tablewidget: &mut MutPtr<QTableWidget>) {
-        let mut cnt = 0;
-        for name in &["Update"] {
-            let vpin_table_widget_item =
-                QTableWidgetItem::from_q_string(&QString::from_std_str(name));
-            vpin_tablewidget.set_horizontal_header_item(cnt, vpin_table_widget_item.into_ptr());
-
-            cnt += 1;
-        }
-    }
+    //--------------------------
+    // Setup Pin Changes Table
+    //--------------------------
     unsafe fn setup_pinchanges() -> CppBox<QTableWidget> {
         let mut pinchanges = QTableWidget::new_2a(0, PC_HEADERS.len() as i32);
         let mut pinchanges_ptr = pinchanges.as_mut_ptr();
         Self::setup_table_headers(&mut pinchanges_ptr, &PC_HEADERS);
-        println!(
-            "setting up pinchanges with {} columns",
-            PC_HEADERS.len() as i32
-        );
         pinchanges.vertical_header().hide();
-        //pinchanges.horizontal_header().hide();
+        pinchanges.horizontal_header().hide();
         pinchanges.set_selection_behavior(SelectionBehavior::SelectRows);
         pinchanges.set_edit_triggers(QFlags::from(EditTrigger::NoEditTriggers));
         pinchanges.set_selection_mode(SelectionMode::SingleSelection);
@@ -344,7 +332,7 @@ impl<'a> Form<'a> {
         pinchanges
             .horizontal_header()
             .set_section_resize_mode_1a(ResizeMode::Stretch);
-        //pinchanges.set_show_grid(false);
+        pinchanges.set_show_grid(false);
         pinchanges
     }
     //----------------------//
@@ -558,7 +546,6 @@ impl<'a> Form<'a> {
                         if usage_ptr.borrow().contains_key(&dist_id) {
                             let row = usage_ptr.borrow();
                             let row = row.get(&dist_id).unwrap();
-                            println!("row {}", *row);
                             let mut item = pinchanges_ptr.item(*row, COL_PC_DISPLAY);
                             item.set_text(&orig_qstr);
                         } else {
@@ -601,7 +588,6 @@ impl<'a> Form<'a> {
                                 pinchanges_item.into_ptr(),
                             );
                             // DISPLAY
-                            println!("setting to {}", orig_text);
                             let pinchanges_item = QTableWidgetItem::from_q_string(&orig_qstr);
                             pinchanges_ptr.set_item(
                                 row_cnt - 1,
