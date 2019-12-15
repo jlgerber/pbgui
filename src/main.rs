@@ -1,4 +1,5 @@
 #![windows_subsystem = "windows"]
+use packybara::db::update::versionpins::VersionPinChange;
 use packybara::packrat::{Client, NoTls, PackratDb};
 use packybara::LtreeSearchMode;
 use qt_core::{AlignmentFlag, Orientation, QFlags, QVariant, ToolButtonStyle};
@@ -467,11 +468,13 @@ impl<'a> Form<'a> {
         let mut qsl = QStringList::new();
         let mut idx = 0;
         let mut cnt = 0;
+        let mut dist_versions = HashMap::new();
         for r in results {
             if r.version == version {
                 idx = cnt;
             }
             cnt += 1;
+            dist_versions.insert(r.version.clone(), r.id);
             qsl.append_q_string(&QString::from_std_str(r.version));
         }
         let mut ok_or_cancel = false;
@@ -490,6 +493,7 @@ impl<'a> Form<'a> {
             println!("cancelled");
         } else {
             let value = new_version.to_std_string();
+            let new_dist_id = dist_versions.get(value.as_str()).unwrap();
             let new_value = format!("{}-{}", package, value);
             if orig_text == new_value {
                 println!("new value and old value match. Skipping");
@@ -530,7 +534,7 @@ impl<'a> Form<'a> {
                 pinchanges_ptr.set_item(row_cnt - 1, COL_PC_VPINID, pinchanges_item.into_ptr());
                 // DIST ID
                 let mut pinchanges_item = QTableWidgetItem::new();
-                let variant = QVariant::from_int(dist_id);
+                let variant = QVariant::from_int(*new_dist_id);
                 pinchanges_item.set_data(
                     2, // EditRole
                     variant.as_ref(),
@@ -557,6 +561,14 @@ impl<'a> Form<'a> {
             }
         }
     }
+    //-----------------------------------------------//
+    //            update_vpin_table                  //
+    //-----------------------------------------------//
+    // update the main versionpin table by gathering //
+    // the user's requested query parameters from    //
+    // the comboboxes up top, querying the database, //
+    // and updating the table                        //
+    //-----------------------------------------------//
     unsafe fn update_vpin_table(
         dir_ptr: MutPtr<QComboBox>,
         line_edit_ptr: MutPtr<QLineEdit>,
@@ -714,11 +726,44 @@ impl<'a> Form<'a> {
             let usage_ptr = Rc::clone(&usage);
             let update_cnt = Rc::new(Cell::new(0));
             let update_cnt_ptr = Rc::clone(&update_cnt);
+            let mut pinchanges_ptr = pinchanges_ptr.clone();
             let form = Form {
-                //---------------------
-                // save clicked
-                //---------------------
-                save_clicked: Slot::new(move || {}),
+                //---------------------//
+                // save clicked        //
+                //---------------------//
+                save_clicked: Slot::new(move || {
+                    // grab all the data from the pin changes
+                    let client = Client::connect(
+                        "host=127.0.0.1 user=postgres dbname=packrat password=example port=5432",
+                        NoTls,
+                    )
+                    .unwrap();
+                    let mut pb = PackratDb::new(client);
+                    let mut update = pb.update_versionpins();
+                    let mut changes = Vec::new();
+                    for row_idx in 0..pinchanges_ptr.row_count() {
+                        let vpin_id = pinchanges_ptr.item(row_idx, COL_PC_VPINID).data(2);
+                        let dist_id = pinchanges_ptr.item(row_idx, COL_PC_DISTID).data(2);
+                        println!(
+                            "vpin_id: {} dist_id: {}",
+                            vpin_id.to_int_0a(),
+                            dist_id.to_int_0a()
+                        );
+                        changes.push(VersionPinChange::new(
+                            vpin_id.to_int_0a(),
+                            Some(dist_id.to_int_0a()),
+                            None,
+                        ));
+                    }
+                    let results = update.changes(&mut changes).update();
+                    if results.is_ok() {
+                        pinchanges_ptr.clear();
+                        pinchanges_ptr.set_row_count(0);
+                    //todo - reset color of query
+                    } else {
+                        println!("{:#?}", results);
+                    }
+                }),
                 //-----------------------------//
                 // Add row_double_clicked slot //
                 //-----------------------------//
@@ -734,9 +779,9 @@ impl<'a> Form<'a> {
                         update_cnt_ptr.clone(),
                     );
                 }),
-                //--------------------------//
+                //--------------------------------//
                 // Add query_button_clicked Slot  //
-                //--------------------------//
+                //--------------------------------//
                 query_button_clicked: Slot::new(move || {
                     Self::update_vpin_table(
                         dir_ptr,
@@ -759,6 +804,7 @@ impl<'a> Form<'a> {
                 //update_cnt: update_cnt,
             };
             button_ptr.clicked().connect(&form.query_button_clicked);
+            save_button.clicked().connect(&form.save_clicked);
             //line_edit.text_edited().connect(&form.line_edit_edited);
             vpin_tablewidget_ptr
                 .cell_double_clicked()

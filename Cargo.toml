@@ -7,7 +7,7 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-packybara = {git= "https://github.com/jlgerber/packybara", tag="v0.18.0"}
+packybara = {git= "https://github.com/jlgerber/packybara", tag="v0.19.0"}
 qt_core = "0.4.0"
 qt_gui = "0.4.0"
 qt_widgets = "0.4.0"
