@@ -12,7 +12,7 @@ use qt_widgets::{
     qt_core::QStringList,
     qt_core::Slot,
     qt_core::SlotOfIntInt,
-    QAction, QApplication, QComboBox, QGroupBox, QHBoxLayout, QInputDialog, QLineEdit, QPushButton,
+    QApplication, QComboBox, QGroupBox, QHBoxLayout, QInputDialog, QLineEdit, QPushButton,
     QSizePolicy, QSpacerItem, QSplitter, QTableWidget, QTableWidgetItem, QToolBar, QVBoxLayout,
     QWidget,
 };
@@ -252,15 +252,25 @@ impl<'a> Form<'a> {
     // setup the headers matching   //
     // the provided header vector   //
     //------------------------------//
-    unsafe fn setup_table_headers(vpin_tablewidget: &mut MutPtr<QTableWidget>) {
-        for (idx, val, hidden) in HEADERS.into_iter() {
+    unsafe fn setup_table_headers(
+        vpin_tablewidget: &mut MutPtr<QTableWidget>,
+        headers: &[(i32, &'static str, bool)],
+    ) {
+        for (idx, val, hidden) in headers.into_iter() {
             if !hidden {
                 let vpin_table_widget_item =
                     QTableWidgetItem::from_q_string(&QString::from_std_str(val));
                 vpin_tablewidget
                     .set_horizontal_header_item(*idx, vpin_table_widget_item.into_ptr());
+            } else {
+                vpin_tablewidget.set_column_hidden(*idx, true);
             }
         }
+        // for (idx, _, hidden) in HEADERS {
+        //     if *hidden {
+        //         tablewidget_ptr.set_column_hidden(*idx, true);
+        //     }
+        // }
     }
     //-----------------------//
     // Setup the TableWidget //
@@ -301,14 +311,10 @@ impl<'a> Form<'a> {
                 table_header_text_color!(),
                 ";border: none; outline:none; border-left: 0px; border-right: 0px;"
             )));
-        Self::setup_table_headers(&mut tablewidget_ptr);
-        for (idx, _, hidden) in HEADERS {
-            if *hidden {
-                tablewidget_ptr.set_column_hidden(*idx, true);
-            }
-        }
+        Self::setup_table_headers(&mut tablewidget_ptr, &HEADERS);
         tablewidget_ptr
     }
+
     unsafe fn setup_pinchanges_headers(vpin_tablewidget: &mut MutPtr<QTableWidget>) {
         let mut cnt = 0;
         for name in &["Update"] {
@@ -320,20 +326,25 @@ impl<'a> Form<'a> {
         }
     }
     unsafe fn setup_pinchanges() -> CppBox<QTableWidget> {
-        let mut pinchanges = QTableWidget::new_2a(0, 1);
+        let mut pinchanges = QTableWidget::new_2a(0, PC_HEADERS.len() as i32);
+        let mut pinchanges_ptr = pinchanges.as_mut_ptr();
+        Self::setup_table_headers(&mut pinchanges_ptr, &PC_HEADERS);
+        println!(
+            "setting up pinchanges with {} columns",
+            PC_HEADERS.len() as i32
+        );
         pinchanges.vertical_header().hide();
-        pinchanges.horizontal_header().hide();
+        //pinchanges.horizontal_header().hide();
         pinchanges.set_selection_behavior(SelectionBehavior::SelectRows);
         pinchanges.set_edit_triggers(QFlags::from(EditTrigger::NoEditTriggers));
         pinchanges.set_selection_mode(SelectionMode::SingleSelection);
         pinchanges
             .horizontal_header()
             .set_stretch_last_section(true);
-        // pinchanges
-        //     .horizontal_header()
-        //     .set_section_resize_mode_1a(ResizeMode::Stretch);
-        pinchanges.set_show_grid(false);
-        Self::setup_pinchanges_headers(&mut pinchanges.as_mut_ptr());
+        pinchanges
+            .horizontal_header()
+            .set_section_resize_mode_1a(ResizeMode::Stretch);
+        //pinchanges.set_show_grid(false);
         pinchanges
     }
     //----------------------//
@@ -373,8 +384,7 @@ impl<'a> Form<'a> {
         let sp = QSizePolicy::new_2a(Policy::Expanding, Policy::Fixed);
         spacer.set_size_policy_1a(sp.as_ref());
         let mut pinchanges = Self::setup_pinchanges();
-
-        let mut pinchanges_ptr = pinchanges.as_mut_ptr();
+        let pinchanges_ptr = pinchanges.as_mut_ptr();
         //pc_vlayout_ptr.add_widget(spacer.into_ptr());
         pc_vlayout_ptr.add_widget(pinchanges.into_ptr());
         //let save_action = pinchanges_bar_ptr.add_action_1a(&QString::from_std_str("Save"));
@@ -398,12 +408,14 @@ impl<'a> Form<'a> {
         CppBox<QString>,
         i32,
         i32,
+        i32,
     ) {
         //level
         let level = row_widget.item(row, COL_LEVEL).text();
         let role = row_widget.item(row, COL_ROLE).text();
         let platform = row_widget.item(row, COL_PLATFORM).text();
         let site = row_widget.item(row, COL_SITE).text();
+        let vpin_id = row_widget.item(row, COL_ID).data(2);
         let dist_id = row_widget.item(row, COL_DISTRIBUTION_ID).data(2);
         let pkgcoord_id = row_widget.item(row, COL_PKGCOORD_ID).data(2);
 
@@ -412,6 +424,7 @@ impl<'a> Form<'a> {
             role,
             platform,
             site,
+            vpin_id.to_int_0a(),
             dist_id.to_int_0a(),
             pkgcoord_id.to_int_0a(),
         )
@@ -525,8 +538,7 @@ impl<'a> Form<'a> {
                             println!("new value and old value match. Skipping");
                             return;
                         }
-                        //let mut dist_item = vpin_tablewidget_ptr.item(r, 1);
-                        let (level, role, platform, site, dist_id, pkgcoord_id) =
+                        let (level, role, platform, site, vpin_id, dist_id, pkgcoord_id) =
                             Self::get_coords_from_row(&mut vpin_tablewidget_ptr, r);
                         let new_value_qstr = QString::from_std_str(new_value);
                         // build up new string
@@ -547,20 +559,55 @@ impl<'a> Form<'a> {
                             let row = usage_ptr.borrow();
                             let row = row.get(&dist_id).unwrap();
                             println!("row {}", *row);
-                            let mut item = pinchanges_ptr.item(*row, 0);
+                            let mut item = pinchanges_ptr.item(*row, COL_PC_DISPLAY);
                             item.set_text(&orig_qstr);
                         } else {
-                            // pinchanges_ptr.add_item_q_string(&orig_qstr);
                             let row_cnt = pinchanges_ptr.row_count() + 1;
-                            let row_cnt2 = update_cnt_ptr.get() + 1;
-                            println!("row count {} {}", row_cnt, row_cnt2);
-                            let pinchanges_item = QTableWidgetItem::from_q_string(&orig_qstr);
-                            //let mut pinchanges_item = QTableWidgetItem::new();
-                            //pinchanges_item.set_text(&QString::from_std_str("Test"));
                             pinchanges_ptr.set_row_count(row_cnt);
-                            pinchanges_ptr.set_item(row_cnt - 1, 0, pinchanges_item.into_ptr());
-                            // let mut pinchanges_item = pinchanges_ptr.item(row_cnt, 0);
-                            // pinchanges_item.set_text(&QString::from_std_str("Test"));
+                            // VPIN ID
+                            let mut pinchanges_item = QTableWidgetItem::new();
+                            let variant = QVariant::from_int(vpin_id);
+                            pinchanges_item.set_data(
+                                2, // EditRole
+                                variant.as_ref(),
+                            );
+                            pinchanges_ptr.set_item(
+                                row_cnt - 1,
+                                COL_PC_VPINID,
+                                pinchanges_item.into_ptr(),
+                            );
+                            // DIST ID
+                            let mut pinchanges_item = QTableWidgetItem::new();
+                            let variant = QVariant::from_int(dist_id);
+                            pinchanges_item.set_data(
+                                2, // EditRole
+                                variant.as_ref(),
+                            );
+                            pinchanges_ptr.set_item(
+                                row_cnt - 1,
+                                COL_PC_DISTID,
+                                pinchanges_item.into_ptr(),
+                            );
+                            // PKGCOORD ID
+                            let mut pinchanges_item = QTableWidgetItem::new();
+                            let variant = QVariant::from_int(pkgcoord_id);
+                            pinchanges_item.set_data(
+                                2, // EditRole
+                                variant.as_ref(),
+                            );
+                            pinchanges_ptr.set_item(
+                                row_cnt - 1,
+                                COL_PC_PKGCOORDID,
+                                pinchanges_item.into_ptr(),
+                            );
+                            // DISPLAY
+                            println!("setting to {}", orig_text);
+                            let pinchanges_item = QTableWidgetItem::from_q_string(&orig_qstr);
+                            pinchanges_ptr.set_item(
+                                row_cnt - 1,
+                                COL_PC_DISPLAY,
+                                pinchanges_item.into_ptr(),
+                            );
 
                             let update_color = qcolor_blue!();
                             dist_item.set_foreground(&QBrush::from_q_color(update_color.as_ref()));
@@ -569,8 +616,6 @@ impl<'a> Form<'a> {
                             usage_ptr.borrow_mut().insert(dist_id, idx);
                             update_cnt_ptr.set(idx + 1);
                         }
-                        // let item = pinchanges_ptr.item(1, 0).text().to_std_string();
-                        //println!("item: {}", item);
                     }
                 }),
                 //--------------------------//
