@@ -12,9 +12,9 @@ use qt_widgets::{
     qt_core::QStringList,
     qt_core::Slot,
     qt_core::SlotOfIntInt,
-    QAction, QApplication, QComboBox, QGroupBox, QHBoxLayout, QInputDialog, QLineEdit, QListWidget,
-    QPushButton, QSizePolicy, QSpacerItem, QSplitter, QTableWidget, QTableWidgetItem, QToolBar,
-    QVBoxLayout, QWidget,
+    QAction, QApplication, QComboBox, QGroupBox, QHBoxLayout, QInputDialog, QLineEdit, QPushButton,
+    QSizePolicy, QSpacerItem, QSplitter, QTableWidget, QTableWidgetItem, QToolBar, QVBoxLayout,
+    QWidget,
 };
 mod constants;
 use constants::*;
@@ -70,11 +70,12 @@ struct Form<'a> {
     _query_button: MutPtr<QPushButton>,
     _pkg_line_edit: MutPtr<QLineEdit>,
     _vpin_table: MutPtr<QTableWidget>,
-    _pinchanges_list: MutPtr<QListWidget>,
+    _pinchanges_list: MutPtr<QTableWidget>,
     _save_button: MutPtr<QPushButton>,
     update_map: Rc<RefCell<HashMap<i32, i32>>>,
     update_cnt: Rc<Cell<i32>>,
     button_clicked: Slot<'a>,
+    save_clicked: Slot<'a>,
     row_double_clicked: SlotOfIntInt<'a>,
 }
 
@@ -308,6 +309,33 @@ impl<'a> Form<'a> {
         }
         tablewidget_ptr
     }
+    unsafe fn setup_pinchanges_headers(vpin_tablewidget: &mut MutPtr<QTableWidget>) {
+        let mut cnt = 0;
+        for name in &["Update"] {
+            let vpin_table_widget_item =
+                QTableWidgetItem::from_q_string(&QString::from_std_str(name));
+            vpin_tablewidget.set_horizontal_header_item(cnt, vpin_table_widget_item.into_ptr());
+
+            cnt += 1;
+        }
+    }
+    unsafe fn setup_pinchanges() -> CppBox<QTableWidget> {
+        let mut pinchanges = QTableWidget::new_2a(0, 1);
+        pinchanges.vertical_header().hide();
+        pinchanges.horizontal_header().hide();
+        pinchanges.set_selection_behavior(SelectionBehavior::SelectRows);
+        pinchanges.set_edit_triggers(QFlags::from(EditTrigger::NoEditTriggers));
+        pinchanges.set_selection_mode(SelectionMode::SingleSelection);
+        pinchanges
+            .horizontal_header()
+            .set_stretch_last_section(true);
+        // pinchanges
+        //     .horizontal_header()
+        //     .set_section_resize_mode_1a(ResizeMode::Stretch);
+        pinchanges.set_show_grid(false);
+        Self::setup_pinchanges_headers(&mut pinchanges.as_mut_ptr());
+        pinchanges
+    }
     //----------------------//
     // Create Query Button  //
     //----------------------//
@@ -325,7 +353,7 @@ impl<'a> Form<'a> {
     //---------------------------//
     unsafe fn create_pinchanges_widget(
         splitter: &mut MutPtr<QSplitter>,
-    ) -> (MutPtr<QListWidget>, MutPtr<QPushButton>) {
+    ) -> (MutPtr<QTableWidget>, MutPtr<QPushButton>) {
         // create widget
         let mut pinchanges_widget = QWidget::new_0a();
         // create vertical layout owned by widget
@@ -344,8 +372,9 @@ impl<'a> Form<'a> {
         let mut spacer = QWidget::new_0a();
         let sp = QSizePolicy::new_2a(Policy::Expanding, Policy::Fixed);
         spacer.set_size_policy_1a(sp.as_ref());
-        let mut pinchanges = QListWidget::new_0a();
-        let pinchanges_ptr = pinchanges.as_mut_ptr();
+        let mut pinchanges = Self::setup_pinchanges();
+
+        let mut pinchanges_ptr = pinchanges.as_mut_ptr();
         //pc_vlayout_ptr.add_widget(spacer.into_ptr());
         pc_vlayout_ptr.add_widget(pinchanges.into_ptr());
         //let save_action = pinchanges_bar_ptr.add_action_1a(&QString::from_std_str("Save"));
@@ -427,6 +456,10 @@ impl<'a> Form<'a> {
             let update_cnt = Rc::new(Cell::new(0));
             let update_cnt_ptr = Rc::clone(&update_cnt);
             let form = Form {
+                //---------------------
+                // save clicked
+                //---------------------
+                save_clicked: Slot::new(move || {}),
                 //-----------------------------//
                 // Add row_double_clicked slot //
                 //-----------------------------//
@@ -513,11 +546,22 @@ impl<'a> Form<'a> {
                         if usage_ptr.borrow().contains_key(&dist_id) {
                             let row = usage_ptr.borrow();
                             let row = row.get(&dist_id).unwrap();
-
-                            let mut item = pinchanges_ptr.item(*row);
+                            println!("row {}", *row);
+                            let mut item = pinchanges_ptr.item(*row, 0);
                             item.set_text(&orig_qstr);
                         } else {
-                            pinchanges_ptr.add_item_q_string(&orig_qstr);
+                            // pinchanges_ptr.add_item_q_string(&orig_qstr);
+                            let row_cnt = pinchanges_ptr.row_count() + 1;
+                            let row_cnt2 = update_cnt_ptr.get() + 1;
+                            println!("row count {} {}", row_cnt, row_cnt2);
+                            let pinchanges_item = QTableWidgetItem::from_q_string(&orig_qstr);
+                            //let mut pinchanges_item = QTableWidgetItem::new();
+                            //pinchanges_item.set_text(&QString::from_std_str("Test"));
+                            pinchanges_ptr.set_row_count(row_cnt);
+                            pinchanges_ptr.set_item(row_cnt - 1, 0, pinchanges_item.into_ptr());
+                            // let mut pinchanges_item = pinchanges_ptr.item(row_cnt, 0);
+                            // pinchanges_item.set_text(&QString::from_std_str("Test"));
+
                             let update_color = qcolor_blue!();
                             dist_item.set_foreground(&QBrush::from_q_color(update_color.as_ref()));
                             dist_item.table_widget().clear_selection();
@@ -525,6 +569,8 @@ impl<'a> Form<'a> {
                             usage_ptr.borrow_mut().insert(dist_id, idx);
                             update_cnt_ptr.set(idx + 1);
                         }
+                        // let item = pinchanges_ptr.item(1, 0).text().to_std_string();
+                        //println!("item: {}", item);
                     }
                 }),
                 //--------------------------//
