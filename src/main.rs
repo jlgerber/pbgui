@@ -3,7 +3,7 @@ use packybara::db::update::versionpins::VersionPinChange;
 use packybara::packrat::{Client, NoTls, PackratDb};
 use packybara::LtreeSearchMode;
 use qt_core::{AlignmentFlag, Orientation, QFlags, QVariant};
-use qt_gui::{QBrush, QColor};
+use qt_gui::{QBrush, QColor, QCursor};
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr},
     q_abstract_item_view::{EditTrigger, SelectionBehavior, SelectionMode},
@@ -13,9 +13,9 @@ use qt_widgets::{
     qt_core::QStringList,
     qt_core::Slot,
     qt_core::SlotOfIntInt,
-    QApplication, QComboBox, QGroupBox, QHBoxLayout, QInputDialog, QLineEdit, QPushButton,
-    QSizePolicy, QSpacerItem, QSplitter, QTableWidget, QTableWidgetItem, QToolBar, QVBoxLayout,
-    QWidget,
+    QAction, QApplication, QComboBox, QGroupBox, QHBoxLayout, QInputDialog, QLineEdit, QMenu,
+    QPushButton, QSizePolicy, QSpacerItem, QSplitter, QTableWidget, QTableWidgetItem, QToolBar,
+    QVBoxLayout, QWidget,
 };
 mod constants;
 use constants::*;
@@ -73,9 +73,13 @@ struct Form<'a> {
     _save_button: MutPtr<QPushButton>,
     //update_map: Rc<RefCell<HashMap<i32, i32>>>,
     //update_cnt: Rc<Cell<i32>>,
+    dist_popup_menu: CppBox<QMenu>,
+    dist_popup_action: MutPtr<QAction>,
     query_button_clicked: Slot<'a>,
     save_clicked: Slot<'a>,
     row_double_clicked: SlotOfIntInt<'a>,
+    row_pressed: SlotOfIntInt<'a>,
+    popup_triggered: Slot<'a>,
 }
 
 impl<'a> Form<'a> {
@@ -720,14 +724,26 @@ impl<'a> Form<'a> {
             // setup the main table widget
             let vpin_tablewidget_ptr = Self::setup_table(&mut vsplit_ptr);
             let (pinchanges_ptr, save_button) = Self::create_pinchanges_widget(&mut vsplit_ptr);
-
+            // setup action
+            let mut dist_popup_menu = QMenu::new();
+            let mut choose_dist_action =
+                dist_popup_menu.add_action_q_string(&QString::from_std_str("Change Version"));
+            let action2 = dist_popup_menu.add_action_q_string(&QString::from_std_str("Withs"));
+            let mut dist_popup_menu_ptr = dist_popup_menu.as_mut_ptr();
             root_widget.show();
+
             let usage = Rc::new(RefCell::new(HashMap::<i32, i32>::new()));
             let usage_ptr = Rc::clone(&usage);
             let update_cnt = Rc::new(Cell::new(0));
             let update_cnt_ptr = Rc::clone(&update_cnt);
             let mut pinchanges_ptr = pinchanges_ptr.clone();
+            let mut dist_usage_ptr = usage_ptr.clone();
+            let mut dist_update_cnt_ptr = update_cnt_ptr.clone();
             let form = Form {
+                row_pressed: SlotOfIntInt::new(move |_r: i32, _c: i32| {
+                    let pos = QCursor::pos_0a();
+                    let action = dist_popup_menu_ptr.exec_1a_mut(pos.as_ref());
+                }),
                 //---------------------//
                 // save clicked        //
                 //---------------------//
@@ -793,6 +809,22 @@ impl<'a> Form<'a> {
                         vpin_tablewidget_ptr,
                     );
                 }),
+                popup_triggered: Slot::new(move || {
+                    println!("Triggered");
+                    let current_row = vpin_tablewidget_ptr.current_row();
+
+                    //let current_dist = vpin_tablewidget_ptr.item(current_row, COL_DISTRIBUTION);
+                    //let txt = current_dist.text().to_std_string();
+                    //println!("{}", txt.as_str());
+                    Self::choose_alternative_distribution(
+                        current_row,
+                        vpin_tablewidget_ptr,
+                        dist_usage_ptr.clone(),
+                        root_widget_ptr,
+                        pinchanges_ptr,
+                        dist_update_cnt_ptr.clone(),
+                    );
+                }),
                 _db: db,
                 _widget: root_widget,
                 _vpin_table: vpin_tablewidget_ptr,
@@ -800,6 +832,8 @@ impl<'a> Form<'a> {
                 _save_button: save_button,
                 _pkg_line_edit: line_edit_ptr,
                 _pinchanges_list: pinchanges_ptr,
+                dist_popup_menu: dist_popup_menu,
+                dist_popup_action: choose_dist_action,
                 //update_map: usage,
                 //update_cnt: update_cnt,
             };
@@ -809,6 +843,12 @@ impl<'a> Form<'a> {
             vpin_tablewidget_ptr
                 .cell_double_clicked()
                 .connect(&form.row_double_clicked);
+            vpin_tablewidget_ptr
+                .cell_pressed()
+                .connect(&form.row_pressed);
+            choose_dist_action
+                .triggered()
+                .connect(&form.popup_triggered);
             form
         }
     }
