@@ -356,12 +356,12 @@ impl<'a> Form<'a> {
     // Create Query Button  //
     //----------------------//
     unsafe fn create_query_button(hlayout_ptr: &mut MutPtr<QHBoxLayout>) -> MutPtr<QPushButton> {
-        let mut button = QPushButton::from_q_string(&QString::from_std_str("Query"));
+        let mut button = QPushButton::from_q_string(&QString::from_std_str("")); //Query
         button.set_object_name(&QString::from_std_str("QueryButton"));
         let button_ptr = button.as_mut_ptr();
-        button.set_minimum_width(70);
-        button.set_maximum_width(70);
-        button.set_minimum_height(60);
+        button.set_minimum_width(60); //70
+        button.set_maximum_width(60); //70
+        button.set_minimum_height(60); //60
         hlayout_ptr.add_widget(button.into_ptr());
         button_ptr
     }
@@ -612,6 +612,7 @@ impl<'a> Form<'a> {
         vpin_tablewidget_ptr.set_sorting_enabled(false);
         vpin_tablewidget_ptr.set_row_count(0);
         vpin_tablewidget_ptr.set_row_count(results.len() as i32);
+        let mut filtered_cnt = 0;
         for result in results {
             if filter_package && line_edit_txt != "" {
                 if !result
@@ -619,6 +620,7 @@ impl<'a> Form<'a> {
                     .package()
                     .contains(line_edit_txt.as_str())
                 {
+                    filtered_cnt += 1;
                     continue;
                 }
             }
@@ -691,6 +693,10 @@ impl<'a> Form<'a> {
             vpin_tablewidget_ptr.set_column_hidden(COL_PKGCOORD_ID, true);
 
             cnt += 1;
+        }
+        if filtered_cnt > 0 {
+            let rc = vpin_tablewidget_ptr.row_count() - filtered_cnt;
+            vpin_tablewidget_ptr.set_row_count(rc);
         }
         vpin_tablewidget_ptr.set_sorting_enabled(true);
     }
