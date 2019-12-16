@@ -2,20 +2,20 @@
 use packybara::db::update::versionpins::VersionPinChange;
 use packybara::packrat::{Client, NoTls, PackratDb};
 use packybara::LtreeSearchMode;
-use qt_core::{AlignmentFlag, Orientation, QFlags, QListOfInt, QVariant};
-use qt_gui::{QBrush, QColor, QCursor};
+use qt_core::{AlignmentFlag, Orientation, QFlags, QListOfInt, QPoint, QVariant};
+use qt_gui::{QBrush, QColor};
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr, Ref},
     q_abstract_item_view::{EditTrigger, SelectionBehavior, SelectionMode},
     q_header_view::ResizeMode,
     q_size_policy::Policy,
+    qt_core::ContextMenuPolicy,
     qt_core::QString,
     qt_core::QStringList,
     qt_core::Slot,
-    qt_core::SlotOfIntInt,
     QAction, QApplication, QComboBox, QGroupBox, QHBoxLayout, QInputDialog, QLineEdit, QMenu,
     QPushButton, QSizePolicy, QSpacerItem, QSplitter, QTableWidget, QTableWidgetItem, QToolBar,
-    QVBoxLayout, QWidget,
+    QVBoxLayout, QWidget, SlotOfQPoint,
 };
 mod constants;
 use constants::*;
@@ -77,9 +77,8 @@ struct Form<'a> {
     dist_popup_action: MutPtr<QAction>,
     query_button_clicked: Slot<'a>,
     save_clicked: Slot<'a>,
-    row_double_clicked: SlotOfIntInt<'a>,
-    row_pressed: SlotOfIntInt<'a>,
-    popup_triggered: Slot<'a>,
+    choose_distribution_triggered: Slot<'a>,
+    show_dist_menu: SlotOfQPoint<'a>,
 }
 
 impl<'a> Form<'a> {
@@ -283,12 +282,6 @@ impl<'a> Form<'a> {
         tablewidget_ptr.set_selection_behavior(SelectionBehavior::SelectRows);
         tablewidget_ptr.set_edit_triggers(QFlags::from(EditTrigger::NoEditTriggers));
         tablewidget_ptr.set_selection_mode(SelectionMode::SingleSelection);
-        tablewidget_ptr
-            .horizontal_header()
-            .set_stretch_last_section(true);
-        tablewidget_ptr
-            .horizontal_header()
-            .set_section_resize_mode_1a(ResizeMode::Stretch);
         tablewidget_ptr.set_show_grid(false);
         tablewidget_ptr.set_alternating_row_colors(true);
         tablewidget_ptr.set_style_sheet(&QString::from_std_str(concat!(
@@ -300,6 +293,7 @@ impl<'a> Form<'a> {
             dark_grey_stripe!(),
             ";"
         )));
+        tablewidget_ptr.set_context_menu_policy(ContextMenuPolicy::CustomContextMenu);
         tablewidget_ptr
             .horizontal_header()
             .set_style_sheet(&QString::from_std_str(concat!(
@@ -310,6 +304,21 @@ impl<'a> Form<'a> {
                 ";border: none; outline:none; border-left: 0px; border-right: 0px;"
             )));
         Self::setup_table_headers(&mut tablewidget_ptr, &HEADERS);
+        // tablewidget_ptr
+        //     .horizontal_header()
+        //     .set_stretch_last_section(true);
+        tablewidget_ptr
+            .horizontal_header()
+            .set_section_resize_mode_1a(ResizeMode::Stretch); //Stretch
+        tablewidget_ptr
+            .horizontal_header()
+            .set_section_resize_mode_2a(COL_ID, ResizeMode::ResizeToContents);
+        // tablewidget_ptr
+        //     .horizontal_header()
+        //     .set_section_resize_mode_2a(COL_DISTRIBUTION, ResizeMode::ResizeToContents);
+        tablewidget_ptr
+            .horizontal_header()
+            .set_section_resize_mode_2a(COL_WITHS, ResizeMode::ResizeToContents);
         tablewidget_ptr
     }
     //--------------------------
@@ -369,13 +378,14 @@ impl<'a> Form<'a> {
         //pinchanges_bar.set_tool_button_style(ToolButtonStyle::ToolButtonTextBesideIcon);
 
         let mut pinchanges_bar_ptr = pinchanges_bar.as_mut_ptr();
-        // add the pinchanges toolbar to the vertical layout
+        // Add the pinchanges toolbar to the vertical layout
         pc_vlayout_ptr.add_widget(pinchanges_bar.into_ptr());
         // create a spacer widget to attempt to push
-        // future buttons to right side (fail)
+        // future buttons to right side
         let mut spacer = QWidget::new_0a();
         let sp = QSizePolicy::new_2a(Policy::Expanding, Policy::Fixed);
         spacer.set_size_policy_1a(sp.as_ref());
+        // set up the pinchanges table.
         let mut pinchanges = Self::setup_pinchanges();
         let pinchanges_ptr = pinchanges.as_mut_ptr();
         //pc_vlayout_ptr.add_widget(spacer.into_ptr());
@@ -714,30 +724,32 @@ impl<'a> Form<'a> {
             // setup the main table widget
             let vpin_tablewidget_ptr = Self::setup_table(&mut vsplit_ptr);
             let (pinchanges_ptr, save_button) = Self::create_pinchanges_widget(&mut vsplit_ptr);
-            // setup action
+            // setup popup menu for versionpin table
             let mut dist_popup_menu = QMenu::new();
-            let mut choose_dist_action =
+            let choose_dist_action =
                 dist_popup_menu.add_action_q_string(&QString::from_std_str("Change Version"));
-            let action2 = dist_popup_menu.add_action_q_string(&QString::from_std_str("Withs"));
+            let _choose_withs_action =
+                dist_popup_menu.add_action_q_string(&QString::from_std_str("Withs"));
             let mut dist_popup_menu_ptr = dist_popup_menu.as_mut_ptr();
-            root_widget.show();
 
+            root_widget.show();
+            //
             let usage = Rc::new(RefCell::new(HashMap::<i32, i32>::new()));
             let usage_ptr = Rc::clone(&usage);
             let update_cnt = Rc::new(Cell::new(0));
             let update_cnt_ptr = Rc::clone(&update_cnt);
             let mut pinchanges_ptr = pinchanges_ptr.clone();
-            let mut dist_usage_ptr = usage_ptr.clone();
-            let mut dist_update_cnt_ptr = update_cnt_ptr.clone();
+            let dist_usage_ptr = usage_ptr.clone();
+            let dist_update_cnt_ptr = update_cnt_ptr.clone();
             let mut splitter_sizes = QListOfInt::new();
             splitter_sizes.append_int(Ref::from_raw_ref(&(500 as i32)));
             splitter_sizes.append_int(Ref::from_raw_ref(&(300 as i32)));
             vsplit.set_sizes(&splitter_sizes);
             root_layout_ptr.add_widget(vsplit.into_ptr());
             let form = Form {
-                row_pressed: SlotOfIntInt::new(move |_r: i32, _c: i32| {
-                    let pos = QCursor::pos_0a();
-                    let action = dist_popup_menu_ptr.exec_1a_mut(pos.as_ref());
+                show_dist_menu: SlotOfQPoint::new(move |pos: Ref<QPoint>| {
+                    let _action = dist_popup_menu_ptr
+                        .exec_1a_mut(vpin_tablewidget_ptr.map_to_global(pos).as_ref());
                 }),
                 //---------------------//
                 // save clicked        //
@@ -775,21 +787,6 @@ impl<'a> Form<'a> {
                         println!("{:#?}", results);
                     }
                 }),
-                //-----------------------------//
-                // Add row_double_clicked slot //
-                //-----------------------------//
-                row_double_clicked: SlotOfIntInt::new(move |r: i32, _c: i32| {
-                    // get the distribution name from the second column of the
-                    // row that the user has clicked, identified by row: r
-                    Self::choose_alternative_distribution(
-                        r,
-                        vpin_tablewidget_ptr,
-                        usage_ptr.clone(),
-                        root_widget_ptr,
-                        pinchanges_ptr,
-                        update_cnt_ptr.clone(),
-                    );
-                }),
                 //--------------------------------//
                 // Add query_button_clicked Slot  //
                 //--------------------------------//
@@ -804,13 +801,12 @@ impl<'a> Form<'a> {
                         vpin_tablewidget_ptr,
                     );
                 }),
-                popup_triggered: Slot::new(move || {
-                    println!("Triggered");
+                //
+                // choose_distribution_triggered slot.
+                //
+                choose_distribution_triggered: Slot::new(move || {
                     let current_row = vpin_tablewidget_ptr.current_row();
 
-                    //let current_dist = vpin_tablewidget_ptr.item(current_row, COL_DISTRIBUTION);
-                    //let txt = current_dist.text().to_std_string();
-                    //println!("{}", txt.as_str());
                     Self::choose_alternative_distribution(
                         current_row,
                         vpin_tablewidget_ptr,
@@ -829,21 +825,18 @@ impl<'a> Form<'a> {
                 _pinchanges_list: pinchanges_ptr,
                 dist_popup_menu: dist_popup_menu,
                 dist_popup_action: choose_dist_action,
-                //update_map: usage,
-                //update_cnt: update_cnt,
             };
+            //
+            // connect signals to slots
+            //
             button_ptr.clicked().connect(&form.query_button_clicked);
             save_button.clicked().connect(&form.save_clicked);
-            //line_edit.text_edited().connect(&form.line_edit_edited);
             vpin_tablewidget_ptr
-                .cell_double_clicked()
-                .connect(&form.row_double_clicked);
-            vpin_tablewidget_ptr
-                .cell_pressed()
-                .connect(&form.row_pressed);
+                .custom_context_menu_requested()
+                .connect(&form.show_dist_menu);
             choose_dist_action
                 .triggered()
-                .connect(&form.popup_triggered);
+                .connect(&form.choose_distribution_triggered);
             form
         }
     }
