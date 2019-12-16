@@ -2,7 +2,10 @@
 use packybara::db::update::versionpins::VersionPinChange;
 use packybara::packrat::{Client, NoTls, PackratDb};
 use packybara::LtreeSearchMode;
-use qt_core::{AlignmentFlag, Orientation, QFlags, QListOfInt, QPoint, QVariant};
+use qt_core::{
+    q_io_device::OpenModeFlag, AlignmentFlag, Orientation, QFile, QFlags, QListOfInt, QPoint,
+    QResource, QTextStream, QVariant,
+};
 use qt_gui::{QBrush, QColor};
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr, Ref},
@@ -690,6 +693,33 @@ impl<'a> Form<'a> {
         }
         vpin_tablewidget_ptr.set_sorting_enabled(true);
     }
+    fn load_stylesheet(mut parent_widget: MutPtr<QWidget>) {
+        /* MIMICING
+        QFile File("stylesheet.qss");
+        File.open(QFile::ReadOnly);
+        QString StyleSheet = QLatin1String(File.readAll());
+
+        qApp->setStyleSheet(StyleSheet);
+        */
+        unsafe {
+            // Does not work
+            //QResource::add_search_path(&QString::from_std_str("/Users/jgerber/bin/"));
+            let result = QResource::register_resource_q_string(&QString::from_std_str(
+                "/Users/jgerber/bin/pbgui.rcc",
+            ));
+            println!("Loading resource successful?: {}", result);
+            let mut file =
+                QFile::from_q_string(&QString::from_std_str("/Users/jgerber/bin/pbgui.qss"));
+            if file.open_1a(QFlags::from(OpenModeFlag::ReadOnly)) {
+                let mut text_stream = QTextStream::new();
+                text_stream.set_device(file.as_mut_ptr());
+                let stylesheet = text_stream.read_all();
+                parent_widget.set_style_sheet(stylesheet.as_ref());
+            } else {
+                println!("stylesheet not found");
+            }
+        }
+    }
     //--------------------//
     // Create Main Widget //
     //--------------------//
@@ -731,7 +761,8 @@ impl<'a> Form<'a> {
             let _choose_withs_action =
                 dist_popup_menu.add_action_q_string(&QString::from_std_str("Withs"));
             let mut dist_popup_menu_ptr = dist_popup_menu.as_mut_ptr();
-
+            // set the style sheet
+            Self::load_stylesheet(root_widget_ptr);
             root_widget.show();
             //
             let usage = Rc::new(RefCell::new(HashMap::<i32, i32>::new()));
@@ -847,6 +878,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "host=127.0.0.1 user=postgres dbname=packrat password=example port=5432",
         NoTls,
     )?;
+
     let mut vpin_finder = PackratDb::new(client);
     QApplication::init(|_| unsafe {
         let mut _form = Form::new(&mut vpin_finder);
