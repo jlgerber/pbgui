@@ -52,6 +52,7 @@ QComboBox::drop-down {
 }
 
 QComboBox::down-arrow {
+    color: darkgray;
     image: url(:/images/dropdown.png);
     width: 10px;
     height: 10px;
@@ -59,14 +60,50 @@ QComboBox::down-arrow {
 
 QPushButton#QueryButton {
     border: 1px solid rgb(101,101,101);
-    border-radius: 5px;
+    border-radius: 30px;
     background: rgb(80,80,80);
+        image: url(:/images/query-shaded.png);
+
+}
+
+QPushButton#QueryButton::hover {
+    background: rgb(90,90,90);
+    image: url(:/images/query-hilite.png);
+
 }
 
 QPushButton#QueryButton:pressed {
+    image: url(:/images/query.png);
     border: 1px solid rgb(131,131,131);
-    border-radius: 5px;
     /* background: rgb(70,110,220); */
     background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
                                 stop: 0 #006DCC, stop: .6 #006DCC,stop: 1.0 #0033BF);
 }
+/* 
+QScrollBar:vertical {
+    border: 2px solid grey;
+    background: #32CC99;
+    height: 15px;
+    margin: 0px 20px 0 20px;
+} */
+
+QScrollBar::handle:vertical {
+    background: rgb(80,80,80);
+    min-width: 20px;
+}
+/* 
+QScrollBar::add-line:vertical {
+    border: 2px solid grey;
+    background: #32CC99;
+    width: 20px;
+    subcontrol-position: right;
+    subcontrol-origin: margin;
+}
+
+QScrollBar::sub-line:vertical {
+    border: 2px solid grey;
+    background: #32CC99;
+    width: 20px;
+    subcontrol-position: left;
+    subcontrol-origin: margin;
+} */
