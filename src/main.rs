@@ -2,10 +2,10 @@
 use packybara::db::update::versionpins::VersionPinChange;
 use packybara::packrat::{Client, NoTls, PackratDb};
 use packybara::LtreeSearchMode;
-use qt_core::{AlignmentFlag, Orientation, QFlags, QVariant};
+use qt_core::{AlignmentFlag, Orientation, QFlags, QListOfInt, QVariant};
 use qt_gui::{QBrush, QColor, QCursor};
 use qt_widgets::{
-    cpp_core::{CppBox, MutPtr},
+    cpp_core::{CppBox, MutPtr, Ref},
     q_abstract_item_view::{EditTrigger, SelectionBehavior, SelectionMode},
     q_header_view::ResizeMode,
     q_size_policy::Policy,
@@ -269,11 +269,6 @@ impl<'a> Form<'a> {
                 vpin_tablewidget.set_column_hidden(*idx, true);
             }
         }
-        // for (idx, _, hidden) in HEADERS {
-        //     if *hidden {
-        //         tablewidget_ptr.set_column_hidden(*idx, true);
-        //     }
-        // }
     }
     //-----------------------//
     // Setup the TableWidget //
@@ -442,12 +437,6 @@ impl<'a> Form<'a> {
         update_cnt_ptr: Rc<Cell<i32>>,
     ) {
         let mut dist_item = vpin_tablewidget_ptr.item(r, COL_DISTRIBUTION);
-        // let dist_id = vpin_tablewidget_ptr
-        //     .item(r, COL_ID)
-        //     .text()
-        //     .to_std_string()
-        //     .parse::<i32>()
-        //     .expect("should have id");
         let mut orig_qstr = dist_item.text();
         let orig_text = orig_qstr.to_std_string();
         // split up the distribution into the package name
@@ -698,6 +687,7 @@ impl<'a> Form<'a> {
         unsafe {
             // parent root_widget
             let mut root_widget = QWidget::new_0a();
+            root_widget.set_base_size_2a(1200, 800);
             let root_widget_ptr = root_widget.as_mut_ptr();
             // top vertical layout
             let mut root_layout = QVBoxLayout::new_0a();
@@ -720,7 +710,7 @@ impl<'a> Form<'a> {
             let mut vsplit = QSplitter::new();
             let mut vsplit_ptr = vsplit.as_mut_ptr();
             vsplit.set_orientation(Orientation::Vertical);
-            root_layout_ptr.add_widget(vsplit.into_ptr());
+            // set splitter sizing
             // setup the main table widget
             let vpin_tablewidget_ptr = Self::setup_table(&mut vsplit_ptr);
             let (pinchanges_ptr, save_button) = Self::create_pinchanges_widget(&mut vsplit_ptr);
@@ -739,6 +729,11 @@ impl<'a> Form<'a> {
             let mut pinchanges_ptr = pinchanges_ptr.clone();
             let mut dist_usage_ptr = usage_ptr.clone();
             let mut dist_update_cnt_ptr = update_cnt_ptr.clone();
+            let mut splitter_sizes = QListOfInt::new();
+            splitter_sizes.append_int(Ref::from_raw_ref(&(500 as i32)));
+            splitter_sizes.append_int(Ref::from_raw_ref(&(300 as i32)));
+            vsplit.set_sizes(&splitter_sizes);
+            root_layout_ptr.add_widget(vsplit.into_ptr());
             let form = Form {
                 row_pressed: SlotOfIntInt::new(move |_r: i32, _c: i32| {
                     let pos = QCursor::pos_0a();
@@ -861,7 +856,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     )?;
     let mut vpin_finder = PackratDb::new(client);
     QApplication::init(|_| unsafe {
-        let _form = Form::new(&mut vpin_finder);
+        let mut _form = Form::new(&mut vpin_finder);
         QApplication::exec()
     });
 }
