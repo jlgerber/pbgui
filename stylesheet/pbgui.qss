@@ -5,6 +5,18 @@ QComboBox {
     min-width: 6em;
 }
 
+QHeaderView::section {
+    border: 0px solid #6c6c6c;
+}
+
+QHeaderView::section:first {
+    padding-right: 15px;
+}
+
+QHeaderView::section:last {
+    padding-right: 15px;
+}
+
 QComboBox {
     background: rgb(80,80,80);
 }
@@ -43,4 +55,18 @@ QComboBox::down-arrow {
     image: url(:/images/dropdown.png);
     width: 10px;
     height: 10px;
+}
+
+QPushButton#QueryButton {
+    border: 1px solid rgb(101,101,101);
+    border-radius: 5px;
+    background: rgb(80,80,80);
+}
+
+QPushButton#QueryButton:pressed {
+    border: 1px solid rgb(131,131,131);
+    border-radius: 5px;
+    /* background: rgb(70,110,220); */
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                stop: 0 #006DCC, stop: .6 #006DCC,stop: 1.0 #0033BF);
 }

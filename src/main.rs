@@ -357,6 +357,7 @@ impl<'a> Form<'a> {
     //----------------------//
     unsafe fn create_query_button(hlayout_ptr: &mut MutPtr<QHBoxLayout>) -> MutPtr<QPushButton> {
         let mut button = QPushButton::from_q_string(&QString::from_std_str("Query"));
+        button.set_object_name(&QString::from_std_str("QueryButton"));
         let button_ptr = button.as_mut_ptr();
         button.set_minimum_width(70);
         button.set_maximum_width(70);
