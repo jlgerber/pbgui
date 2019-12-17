@@ -48,6 +48,9 @@ struct Form<'a> {
 }
 
 impl<'a> Form<'a> {
+    pub fn greet(&mut self) {
+        println!("HELLO");
+    }
     //
     // Create Main Widget
     //
@@ -205,6 +208,7 @@ impl<'a> Form<'a> {
     }
 }
 
+//impl qt_core::ArgumentsCompatible<()> for Form<_a> {};
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = Client::connect(
         "host=127.0.0.1 user=postgres dbname=packrat password=example port=5432",
@@ -213,7 +217,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut vpin_finder = PackratDb::new(client);
     QApplication::init(|_| unsafe {
-        let mut _form = Form::new(&mut vpin_finder);
+        let mut form = Form::new(&mut vpin_finder);
+        let save_btn = form._save_button;
+        let slot = Slot::new(|| form.greet());
+        save_btn.clicked().connect(&slot);
         QApplication::exec()
     });
 }
