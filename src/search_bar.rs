@@ -1,6 +1,8 @@
 use packybara::packrat::PackratDb;
 use qt_core::{AlignmentFlag, QFlags};
-use qt_widgets::{cpp_core::MutPtr, qt_core::QString, QComboBox, QGroupBox, QHBoxLayout};
+use qt_widgets::{
+    cpp_core::MutPtr, qt_core::QString, QComboBox, QGroupBox, QHBoxLayout, QPushButton,
+};
 
 //------------------------//
 // build the combo boxes  //
@@ -120,9 +122,9 @@ unsafe fn setup_platforms_cb<'b>(
     layout.add_widget(grpbox.into_ptr());
     platform_cb_ptr
 }
-//----------------//
-// Site Combobox  //
-//----------------//
+//
+// Site Combobox
+//
 unsafe fn setup_sites_cb<'b>(
     db: &'b mut PackratDb,
     layout: &mut MutPtr<QHBoxLayout>,
@@ -147,9 +149,9 @@ unsafe fn setup_sites_cb<'b>(
     layout.add_widget(grpbox.into_ptr());
     site_cb_ptr
 }
-//---------------------------------//
-// Set up the directions combobox  //
-//---------------------------------//
+//
+// Set up the directions combobox
+//
 unsafe fn setup_directions_cb<'b>(layout: &mut MutPtr<QHBoxLayout>) -> MutPtr<QComboBox> {
     let mut dir_combobox = QComboBox::new_0a();
     let dir_cb_ptr = dir_combobox.as_mut_ptr();
@@ -167,4 +169,20 @@ unsafe fn setup_directions_cb<'b>(layout: &mut MutPtr<QHBoxLayout>) -> MutPtr<QC
     grpbox.set_title(&QString::from_std_str("Direction"));
     layout.add_widget(grpbox.into_ptr());
     dir_cb_ptr
+}
+
+//
+// Create Query Button
+//
+pub fn create_query_button(hlayout_ptr: &mut MutPtr<QHBoxLayout>) -> MutPtr<QPushButton> {
+    unsafe {
+        let mut button = QPushButton::from_q_string(&QString::from_std_str("")); //Query
+        button.set_object_name(&QString::from_std_str("QueryButton"));
+        let button_ptr = button.as_mut_ptr();
+        button.set_minimum_width(60); //70
+        button.set_maximum_width(60); //70
+        button.set_minimum_height(60); //60
+        hlayout_ptr.add_widget(button.into_ptr());
+        button_ptr
+    }
 }

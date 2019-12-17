@@ -1,15 +1,13 @@
 #![windows_subsystem = "windows"]
 use packybara::packrat::{Client, NoTls, PackratDb};
 use pbgui::choose_distribution::choose_alternative_distribution;
-use pbgui::combo_boxes;
 use pbgui::save_versionpin_changes::save_versionpin_changes;
 use pbgui::update_versionpin_table::update_vpin_table;
+use pbgui::utility::load_stylesheet;
 use pbgui::versionpin_changes_table::create_pinchanges_widget;
 use pbgui::versionpin_table::setup_table;
-use qt_core::{
-    q_io_device::OpenModeFlag, Orientation, QFile, QFlags, QListOfInt, QPoint, QResource,
-    QTextStream, WidgetAttribute,
-};
+use pbgui::{combo_boxes, create_query_button};
+use qt_core::{Orientation, QListOfInt, QPoint, WidgetAttribute};
 use qt_gui::QIcon;
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr, /*Ptr,*/ Ref},
@@ -45,40 +43,6 @@ struct Form<'a> {
 }
 
 impl<'a> Form<'a> {
-    //
-    // Create Query Button
-    //
-    unsafe fn create_query_button(hlayout_ptr: &mut MutPtr<QHBoxLayout>) -> MutPtr<QPushButton> {
-        let mut button = QPushButton::from_q_string(&QString::from_std_str("")); //Query
-        button.set_object_name(&QString::from_std_str("QueryButton"));
-        let button_ptr = button.as_mut_ptr();
-        button.set_minimum_width(60); //70
-        button.set_maximum_width(60); //70
-        button.set_minimum_height(60); //60
-        hlayout_ptr.add_widget(button.into_ptr());
-        button_ptr
-    }
-
-    fn load_stylesheet(mut parent_widget: MutPtr<QWidget>) {
-        unsafe {
-            // Does not work
-            //QResource::add_search_path(&QString::from_std_str("/Users/jgerber/bin/"));
-            let _result = QResource::register_resource_q_string(&QString::from_std_str(
-                "/Users/jgerber/bin/pbgui.rcc",
-            ));
-            //println!("Loading resource successful?: {}", result);
-            let mut file =
-                QFile::from_q_string(&QString::from_std_str("/Users/jgerber/bin/pbgui.qss"));
-            if file.open_1a(QFlags::from(OpenModeFlag::ReadOnly)) {
-                let mut text_stream = QTextStream::new();
-                text_stream.set_device(file.as_mut_ptr());
-                let stylesheet = text_stream.read_all();
-                parent_widget.set_style_sheet(stylesheet.as_ref());
-            } else {
-                println!("stylesheet not found");
-            }
-        }
-    }
     //
     // Create Main Widget
     //
@@ -120,7 +84,7 @@ impl<'a> Form<'a> {
 
             hlayout_ptr.add_widget(line_edit.into_ptr());
             // create query button
-            let button_ptr = Self::create_query_button(&mut hlayout_ptr);
+            let button_ptr = create_query_button(&mut hlayout_ptr);
             // Create Splitter between query results and action logger
             let mut vsplit = QSplitter::new();
             let mut vsplit_ptr = vsplit.as_mut_ptr();
@@ -137,7 +101,7 @@ impl<'a> Form<'a> {
                 dist_popup_menu.add_action_q_string(&QString::from_std_str("Withs"));
             let mut dist_popup_menu_ptr = dist_popup_menu.as_mut_ptr();
             // set the style sheet
-            Self::load_stylesheet(root_widget_ptr);
+            load_stylesheet(root_widget_ptr);
             root_widget.show();
             //
             let usage = Rc::new(RefCell::new(HashMap::<i32, i32>::new()));
