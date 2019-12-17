@@ -30,9 +30,14 @@ struct Form<'a> {
     _vpin_table: MutPtr<QTableWidget>,
     _pinchanges_list: MutPtr<QTableWidget>,
     _save_button: MutPtr<QPushButton>,
+    // needed so that qt wont segfault
+    #[allow(dead_code)]
     dist_popup_menu: CppBox<QMenu>,
+    // needed so that qt wont segfault
+    #[allow(dead_code)]
     package_popup_menu: CppBox<QMenu>,
     // needed so that qt wont segfault
+    #[allow(dead_code)]
     dist_popup_action: MutPtr<QAction>,
     query_button_clicked: Slot<'a>,
     save_clicked: Slot<'a>,
