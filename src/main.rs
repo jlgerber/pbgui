@@ -4,22 +4,24 @@ use packybara::packrat::{Client, NoTls, PackratDb};
 use packybara::LtreeSearchMode;
 use qt_core::{
     q_io_device::OpenModeFlag, AlignmentFlag, Orientation, QFile, QFlags, QListOfInt, QPoint,
-    QResource, QTextStream, QVariant,
+    QResource, QTextStream, QVariant, WidgetAttribute,
 };
-use qt_gui::{QBrush, QColor};
+use qt_gui::{QBrush, QColor, QIcon};
 use qt_widgets::{
-    cpp_core::{CppBox, MutPtr, Ref},
+    cpp_core::{CppBox, MutPtr, Ptr, Ref},
     q_abstract_item_view::{EditTrigger, SelectionBehavior, SelectionMode},
     q_header_view::ResizeMode,
+    q_line_edit::ActionPosition,
     q_size_policy::Policy,
     qt_core::ContextMenuPolicy,
     qt_core::QString,
     qt_core::QStringList,
     qt_core::Slot,
     QAction, QApplication, QComboBox, QGroupBox, QHBoxLayout, QInputDialog, QLineEdit, QMenu,
-    QPushButton, QSizePolicy, QSpacerItem, QSplitter, QTableWidget, QTableWidgetItem, QToolBar,
+    QMessageBox, QPushButton, QSizePolicy, QSplitter, QTableWidget, QTableWidgetItem, QToolBar,
     QVBoxLayout, QWidget, SlotOfQPoint,
 };
+use whoami;
 mod constants;
 use constants::*;
 
@@ -66,6 +68,10 @@ macro_rules! qcolor_blue {
     };
 }
 
+/// Given an input of &str or String, return a boxed QString
+pub fn qs<S: AsRef<str>>(input: S) -> CppBox<QString> {
+    QString::from_std_str(input.as_ref())
+}
 struct Form<'a> {
     _db: &'a mut PackratDb,
     _widget: CppBox<QWidget>,
@@ -74,14 +80,16 @@ struct Form<'a> {
     _vpin_table: MutPtr<QTableWidget>,
     _pinchanges_list: MutPtr<QTableWidget>,
     _save_button: MutPtr<QPushButton>,
-    //update_map: Rc<RefCell<HashMap<i32, i32>>>,
-    //update_cnt: Rc<Cell<i32>>,
     dist_popup_menu: CppBox<QMenu>,
+    package_popup_menu: CppBox<QMenu>,
+    // needed so that qt wont segfault
     dist_popup_action: MutPtr<QAction>,
     query_button_clicked: Slot<'a>,
     save_clicked: Slot<'a>,
     choose_distribution_triggered: Slot<'a>,
     show_dist_menu: SlotOfQPoint<'a>,
+    clear_package: Slot<'a>,
+    show_line_edit_menu: SlotOfQPoint<'a>,
 }
 
 impl<'a> Form<'a> {
@@ -242,8 +250,8 @@ impl<'a> Form<'a> {
         // Direction
         let dir_cb_ptr = Self::setup_directions_cb(layout);
 
-        let qspacer = QSpacerItem::new_3a(30, 10, Policy::Expanding);
-        layout.add_item(qspacer.into_ptr());
+        //let qspacer = QSpacerItem::new_3a(30, 10, Policy::Expanding);
+        //layout.add_item(qspacer.into_ptr());
         // return tuple
         (
             level_cb_ptr,
@@ -714,7 +722,7 @@ impl<'a> Form<'a> {
             let result = QResource::register_resource_q_string(&QString::from_std_str(
                 "/Users/jgerber/bin/pbgui.rcc",
             ));
-            println!("Loading resource successful?: {}", result);
+            //println!("Loading resource successful?: {}", result);
             let mut file =
                 QFile::from_q_string(&QString::from_std_str("/Users/jgerber/bin/pbgui.qss"));
             if file.open_1a(QFlags::from(OpenModeFlag::ReadOnly)) {
@@ -749,8 +757,24 @@ impl<'a> Form<'a> {
                 Self::combo_boxes(&mut db, &mut hlayout_ptr);
             // LINE EDIT
             let mut line_edit = QLineEdit::new();
-            let line_edit_ptr = line_edit.as_mut_ptr();
-            root_layout_ptr.add_widget(line_edit.into_ptr());
+            line_edit.set_attribute_2a(WidgetAttribute::WAMacShowFocusRect, false);
+            line_edit.set_object_name(&QString::from_std_str("packageLineEdit"));
+            let clear_icon = QIcon::from_q_string(&QString::from_std_str(":/images/clear.png"));
+            println!("icon is null {}", clear_icon.is_null());
+            let clear_action = line_edit.add_action_q_icon_action_position(
+                clear_icon.as_ref(),
+                ActionPosition::TrailingPosition,
+            );
+            line_edit.set_context_menu_policy(ContextMenuPolicy::CustomContextMenu);
+            let mut line_edit_popup_menu = QMenu::new();
+            let mut line_edit_popup_menu_ptr = line_edit_popup_menu.as_mut_ptr();
+            let choose_line_edit_clear_action =
+                line_edit_popup_menu.add_action_q_string(&QString::from_std_str("Clear"));
+
+            let mut line_edit_ptr = line_edit.as_mut_ptr();
+            //root_layout_ptr.add_widget(line_edit.into_ptr());
+
+            hlayout_ptr.add_widget(line_edit.into_ptr());
             // create query button
             let button_ptr = Self::create_query_button(&mut hlayout_ptr);
             // Create Splitter between query results and action logger
@@ -785,10 +809,21 @@ impl<'a> Form<'a> {
             vsplit.set_sizes(&splitter_sizes);
             root_layout_ptr.add_widget(vsplit.into_ptr());
             let form = Form {
+                clear_package: Slot::new(move || {
+                    line_edit_ptr.clear();
+                }),
+                show_line_edit_menu: SlotOfQPoint::new(move |pos: Ref<QPoint>| {
+                    let _action = line_edit_popup_menu_ptr
+                        .exec_1a_mut(line_edit_ptr.map_to_global(pos).as_ref());
+                }),
                 show_dist_menu: SlotOfQPoint::new(move |pos: Ref<QPoint>| {
                     let _action = dist_popup_menu_ptr
                         .exec_1a_mut(vpin_tablewidget_ptr.map_to_global(pos).as_ref());
                 }),
+                // show_clear_menu: SlotOfQPoint::new(move |pos: Ref<QPoint>| {
+                //     let _action = dist_popup_menu_ptr
+                //         .exec_1a_mut(vpin_tablewidget_ptr.map_to_global(pos).as_ref());
+                // }),
                 //---------------------//
                 // save clicked        //
                 //---------------------//
@@ -799,17 +834,19 @@ impl<'a> Form<'a> {
                         NoTls,
                     )
                     .unwrap();
+                    let comments = QInputDialog::get_multi_line_text_3a(
+                        root_widget_ptr,
+                        &qs("Save Changes"),
+                        &qs("Comment"),
+                    )
+                    .to_std_string();
                     let mut pb = PackratDb::new(client);
-                    let mut update = pb.update_versionpins();
+                    let user = whoami::username();
+                    let mut update = pb.update_versionpins(user.as_str(), comments.as_str());
                     let mut changes = Vec::new();
                     for row_idx in 0..pinchanges_ptr.row_count() {
                         let vpin_id = pinchanges_ptr.item(row_idx, COL_PC_VPINID).data(2);
                         let dist_id = pinchanges_ptr.item(row_idx, COL_PC_DISTID).data(2);
-                        println!(
-                            "vpin_id: {} dist_id: {}",
-                            vpin_id.to_int_0a(),
-                            dist_id.to_int_0a()
-                        );
                         changes.push(VersionPinChange::new(
                             vpin_id.to_int_0a(),
                             Some(dist_id.to_int_0a()),
@@ -820,9 +857,16 @@ impl<'a> Form<'a> {
                     if results.is_ok() {
                         pinchanges_ptr.clear();
                         pinchanges_ptr.set_row_count(0);
+                        let mut mb = QMessageBox::new();
+                        mb.set_text(&qs("Success"));
+                        mb.exec();
                     //todo - reset color of query
                     } else {
-                        println!("{:#?}", results);
+                        let mut mb = QMessageBox::new();
+                        mb.set_text(&qs("Error Occured"));
+                        mb.set_detailed_text(&qs(format!("{:#?}", results)));
+                        //println!("{:#?}", results);
+                        mb.exec();
                     }
                 }),
                 //--------------------------------//
@@ -863,6 +907,7 @@ impl<'a> Form<'a> {
                 _pinchanges_list: pinchanges_ptr,
                 dist_popup_menu: dist_popup_menu,
                 dist_popup_action: choose_dist_action,
+                package_popup_menu: line_edit_popup_menu,
             };
             //
             // connect signals to slots
@@ -875,6 +920,16 @@ impl<'a> Form<'a> {
             choose_dist_action
                 .triggered()
                 .connect(&form.choose_distribution_triggered);
+            clear_action.triggered().connect(&form.clear_package);
+            // line_edit_ptr
+            //     .custom_context_menu_requested()
+            //     .connect(&form.clear_package);
+            line_edit_ptr
+                .custom_context_menu_requested()
+                .connect(&form.show_line_edit_menu);
+            choose_line_edit_clear_action
+                .triggered()
+                .connect(&form.clear_package);
             form
         }
     }

@@ -1,3 +1,13 @@
+/* QLineEdit#packageLineEdit {
+    outline: none;
+    border-radius: 5px;
+} */
+QLineEdit {
+    border-radius: 8px;
+    padding-left: 8px;
+    padding-right: 8px;
+    border: 1px solid rgb(80,80,80);
+}
 QComboBox {
     border: 1px solid gray;
     border-radius: 3px;

@@ -4,7 +4,6 @@
     <file>images/query.png</file>
     <file>images/query-hilite.png</file>
     <file>images/query-shaded.png</file>
-
-
+    <file>images/clear.png</file>
 </qresource>
 </RCC>
