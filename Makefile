@@ -5,12 +5,12 @@ install:
 	cp ./target/release/pbgui ~/bin/.
 
 install-stylesheet:
-	cp ./stylesheet/pbgui.qss ~/bin/.
+	cp ./resources/pbgui.qss ~/bin/.
 
 rcc:
-	rcc -binary pbgui.qrc -o pbgui.rcc
+	rcc -binary ./resources/pbgui.qrc -o ./resources/pbgui.rcc
 
 install-rcc:
-	cp ./pbgui.rcc ~/bin/.
+	cp ./resources/pbgui.rcc ~/bin/. && rm ./resources/pbgui.rcc
 
 all: build install install-stylesheet rcc install-rcc
