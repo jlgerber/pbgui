@@ -24,7 +24,7 @@ pub fn save_versionpin_changes(
         .to_std_string();
         let mut pb = PackratDb::new(client);
         let user = whoami::username();
-        let mut update = pb.update_versionpins(user.as_str(), comments.as_str());
+        let mut update = pb.update_versionpins(comments.as_str(), user.as_str());
         let mut changes = Vec::new();
         for row_idx in 0..pinchanges_ptr.row_count() {
             let vpin_id = pinchanges_ptr.item(row_idx, COL_PC_VPINID).data(2);
