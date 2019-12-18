@@ -2,7 +2,7 @@ use crate::constants::*;
 use crate::utility::qs;
 use crate::ClientProxy;
 use packybara::db::update::versionpins::VersionPinChange;
-use packybara::packrat::{Client, NoTls, PackratDb};
+use packybara::packrat::PackratDb;
 use qt_widgets::{cpp_core::MutPtr, QInputDialog, QMessageBox, QTableWidget, QWidget};
 use whoami;
 

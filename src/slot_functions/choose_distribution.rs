@@ -1,7 +1,7 @@
 use crate::constants::*;
 
 pub use crate::ClientProxy;
-use packybara::packrat::{Client, NoTls, PackratDb};
+use packybara::packrat::PackratDb;
 use qt_core::QVariant;
 use qt_gui::{QBrush, QColor};
 use qt_widgets::{

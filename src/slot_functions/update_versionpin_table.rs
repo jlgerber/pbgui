@@ -1,6 +1,6 @@
 use crate::constants::*;
 use crate::ClientProxy;
-use packybara::packrat::{Client, NoTls, PackratDb};
+use packybara::packrat::PackratDb;
 use packybara::LtreeSearchMode;
 use qt_core::QVariant;
 use qt_widgets::{
