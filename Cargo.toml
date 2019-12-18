@@ -5,7 +5,7 @@ authors = ["jgerber <jlgerber@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-packybara = {git= "https://github.com/jlgerber/packybara", tag="v0.20.0"}
+packybara = {git= "https://github.com/jlgerber/packybara", tag="v0.21.1"}
 qt_core = "0.4.0"
 qt_gui = "0.4.0"
 qt_widgets = "0.4.0"

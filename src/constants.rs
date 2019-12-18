@@ -30,3 +30,16 @@ pub const PC_HEADERS: &[(i32, &'static str, bool)] = &[
     (COL_PC_PKGCOORDID, "pkgcoordid", true),
     (COL_PC_DISPLAY, "display", false),
 ];
+
+//
+pub const COL_REV_TXID: i32 = 0;
+pub const COL_REV_AUTHOR: i32 = 1;
+pub const COL_REV_DATETIME: i32 = 2;
+pub const COL_REV_COMMENT: i32 = 3;
+
+pub const REV_HEADERS: &[(i32, &'static str, bool)] = &[
+    (COL_REV_TXID, "tx_id", false),
+    (COL_REV_AUTHOR, "author", false),
+    (COL_REV_DATETIME, "datetime", false),
+    (COL_REV_COMMENT, "comment", false),
+];

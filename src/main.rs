@@ -1,14 +1,17 @@
 #![windows_subsystem = "windows"]
-use packybara::packrat::{Client, NoTls, PackratDb};
+use packybara::packrat::PackratDb;
+use packybara::OrderDirection;
+use packybara::OrderRevisionBy;
+use pbgui::bottom_stacked_widget::create_bottom_stacked_widget;
 use pbgui::choose_distribution::choose_alternative_distribution;
+use pbgui::constants::*;
 use pbgui::save_versionpin_changes::save_versionpin_changes;
 use pbgui::update_versionpin_table::update_vpin_table;
 use pbgui::utility::load_stylesheet;
-use pbgui::versionpin_changes_table::create_pinchanges_widget;
 use pbgui::versionpin_table::setup_table;
 use pbgui::ClientProxy;
 use pbgui::{combo_boxes, create_query_button};
-use qt_core::{Orientation, QListOfInt, QPoint, WidgetAttribute};
+use qt_core::{Orientation, QListOfInt, QPoint, QVariant, WidgetAttribute};
 use qt_gui::QIcon;
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr, /*Ptr,*/ Ref},
@@ -17,7 +20,7 @@ use qt_widgets::{
     qt_core::QString,
     qt_core::Slot,
     QAction, QApplication, QHBoxLayout, QLineEdit, QMenu, QPushButton, QSplitter, QTableWidget,
-    QVBoxLayout, QWidget, SlotOfQPoint,
+    QTableWidgetItem, QVBoxLayout, QWidget, SlotOfQPoint,
 };
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
@@ -31,6 +34,8 @@ struct Form<'a> {
     _vpin_table: MutPtr<QTableWidget>,
     _pinchanges_list: MutPtr<QTableWidget>,
     _save_button: MutPtr<QPushButton>,
+    pg1_button: MutPtr<QPushButton>,
+    pg2_button: MutPtr<QPushButton>,
     // needed so that qt wont segfault
     #[allow(dead_code)]
     dist_popup_menu: CppBox<QMenu>,
@@ -46,6 +51,8 @@ struct Form<'a> {
     show_dist_menu: SlotOfQPoint<'a>,
     clear_package: Slot<'a>,
     show_line_edit_menu: SlotOfQPoint<'a>,
+    select_pg1: Slot<'a>,
+    select_pg2: Slot<'a>,
 }
 
 impl<'a> Form<'a> {
@@ -98,7 +105,14 @@ impl<'a> Form<'a> {
             // set splitter sizing
             // setup the main table widget
             let vpin_tablewidget_ptr = setup_table(&mut vsplit_ptr);
-            let (pinchanges_ptr, save_button) = create_pinchanges_widget(&mut vsplit_ptr);
+            let (
+                pinchanges_ptr,
+                mut revisions_ptr,
+                save_button,
+                mut stacked_ptr,
+                pinchanges_button_ptr,
+                history_button_ptr,
+            ) = create_bottom_stacked_widget(&mut vsplit_ptr);
             // setup popup menu for versionpin table
             let mut dist_popup_menu = QMenu::new();
             let choose_dist_action =
@@ -169,6 +183,67 @@ impl<'a> Form<'a> {
                         dist_update_cnt_ptr.clone(),
                     );
                 }),
+                select_pg1: Slot::new(move || {
+                    stacked_ptr.set_current_index(0);
+                }),
+                select_pg2: Slot::new(move || {
+                    stacked_ptr.set_current_index(1);
+                    let client = ClientProxy::connect().unwrap();
+                    let mut packratdb = PackratDb::new(client);
+                    let mut revisions_finder = packratdb.find_all_revisions();
+                    let results = revisions_finder
+                        .order_by(vec![OrderRevisionBy::Id])
+                        .order_direction(OrderDirection::Desc)
+                        .query()
+                        .expect("failed to call db");
+                    //println!("{:?}", results);
+                    revisions_ptr.clear_contents();
+                    //revisions_ptr.set_row_count(0);
+                    let r_len = results.len() as i32;
+                    //println!("length {}", r_len);
+                    revisions_ptr.set_row_count(r_len);
+                    let mut cnt = 0;
+                    for revision in results {
+                        let mut revisions_table_item = QTableWidgetItem::new();
+                        let variant = QVariant::from_int(revision.transaction_id as i32);
+                        revisions_table_item.set_data(
+                            2, // EditRole
+                            variant.as_ref(),
+                        );
+                        revisions_ptr.set_item(cnt, COL_REV_TXID, revisions_table_item.into_ptr());
+                        // Author
+                        let mut revisions_table_item = QTableWidgetItem::new();
+                        revisions_table_item
+                            .set_text(&QString::from_std_str(revision.author.to_string().as_str()));
+                        revisions_ptr.set_item(
+                            cnt,
+                            COL_REV_AUTHOR,
+                            revisions_table_item.into_ptr(),
+                        );
+                        // Datetime
+                        let mut revisions_table_item = QTableWidgetItem::new();
+                        revisions_table_item.set_text(&QString::from_std_str(
+                            revision.datetime.format("%F %r").to_string().as_str(),
+                        ));
+                        revisions_ptr.set_item(
+                            cnt,
+                            COL_REV_DATETIME,
+                            revisions_table_item.into_ptr(),
+                        );
+                        // comment
+                        let mut revisions_table_item = QTableWidgetItem::new();
+                        revisions_table_item.set_text(&QString::from_std_str(
+                            revision.comment.to_string().as_str(),
+                        ));
+                        revisions_ptr.set_item(
+                            cnt,
+                            COL_REV_COMMENT,
+                            revisions_table_item.into_ptr(),
+                        );
+                        //println!("author: {} comment: {}", revision.author, revision.comment);
+                        cnt += 1;
+                    }
+                }),
                 _db: db,
                 _widget: root_widget,
                 _vpin_table: vpin_tablewidget_ptr,
@@ -179,10 +254,14 @@ impl<'a> Form<'a> {
                 dist_popup_menu: dist_popup_menu,
                 dist_popup_action: choose_dist_action,
                 package_popup_menu: line_edit_popup_menu,
+                pg1_button: pinchanges_button_ptr,
+                pg2_button: history_button_ptr,
             };
             //
             // connect signals to slots
             //
+            pinchanges_button_ptr.clicked().connect(&form.select_pg1);
+            history_button_ptr.clicked().connect(&form.select_pg2);
             button_ptr.clicked().connect(&form.query_button_clicked);
             save_button.clicked().connect(&form.save_clicked);
             vpin_tablewidget_ptr
@@ -192,9 +271,6 @@ impl<'a> Form<'a> {
                 .triggered()
                 .connect(&form.choose_distribution_triggered);
             clear_action.triggered().connect(&form.clear_package);
-            // line_edit_ptr
-            //     .custom_context_menu_requested()
-            //     .connect(&form.clear_package);
             line_edit_ptr
                 .custom_context_menu_requested()
                 .connect(&form.show_line_edit_menu);
