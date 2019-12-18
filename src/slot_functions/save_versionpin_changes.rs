@@ -13,13 +13,23 @@ pub fn save_versionpin_changes(
     let client = ClientProxy::connect().unwrap();
     unsafe {
         // grab all the data from the pin changes
-
-        let comments = QInputDialog::get_multi_line_text_3a(
+        let mut ok = false;
+        let ok_p: *mut bool = &mut ok;
+        let ok_ptr = MutPtr::from_raw(ok_p);
+        let comments = QInputDialog::get_multi_line_text_5a(
             root_widget_ptr,
             &qs("Save Changes"),
             &qs("Comment"),
+            &qs(""),
+            ok_ptr,
         )
         .to_std_string();
+        if *ok_ptr == false {
+            let mut mb = QMessageBox::new();
+            mb.set_text(&qs("Cancelled"));
+            mb.exec();
+            return;
+        }
         let mut pb = PackratDb::new(client);
         let user = whoami::username();
         let mut update = pb.update_versionpins(comments.as_str(), user.as_str());
