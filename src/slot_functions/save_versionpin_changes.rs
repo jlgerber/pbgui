@@ -1,5 +1,6 @@
 use crate::constants::*;
 use crate::utility::qs;
+use crate::ClientProxy;
 use packybara::db::update::versionpins::VersionPinChange;
 use packybara::packrat::{Client, NoTls, PackratDb};
 use qt_widgets::{cpp_core::MutPtr, QInputDialog, QMessageBox, QTableWidget, QWidget};
@@ -9,13 +10,10 @@ pub fn save_versionpin_changes(
     root_widget_ptr: MutPtr<QWidget>,
     pinchanges_ptr: &mut MutPtr<QTableWidget>,
 ) {
+    let client = ClientProxy::connect().unwrap();
     unsafe {
         // grab all the data from the pin changes
-        let client = Client::connect(
-            "host=127.0.0.1 user=postgres dbname=packrat password=example port=5432",
-            NoTls,
-        )
-        .unwrap();
+
         let comments = QInputDialog::get_multi_line_text_3a(
             root_widget_ptr,
             &qs("Save Changes"),

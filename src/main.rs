@@ -6,6 +6,7 @@ use pbgui::update_versionpin_table::update_vpin_table;
 use pbgui::utility::load_stylesheet;
 use pbgui::versionpin_changes_table::create_pinchanges_widget;
 use pbgui::versionpin_table::setup_table;
+use pbgui::ClientProxy;
 use pbgui::{combo_boxes, create_query_button};
 use qt_core::{Orientation, QListOfInt, QPoint, WidgetAttribute};
 use qt_gui::QIcon;
@@ -206,11 +207,7 @@ impl<'a> Form<'a> {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let client = Client::connect(
-        "host=127.0.0.1 user=postgres dbname=packrat password=example port=5432",
-        NoTls,
-    )?;
-
+    let client = ClientProxy::connect()?;
     let mut vpin_finder = PackratDb::new(client);
     QApplication::init(|_| unsafe {
         let mut _form = Form::new(&mut vpin_finder);

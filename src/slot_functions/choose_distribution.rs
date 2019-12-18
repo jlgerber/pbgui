@@ -1,5 +1,6 @@
 use crate::constants::*;
 
+pub use crate::ClientProxy;
 use packybara::packrat::{Client, NoTls, PackratDb};
 use qt_core::QVariant;
 use qt_gui::{QBrush, QColor};
@@ -44,11 +45,7 @@ pub fn choose_alternative_distribution(
             } else {
                 panic!("unable to extract packge and version from row");
             };
-        let client = Client::connect(
-            "host=127.0.0.1 user=postgres dbname=packrat password=example port=5432",
-            NoTls,
-        )
-        .unwrap();
+        let client = ClientProxy::connect().unwrap();
         let mut packratdb = PackratDb::new(client);
         let results = packratdb
             .find_all_distributions()

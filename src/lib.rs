@@ -1,6 +1,8 @@
+pub mod api;
 pub mod constants;
 pub mod slot_functions;
 pub mod utility;
+pub use api::client_proxy::ClientProxy;
 // needed so that qt wont segfault
 pub mod components;
 pub use components::{

@@ -1,4 +1,5 @@
 use crate::constants::*;
+use crate::ClientProxy;
 use packybara::packrat::{Client, NoTls, PackratDb};
 use packybara::LtreeSearchMode;
 use qt_core::QVariant;
@@ -23,6 +24,11 @@ pub fn update_vpin_table(
     site_ptr: MutPtr<QComboBox>,
     mut vpin_tablewidget_ptr: MutPtr<QTableWidget>,
 ) {
+    // will do better
+    let client = ClientProxy::connect().unwrap();
+    let mut packratdb = PackratDb::new(client);
+    let mut vpin_finder = packratdb.find_all_versionpins();
+
     unsafe {
         let dirtxt = dir_ptr.current_text().to_std_string();
         let line_edit_txt = line_edit_ptr.text().to_std_string();
@@ -30,14 +36,6 @@ pub fn update_vpin_table(
         let roletxt = role_ptr.current_text().to_std_string();
         let platformtxt = platform_ptr.current_text().to_std_string();
         let sitetxt = site_ptr.current_text().to_std_string();
-        // for now
-        let client = Client::connect(
-            "host=127.0.0.1 user=postgres dbname=packrat password=example port=5432",
-            NoTls,
-        )
-        .unwrap();
-        let mut packratdb = PackratDb::new(client);
-        let mut vpin_finder = packratdb.find_all_versionpins();
 
         vpin_finder
             .level(showtxt.as_str())
