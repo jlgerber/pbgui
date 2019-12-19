@@ -10,4 +10,7 @@ pub use components::{
     search_bar::{combo_boxes, create_query_button},
     table_headers, versionpin_changes_table, versionpin_table,
 };
-pub use slot_functions::{choose_distribution, save_versionpin_changes, update_versionpin_table};
+pub use slot_functions::{
+    choose_distribution, save_versionpin_changes, select_history, update_changes_table,
+    update_versionpin_table,
+};

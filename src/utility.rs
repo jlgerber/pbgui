@@ -1,7 +1,9 @@
-use qt_core::{q_io_device::OpenModeFlag, QFile, QFlags, QResource, QString, QTextStream};
+use qt_core::{
+    q_io_device::OpenModeFlag, QFile, QFlags, QResource, QString, QTextStream, QVariant,
+};
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr},
-    QWidget,
+    QTableWidget, QTableWidgetItem, QWidget,
 };
 
 /// Given an input of &str or String, return a boxed QString
@@ -27,4 +29,45 @@ pub fn load_stylesheet(mut parent_widget: MutPtr<QWidget>) {
             println!("stylesheet not found");
         }
     }
+}
+
+/// Update a row
+pub fn update_text_row<T: std::fmt::Display>(
+    value: &T,
+    table: &mut MutPtr<QTableWidget>,
+    cnt: i32,
+    column: i32,
+) {
+    unsafe {
+        let mut changes_table_item = QTableWidgetItem::new();
+        changes_table_item.set_text(&QString::from_std_str(value.to_string().as_str()));
+        table.set_item(cnt, column, changes_table_item.into_ptr());
+    }
+}
+/// Update a row given a RowType
+pub fn update_row(value: RowType, table: &mut MutPtr<QTableWidget>, cnt: i32, column: i32) {
+    unsafe {
+        let mut changes_table_item = QTableWidgetItem::new();
+        match value {
+            RowType::Str(s) => {
+                changes_table_item.set_text(&QString::from_std_str(s));
+                table.set_item(cnt, column, changes_table_item.into_ptr());
+            }
+            RowType::Int(i) => {
+                let variant = QVariant::from_int(i);
+                changes_table_item.set_data(
+                    2, // EditRole
+                    variant.as_ref(),
+                );
+                table.set_item(cnt, column, changes_table_item.into_ptr());
+            }
+        }
+    }
+}
+
+/// Type of row
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub enum RowType<'a> {
+    Str(&'a str),
+    Int(i32),
 }
