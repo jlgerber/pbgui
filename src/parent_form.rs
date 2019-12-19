@@ -1,6 +1,7 @@
 use crate::{
     bottom_stacked_widget::create_bottom_stacked_widget,
     choose_distribution::choose_alternative_distribution,
+    constants::COL_REV_TXID,
     save_versionpin_changes::save_versionpin_changes,
     select_history::select_history,
     update_changes_table::update_changes_table,
@@ -11,8 +12,8 @@ use crate::{
 };
 use packybara::packrat::PackratDb;
 use qt_core::{
-    ContextMenuPolicy, Orientation, QListOfInt, QPoint, QString, Slot, SlotOfIntInt,
-    WidgetAttribute,
+    ContextMenuPolicy, Orientation, QItemSelection, QListOfInt, QPoint, QString, Slot,
+    SlotOfQItemSelectionQItemSelection, WidgetAttribute,
 };
 use qt_gui::QIcon;
 use qt_widgets::{
@@ -50,9 +51,9 @@ pub struct Form<'a> {
     show_dist_menu: SlotOfQPoint<'a>,
     clear_package: Slot<'a>,
     show_line_edit_menu: SlotOfQPoint<'a>,
-    revision_selected: SlotOfIntInt<'a>,
     select_pin_changes: Slot<'a>,
     select_history: Slot<'a>,
+    revision_changed: SlotOfQItemSelectionQItemSelection<'a>,
 }
 
 impl<'a> Form<'a> {
@@ -108,7 +109,7 @@ impl<'a> Form<'a> {
             let (
                 pinchanges_ptr,
                 mut revisions_ptr,
-                changes_table_ptr,
+                mut changes_table_ptr,
                 save_button,
                 mut stacked_ptr,
                 pinchanges_button_ptr,
@@ -138,9 +139,18 @@ impl<'a> Form<'a> {
             vsplit.set_sizes(&splitter_sizes);
             root_layout_ptr.add_widget(vsplit.into_ptr());
             let form = Form {
-                revision_selected: SlotOfIntInt::new(move |r: i32, _c: i32| {
-                    update_changes_table(r, revisions_ptr, changes_table_ptr);
-                }),
+                revision_changed: SlotOfQItemSelectionQItemSelection::new(
+                    move |selected: Ref<QItemSelection>, _deselected: Ref<QItemSelection>| {
+                        let ind = selected.indexes();
+                        if ind.count_0a() > 0 {
+                            let txid = ind.at(COL_REV_TXID);
+                            update_changes_table(txid.row(), revisions_ptr, changes_table_ptr);
+                        } else {
+                            changes_table_ptr.clear_contents();
+                            changes_table_ptr.set_row_count(0);
+                        }
+                    },
+                ),
                 clear_package: Slot::new(move || {
                     line_edit_ptr.clear();
                 }),
@@ -229,8 +239,9 @@ impl<'a> Form<'a> {
                 .triggered()
                 .connect(&form.clear_package);
             revisions_ptr
-                .cell_clicked()
-                .connect(&form.revision_selected);
+                .selection_model()
+                .selection_changed()
+                .connect(&form.revision_changed);
             form
         }
     }
