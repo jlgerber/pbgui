@@ -43,7 +43,7 @@ pub fn choose_alternative_distribution(
             if let &[package, version] = &*orig_text.split("-").collect::<Vec<_>>() {
                 (package, version)
             } else {
-                panic!("unable to extract packge and version from row");
+                panic!("unable to extract package and version from row");
             };
         let client = ClientProxy::connect()
             .expect("unable to unwrap clientproxy connection in choose distributions");
@@ -77,6 +77,10 @@ pub fn choose_alternative_distribution(
             false,
             ok_or_cancel_ptr,
         );
+        if ok_or_cancel_ptr.is_null() {
+            println!("ok_or_cancel_ptr is null. Problem on QT side. Returning");
+            return;
+        }
         if *ok_or_cancel_ptr == false {
             println!("cancelled");
         } else {
