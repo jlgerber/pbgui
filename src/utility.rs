@@ -3,7 +3,7 @@ use qt_core::{
 };
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr},
-    QTableWidget, QTableWidgetItem, QWidget,
+    QHBoxLayout, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget,
 };
 
 /// Given an input of &str or String, return a boxed QString
@@ -70,4 +70,24 @@ pub fn update_row(value: RowType, table: &mut MutPtr<QTableWidget>, cnt: i32, co
 pub enum RowType<'a> {
     Str(&'a str),
     Int(i32),
+}
+
+pub fn create_vlayout() -> CppBox<QVBoxLayout> {
+    unsafe {
+        let mut pc_vlayout = QVBoxLayout::new_0a();
+        pc_vlayout.set_margin(0);
+        pc_vlayout.set_contents_margins_4a(0, 0, 0, 0);
+        pc_vlayout.set_spacing(0);
+        pc_vlayout
+    }
+}
+
+pub fn create_hlayout() -> CppBox<QHBoxLayout> {
+    unsafe {
+        let mut pc_hlayout = QHBoxLayout::new_0a();
+        pc_hlayout.set_margin(0);
+        pc_hlayout.set_contents_margins_4a(0, 0, 0, 0);
+        pc_hlayout.set_spacing(0);
+        pc_hlayout
+    }
 }

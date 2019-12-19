@@ -1,3 +1,4 @@
+pub mod bottom_context_widget;
 pub mod bottom_stacked_widget;
 pub mod changes_table;
 pub mod revisions_table;

@@ -114,6 +114,7 @@ impl<'a> Form<'a> {
                 mut stacked_ptr,
                 pinchanges_button_ptr,
                 history_button_ptr,
+                mut controls_ptr,
             ) = create_bottom_stacked_widget(&mut vsplit_ptr);
             // setup popup menu for versionpin table
             let mut dist_popup_menu = QMenu::new();
@@ -199,9 +200,11 @@ impl<'a> Form<'a> {
                 }),
                 select_pin_changes: Slot::new(move || {
                     stacked_ptr.set_current_index(0);
+                    controls_ptr.set_current_index(0);
                 }),
                 select_history: Slot::new(move || {
                     select_history(&mut revisions_ptr, &mut stacked_ptr);
+                    controls_ptr.set_current_index(1);
                 }),
                 _db: db,
                 _widget: root_widget,

@@ -1,13 +1,14 @@
+use super::bottom_context_widget::create_bottom_context_widget;
 use super::changes_table::setup_changes_table;
 use super::revisions_table::setup_revisions_table;
 use super::versionpin_changes_table::setup_pinchanges_table;
-use crate::utility::qs;
+
+use crate::utility::{create_hlayout, create_vlayout, qs};
 use qt_core::{Orientation, QString};
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr},
     q_size_policy::Policy,
-    QHBoxLayout, QPushButton, QSizePolicy, QSplitter, QStackedWidget, QTableWidget, QVBoxLayout,
-    QWidget,
+    QHBoxLayout, QPushButton, QSizePolicy, QSplitter, QStackedWidget, QTableWidget, QWidget,
 };
 //---------------------------//
 // Create pinchanges widget  //
@@ -22,6 +23,7 @@ pub fn create_bottom_stacked_widget(
     MutPtr<QStackedWidget>,
     MutPtr<QPushButton>,
     MutPtr<QPushButton>,
+    MutPtr<QStackedWidget>,
 ) {
     unsafe {
         // create widget
@@ -33,6 +35,7 @@ pub fn create_bottom_stacked_widget(
         bottom_stacked_widget.set_layout(pc_vlayout.into_ptr());
         // create another layout
         let mut top_hlayout = QHBoxLayout::new_0a();
+        let mut top_hlayout_ptr = top_hlayout.as_mut_ptr();
         top_hlayout.set_spacing(10);
         top_hlayout.set_contents_margins_4a(10, 10, 10, 10);
         // pin changes button
@@ -43,13 +46,11 @@ pub fn create_bottom_stacked_widget(
         let mut history_button = create_check_button("History", false);
         let history_button_ptr = history_button.as_mut_ptr();
         top_hlayout.add_widget(history_button.into_ptr());
-        // spacer
-        let mut spacer = QWidget::new_0a();
-        let sp = QSizePolicy::new_2a(Policy::Expanding, Policy::Fixed);
-        spacer.set_size_policy_1a(sp.as_ref());
-        top_hlayout.add_widget(spacer.into_ptr());
-        // add the top horizontal layout to the vertical layout
+        top_hlayout.add_stretch_0a();
         pc_vlayout_ptr.add_layout_1a(top_hlayout.into_ptr());
+        //
+        //  stacked widget
+        //
         let mut stacked = QStackedWidget::new_0a();
         let mut stacked_ptr = stacked.as_mut_ptr();
         pc_vlayout_ptr.add_widget(stacked.into_ptr());
@@ -66,30 +67,39 @@ pub fn create_bottom_stacked_widget(
         let mut spacer = QWidget::new_0a();
         let sp = QSizePolicy::new_2a(Policy::Expanding, Policy::Fixed);
         spacer.set_size_policy_1a(sp.as_ref());
+        let mut controls = Vec::new();
         //
         // set up the pinchanges table
         //
         let mut pinchanges = setup_pinchanges_table();
         let pinchanges_ptr = pinchanges.as_mut_ptr();
         pg1_layout_ptr.add_widget(pinchanges.into_ptr());
-        // bottom layout
-        let mut bottom_hlayout = create_hlayout();
-        let mut bottom_vlayout_ptr = bottom_hlayout.as_mut_ptr();
-        pg1_layout_ptr.add_layout_1a(bottom_hlayout.into_ptr());
         // save button
+        let mut save_widget = QWidget::new_0a();
+        let mut save_layout = create_hlayout();
+        save_layout.insert_stretch_2a(0, 1);
+        let mut save_layout_ptr = save_layout.as_mut_ptr();
+        save_widget.set_layout(save_layout.into_ptr());
         let mut save_button = QPushButton::from_q_string(&QString::from_std_str("Save"));
         let save_button_ptr = save_button.as_mut_ptr();
-        bottom_vlayout_ptr.add_widget(spacer.into_ptr());
-        bottom_vlayout_ptr.add_widget(save_button.into_ptr());
+        save_layout_ptr.add_widget(save_button.into_ptr());
+        controls.push(save_widget);
+        //bottom_vlayout_ptr.add_widget(spacer.into_ptr());
+        //bottom_vlayout_ptr.add_widget(save_button.into_ptr());
         //
         // set up the second page of the stacked widget
         //
         let mut pg2_widget = QWidget::new_0a();
+        pg2_widget.set_object_name(&qs("HistoryWidget"));
         let mut pg2_layout = create_vlayout();
         let mut pg2_layout_ptr = pg2_layout.as_mut_ptr();
         pg2_widget.set_layout(pg2_layout.into_ptr());
         stacked_ptr.add_widget(pg2_widget.into_ptr());
         splitter.add_widget(bottom_stacked_widget.into_ptr());
+        // page2 context widget
+        let pg2_context_widget = QWidget::new_0a();
+        //nothing in it
+        controls.push(pg2_context_widget);
         //
         // Add revisions table
         //
@@ -98,7 +108,7 @@ pub fn create_bottom_stacked_widget(
         let mut rsplitter = QSplitter::new();
         rsplitter.set_orientation(Orientation::Horizontal);
         let mut rsplitter_ptr = rsplitter.as_mut_ptr();
-        let mut rw_layout = QHBoxLayout::new_0a();
+        let mut rw_layout = create_hlayout();
         rw_layout.add_widget(rsplitter.into_ptr());
         revisions_widget.set_layout(rw_layout.into_ptr());
         pg2_layout_ptr.add_widget(revisions_widget.into_ptr());
@@ -109,6 +119,10 @@ pub fn create_bottom_stacked_widget(
         let changes_table_ptr = changes_table.as_mut_ptr();
         rsplitter_ptr.add_widget(revisions_table.into_ptr());
         rsplitter_ptr.add_widget(changes_table.into_ptr());
+
+        // add the bottom_context_widget which gives us the ablitity
+        // to add controls per page
+        let controls_widget_ptr = create_bottom_context_widget(&mut top_hlayout_ptr, controls);
         (
             pinchanges_ptr,
             revisions_table_ptr,
@@ -117,6 +131,7 @@ pub fn create_bottom_stacked_widget(
             stacked_ptr,
             pinchanges_button_ptr,
             history_button_ptr,
+            controls_widget_ptr,
         )
     }
 }
@@ -129,25 +144,5 @@ fn create_check_button(label: &'static str, checked: bool) -> CppBox<QPushButton
         check_button.set_checkable(true);
         check_button.set_checked(checked);
         check_button
-    }
-}
-
-fn create_vlayout() -> CppBox<QVBoxLayout> {
-    unsafe {
-        let mut pc_vlayout = QVBoxLayout::new_0a();
-        pc_vlayout.set_margin(0);
-        pc_vlayout.set_contents_margins_4a(0, 0, 0, 0);
-        pc_vlayout.set_spacing(0);
-        pc_vlayout
-    }
-}
-
-fn create_hlayout() -> CppBox<QHBoxLayout> {
-    unsafe {
-        let mut pc_hlayout = QHBoxLayout::new_0a();
-        pc_hlayout.set_margin(0);
-        pc_hlayout.set_contents_margins_4a(0, 0, 0, 0);
-        pc_hlayout.set_spacing(0);
-        pc_hlayout
     }
 }

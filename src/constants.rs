@@ -25,10 +25,10 @@ pub const COL_PC_PKGCOORDID: i32 = 2;
 pub const COL_PC_DISPLAY: i32 = 3;
 
 pub const PC_HEADERS: &[(i32, &'static str, bool)] = &[
-    (COL_PC_VPINID, "vpinid", true),
-    (COL_PC_DISTID, "distid", true),
-    (COL_PC_PKGCOORDID, "pkgcoordid", true),
-    (COL_PC_DISPLAY, "display", false),
+    (COL_PC_VPINID, "Vpinid", true),
+    (COL_PC_DISTID, "Distid", true),
+    (COL_PC_PKGCOORDID, "Pkgcoordid", true),
+    (COL_PC_DISPLAY, "Display", false),
 ];
 
 //
@@ -38,10 +38,10 @@ pub const COL_REV_DATETIME: i32 = 2;
 pub const COL_REV_COMMENT: i32 = 3;
 
 pub const REV_HEADERS: &[(i32, &'static str, bool)] = &[
-    (COL_REV_TXID, "tx_id", false),
-    (COL_REV_AUTHOR, "author", false),
-    (COL_REV_DATETIME, "datetime", false),
-    (COL_REV_COMMENT, "comment", false),
+    (COL_REV_TXID, "Tx ID", false),
+    (COL_REV_AUTHOR, "Author", false),
+    (COL_REV_DATETIME, "Datetime", false),
+    (COL_REV_COMMENT, "Comment", false),
 ];
 
 pub const COL_CHNG_ID: i32 = 0;
@@ -56,14 +56,14 @@ pub const COL_CHNG_OLD: i32 = 8;
 pub const COL_CHNG_NEW: i32 = 9;
 
 pub const CHNG_HEADERS: &[(i32, &'static str, bool)] = &[
-    (COL_CHNG_ID, "id", true),
-    (COL_CHNG_TXID, "tx_id", true),
-    (COL_CHNG_ACTION, "action", false),
-    (COL_CHNG_LEVEL, "level", false),
-    (COL_CHNG_ROLE, "role", false),
-    (COL_CHNG_PLATFORM, "platform", false),
-    (COL_CHNG_SITE, "site", false),
-    (COL_CHNG_PKG, "package", false),
-    (COL_CHNG_OLD, "old", false),
-    (COL_CHNG_NEW, "new", false),
+    (COL_CHNG_ID, "Id", true),
+    (COL_CHNG_TXID, "TX Id", true),
+    (COL_CHNG_ACTION, "Action", false),
+    (COL_CHNG_LEVEL, "Level", false),
+    (COL_CHNG_ROLE, "Role", false),
+    (COL_CHNG_PLATFORM, "Platform", false),
+    (COL_CHNG_SITE, "Site", false),
+    (COL_CHNG_PKG, "Package", false),
+    (COL_CHNG_OLD, "Old", false),
+    (COL_CHNG_NEW, "New", false),
 ];
