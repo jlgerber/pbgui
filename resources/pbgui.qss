@@ -53,7 +53,7 @@ QHeaderView::section:last {
     padding-right: 15px;
 }
 
-QHeaderView::section#RevisionsHeader {
+QHeaderView::section#RevisionsHeader, QHeaderView::section#ChangesHeader {
     margin-left: 5px;
 }
 QComboBox {

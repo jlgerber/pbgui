@@ -192,6 +192,14 @@ impl<'a> Form<'a> {
 
                         let mut changes_table_item = QTableWidgetItem::new();
                         changes_table_item
+                            .set_text(&QString::from_std_str(result.action.to_string().as_str()));
+                        changes_table_ptr.set_item(
+                            cnt,
+                            COL_CHNG_ACTION,
+                            changes_table_item.into_ptr(),
+                        );
+                        let mut changes_table_item = QTableWidgetItem::new();
+                        changes_table_item
                             .set_text(&QString::from_std_str(result.role.to_string().as_str()));
                         changes_table_ptr.set_item(
                             cnt,
