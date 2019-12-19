@@ -45,13 +45,14 @@ pub fn choose_alternative_distribution(
             } else {
                 panic!("unable to extract packge and version from row");
             };
-        let client = ClientProxy::connect().unwrap();
+        let client = ClientProxy::connect()
+            .expect("unable to unwrap clientproxy connection in choose distributions");
         let mut packratdb = PackratDb::new(client);
         let results = packratdb
             .find_all_distributions()
             .package(package)
             .query()
-            .unwrap();
+            .expect("unable to unwrap query of distributions");
         let mut qsl = QStringList::new();
         let mut idx = 0;
         let mut cnt = 0;
@@ -80,7 +81,14 @@ pub fn choose_alternative_distribution(
             println!("cancelled");
         } else {
             let value = new_version.to_std_string();
-            let new_dist_id = dist_versions.get(value.as_str()).unwrap();
+            let new_dist_id = match dist_versions.get(value.as_str()) {
+                Some(id) => id,
+                // TODO: handle this more appropriately
+                None => {
+                    println!("ERROR: Unable to get dist id.");
+                    return;
+                }
+            };
             let new_value = format!("{}-{}", package, value);
             if orig_text == new_value {
                 println!("new value and old value match. Skipping");
@@ -105,7 +113,13 @@ pub fn choose_alternative_distribution(
 
             if usage_ptr.borrow().contains_key(&dist_id) {
                 let row = usage_ptr.borrow();
-                let row = row.get(&dist_id).unwrap();
+                let row = match row.get(&dist_id) {
+                    Some(r) => r,
+                    None => {
+                        println!("ERROR: Problem retrieving row from QT");
+                        return;
+                    }
+                };
                 let mut item = pinchanges_ptr.item(*row, COL_PC_DISPLAY);
                 item.set_text(&orig_qstr);
             } else {

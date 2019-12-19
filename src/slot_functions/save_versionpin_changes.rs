@@ -10,7 +10,7 @@ pub fn save_versionpin_changes(
     root_widget_ptr: MutPtr<QWidget>,
     pinchanges_ptr: &mut MutPtr<QTableWidget>,
 ) {
-    let client = ClientProxy::connect().unwrap();
+    let client = ClientProxy::connect().expect("unable to connect via ClientProxy");
     unsafe {
         // grab all the data from the pin changes
         let mut ok = false;

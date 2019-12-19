@@ -43,3 +43,25 @@ pub const REV_HEADERS: &[(i32, &'static str, bool)] = &[
     (COL_REV_DATETIME, "datetime", false),
     (COL_REV_COMMENT, "comment", false),
 ];
+
+pub const COL_CHNG_ID: i32 = 0;
+pub const COL_CHNG_TXID: i32 = 1;
+pub const COL_CHNG_LEVEL: i32 = 2;
+pub const COL_CHNG_ROLE: i32 = 3;
+pub const COL_CHNG_PLATFORM: i32 = 4;
+pub const COL_CHNG_SITE: i32 = 5;
+pub const COL_CHNG_PKG: i32 = 6;
+pub const COL_CHNG_OLD: i32 = 7;
+pub const COL_CHNG_NEW: i32 = 8;
+
+pub const CHNG_HEADERS: &[(i32, &'static str, bool)] = &[
+    (COL_CHNG_ID, "id", true),
+    (COL_CHNG_TXID, "tx_id", true),
+    (COL_CHNG_LEVEL, "level", false),
+    (COL_CHNG_ROLE, "role", false),
+    (COL_CHNG_PLATFORM, "platform", false),
+    (COL_CHNG_SITE, "site", false),
+    (COL_CHNG_PKG, "package", false),
+    (COL_CHNG_OLD, "old", false),
+    (COL_CHNG_NEW, "new", false),
+];

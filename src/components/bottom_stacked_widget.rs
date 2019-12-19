@@ -1,7 +1,8 @@
+use super::changes_table::setup_changes_table;
 use super::revisions_table::setup_revisions_table;
 use super::versionpin_changes_table::setup_pinchanges_table;
 use crate::utility::qs;
-use qt_core::QString;
+use qt_core::{Orientation, QString};
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr},
     q_size_policy::Policy,
@@ -14,6 +15,7 @@ use qt_widgets::{
 pub fn create_bottom_stacked_widget(
     splitter: &mut MutPtr<QSplitter>,
 ) -> (
+    MutPtr<QTableWidget>,
     MutPtr<QTableWidget>,
     MutPtr<QTableWidget>,
     MutPtr<QPushButton>,
@@ -91,12 +93,26 @@ pub fn create_bottom_stacked_widget(
         //
         // Add revisions table
         //
+        let mut revisions_widget = QWidget::new_0a();
+        //let mut revisions_widget_ptr = revisions_widget.as_mut_ptr();
+        let mut rsplitter = QSplitter::new();
+        rsplitter.set_orientation(Orientation::Horizontal);
+        let mut rsplitter_ptr = rsplitter.as_mut_ptr();
+        let mut rw_layout = QHBoxLayout::new_0a();
+        rw_layout.add_widget(rsplitter.into_ptr());
+        revisions_widget.set_layout(rw_layout.into_ptr());
+        pg2_layout_ptr.add_widget(revisions_widget.into_ptr());
+
         let mut revisions_table = setup_revisions_table();
         let revisions_table_ptr = revisions_table.as_mut_ptr();
-        pg2_layout_ptr.add_widget(revisions_table.into_ptr());
+        let mut changes_table = setup_changes_table();
+        let changes_table_ptr = changes_table.as_mut_ptr();
+        rsplitter_ptr.add_widget(revisions_table.into_ptr());
+        rsplitter_ptr.add_widget(changes_table.into_ptr());
         (
             pinchanges_ptr,
             revisions_table_ptr,
+            changes_table_ptr,
             save_button_ptr,
             stacked_ptr,
             pinchanges_button_ptr,

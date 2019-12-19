@@ -25,7 +25,7 @@ pub fn update_vpin_table(
     mut vpin_tablewidget_ptr: MutPtr<QTableWidget>,
 ) {
     // will do better
-    let client = ClientProxy::connect().unwrap();
+    let client = ClientProxy::connect().expect("Unable to connect via ClientProxy");
     let mut packratdb = PackratDb::new(client);
     let mut vpin_finder = packratdb.find_all_versionpins();
 
@@ -42,9 +42,11 @@ pub fn update_vpin_table(
             .role(roletxt.as_str())
             .platform(platformtxt.as_str())
             .site(sitetxt.as_str())
-            .search_mode(LtreeSearchMode::from_str(dirtxt.as_str()).unwrap());
+            .search_mode(LtreeSearchMode::from_str(dirtxt.as_str()).expect("unable to find vpin"));
         let filter_package = if line_edit_txt != "" { true } else { false };
-        let results = vpin_finder.query().unwrap();
+        let results = vpin_finder
+            .query()
+            .expect("unable to unwrap vpin_finder.query");
         let mut cnt = 0;
         vpin_tablewidget_ptr.set_sorting_enabled(false);
         vpin_tablewidget_ptr.set_row_count(0);

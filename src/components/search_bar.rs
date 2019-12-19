@@ -50,7 +50,10 @@ unsafe fn setup_levels_cb<'b>(
     let mut level_combobox = QComboBox::new_0a();
     let level_cb_ptr = level_combobox.as_mut_ptr();
     // LEVELS
-    let results = db.find_all_levels().query().unwrap();
+    let results = db
+        .find_all_levels()
+        .query()
+        .expect("unable to find_all_levels");
     level_combobox.add_item_q_string(&QString::from_std_str("facility"));
     results
         .iter()
@@ -78,7 +81,10 @@ unsafe fn setup_roles_cb<'b>(
 ) -> MutPtr<QComboBox> {
     let mut role_combobox = QComboBox::new_0a();
     let role_cb_ptr = role_combobox.as_mut_ptr();
-    let results = db.find_all_roles().query().unwrap();
+    let results = db
+        .find_all_roles()
+        .query()
+        .expect("unable to find all roles");
     role_combobox.add_item_q_string(&QString::from_std_str("any"));
     results
         .iter()
@@ -105,7 +111,10 @@ unsafe fn setup_platforms_cb<'b>(
 ) -> MutPtr<QComboBox> {
     let mut platform_combobox = QComboBox::new_0a();
     let platform_cb_ptr = platform_combobox.as_mut_ptr();
-    let results = db.find_all_platforms().query().unwrap();
+    let results = db
+        .find_all_platforms()
+        .query()
+        .expect("unable to find_all_platforms");
     for r in results {
         let platform_str = r.name.as_str();
         platform_combobox.add_item_q_string(&QString::from_std_str(platform_str));
@@ -131,7 +140,10 @@ unsafe fn setup_sites_cb<'b>(
 ) -> MutPtr<QComboBox> {
     let mut site_combobox = QComboBox::new_0a();
     let site_cb_ptr = site_combobox.as_mut_ptr();
-    let results = db.find_all_sites().query().unwrap();
+    let results = db
+        .find_all_sites()
+        .query()
+        .expect("unable to find all sites");
     site_combobox.add_item_q_string(&QString::from_std_str("any"));
     for r in results {
         let site_str = r.name.as_str();

@@ -11,7 +11,7 @@ use qt_widgets::{
 };
 
 //--------------------------
-// Setup Pin Changes Table
+// Setup revisions Changes Table
 //--------------------------
 pub fn setup_revisions_table() -> CppBox<QTableWidget> {
     unsafe {

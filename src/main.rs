@@ -18,7 +18,7 @@ use qt_widgets::{
     q_line_edit::ActionPosition,
     qt_core::ContextMenuPolicy,
     qt_core::QString,
-    qt_core::Slot,
+    qt_core::{Slot, SlotOfIntInt},
     QAction, QApplication, QHBoxLayout, QLineEdit, QMenu, QPushButton, QSplitter, QTableWidget,
     QTableWidgetItem, QVBoxLayout, QWidget, SlotOfQPoint,
 };
@@ -51,6 +51,7 @@ struct Form<'a> {
     show_dist_menu: SlotOfQPoint<'a>,
     clear_package: Slot<'a>,
     show_line_edit_menu: SlotOfQPoint<'a>,
+    revision_selected: SlotOfIntInt<'a>,
     select_pg1: Slot<'a>,
     select_pg2: Slot<'a>,
 }
@@ -108,6 +109,7 @@ impl<'a> Form<'a> {
             let (
                 pinchanges_ptr,
                 mut revisions_ptr,
+                mut changes_table_ptr,
                 save_button,
                 mut stacked_ptr,
                 pinchanges_button_ptr,
@@ -137,6 +139,115 @@ impl<'a> Form<'a> {
             vsplit.set_sizes(&splitter_sizes);
             root_layout_ptr.add_widget(vsplit.into_ptr());
             let form = Form {
+                revision_selected: SlotOfIntInt::new(move |r: i32, c: i32| {
+                    changes_table_ptr.clear_contents();
+                    let client = match ClientProxy::connect() {
+                        Ok(c) => c,
+                        Err(e) => {
+                            println!("Problem getting proxy client to db {}", e);
+                            return;
+                        }
+                    };
+                    let mut packratdb = PackratDb::new(client);
+                    let mut changes_finder = packratdb.find_all_changes();
+
+                    let data = revisions_ptr.item(r, COL_REV_TXID).data(2).to_int_0a();
+                    let mut cnt = 0;
+                    let results = changes_finder
+                        .transaction_id(data as i64)
+                        .query()
+                        .expect("failed to call db");
+                    let r_len = results.len() as i32;
+                    changes_table_ptr.set_row_count(r_len);
+                    for result in results {
+                        // ID
+                        let mut changes_table_item = QTableWidgetItem::new();
+                        let variant = QVariant::from_int(result.id as i32);
+                        changes_table_item.set_data(
+                            2, // EditRole
+                            variant.as_ref(),
+                        );
+                        changes_table_ptr.set_item(cnt, COL_CHNG_ID, changes_table_item.into_ptr());
+                        // TX ID
+                        let mut changes_table_item = QTableWidgetItem::new();
+                        let variant = QVariant::from_int(result.transaction_id as i32);
+                        changes_table_item.set_data(
+                            2, // EditRole
+                            variant.as_ref(),
+                        );
+                        changes_table_ptr.set_item(
+                            cnt,
+                            COL_CHNG_TXID,
+                            changes_table_item.into_ptr(),
+                        );
+
+                        let mut changes_table_item = QTableWidgetItem::new();
+                        changes_table_item
+                            .set_text(&QString::from_std_str(result.level.to_string().as_str()));
+                        changes_table_ptr.set_item(
+                            cnt,
+                            COL_CHNG_LEVEL,
+                            changes_table_item.into_ptr(),
+                        );
+
+                        let mut changes_table_item = QTableWidgetItem::new();
+                        changes_table_item
+                            .set_text(&QString::from_std_str(result.role.to_string().as_str()));
+                        changes_table_ptr.set_item(
+                            cnt,
+                            COL_CHNG_ROLE,
+                            changes_table_item.into_ptr(),
+                        );
+
+                        let mut changes_table_item = QTableWidgetItem::new();
+                        changes_table_item
+                            .set_text(&QString::from_std_str(result.platform.to_string().as_str()));
+                        changes_table_ptr.set_item(
+                            cnt,
+                            COL_CHNG_PLATFORM,
+                            changes_table_item.into_ptr(),
+                        );
+
+                        let mut changes_table_item = QTableWidgetItem::new();
+                        changes_table_item
+                            .set_text(&QString::from_std_str(result.site.to_string().as_str()));
+                        changes_table_ptr.set_item(
+                            cnt,
+                            COL_CHNG_SITE,
+                            changes_table_item.into_ptr(),
+                        );
+
+                        let mut changes_table_item = QTableWidgetItem::new();
+                        changes_table_item
+                            .set_text(&QString::from_std_str(result.package.to_string().as_str()));
+                        changes_table_ptr.set_item(
+                            cnt,
+                            COL_CHNG_PKG,
+                            changes_table_item.into_ptr(),
+                        );
+
+                        let mut changes_table_item = QTableWidgetItem::new();
+                        changes_table_item.set_text(&QString::from_std_str(
+                            result.old.version().to_string().as_str(),
+                        ));
+                        changes_table_ptr.set_item(
+                            cnt,
+                            COL_CHNG_OLD,
+                            changes_table_item.into_ptr(),
+                        );
+
+                        let mut changes_table_item = QTableWidgetItem::new();
+                        changes_table_item.set_text(&QString::from_std_str(
+                            result.new.version().to_string().as_str(),
+                        ));
+                        changes_table_ptr.set_item(
+                            cnt,
+                            COL_CHNG_NEW,
+                            changes_table_item.into_ptr(),
+                        );
+                        cnt += 1;
+                    }
+                }),
                 clear_package: Slot::new(move || {
                     line_edit_ptr.clear();
                 }),
@@ -188,7 +299,7 @@ impl<'a> Form<'a> {
                 }),
                 select_pg2: Slot::new(move || {
                     stacked_ptr.set_current_index(1);
-                    let client = ClientProxy::connect().unwrap();
+                    let client = ClientProxy::connect().expect("unable to connect via CLientproxy");
                     let mut packratdb = PackratDb::new(client);
                     let mut revisions_finder = packratdb.find_all_revisions();
                     let results = revisions_finder
@@ -240,7 +351,6 @@ impl<'a> Form<'a> {
                             COL_REV_COMMENT,
                             revisions_table_item.into_ptr(),
                         );
-                        //println!("author: {} comment: {}", revision.author, revision.comment);
                         cnt += 1;
                     }
                 }),
@@ -277,6 +387,9 @@ impl<'a> Form<'a> {
             choose_line_edit_clear_action
                 .triggered()
                 .connect(&form.clear_package);
+            revisions_ptr
+                .cell_clicked()
+                .connect(&form.revision_selected);
             form
         }
     }
