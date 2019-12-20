@@ -1,6 +1,7 @@
 use crate::constants::*;
 use crate::utility::qs;
 use crate::ClientProxy;
+use log;
 use packybara::db::update::versionpins::VersionPinChange;
 use packybara::packrat::PackratDb;
 use qt_widgets::{cpp_core::MutPtr, QInputDialog, QMessageBox, QTableWidget, QWidget};
@@ -24,7 +25,13 @@ pub fn save_versionpin_changes(
             ok_ptr,
         )
         .to_std_string();
-        if *ok_ptr == false {
+        if ok_ptr.is_null() {
+            log::error!("In save_versionpin_changes. QInputDialog returned null ok_ptr.");
+            let mut mb = QMessageBox::new();
+            mb.set_text(&qs("QT Problem Detected"));
+            mb.exec();
+            return;
+        } else if *ok_ptr == false {
             let mut mb = QMessageBox::new();
             mb.set_text(&qs("Cancelled"));
             mb.exec();
