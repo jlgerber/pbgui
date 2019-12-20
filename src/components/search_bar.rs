@@ -50,6 +50,7 @@ unsafe fn setup_levels_cb<'b>(
 ) -> MutPtr<QComboBox> {
     //results
     let mut level_combobox = QComboBox::new_0a();
+    level_combobox.set_object_name(&qs("TopCB"));
     let level_cb_ptr = level_combobox.as_mut_ptr();
     // LEVELS
     let results = db
@@ -83,6 +84,7 @@ unsafe fn setup_roles_cb<'b>(
     layout: &mut MutPtr<QHBoxLayout>,
 ) -> MutPtr<QComboBox> {
     let mut role_combobox = QComboBox::new_0a();
+    role_combobox.set_object_name(&qs("TopCB"));
     let role_cb_ptr = role_combobox.as_mut_ptr();
     let results = db
         .find_all_roles()
@@ -112,6 +114,7 @@ unsafe fn setup_platforms_cb<'b>(
     layout: &mut MutPtr<QHBoxLayout>,
 ) -> MutPtr<QComboBox> {
     let mut platform_combobox = QComboBox::new_0a();
+    platform_combobox.set_object_name(&qs("TopCB"));
     let platform_cb_ptr = platform_combobox.as_mut_ptr();
     let results = db
         .find_all_platforms()
@@ -139,6 +142,7 @@ unsafe fn setup_sites_cb<'b>(
     layout: &mut MutPtr<QHBoxLayout>,
 ) -> MutPtr<QComboBox> {
     let mut site_combobox = QComboBox::new_0a();
+    site_combobox.set_object_name(&qs("TopCB"));
     let site_cb_ptr = site_combobox.as_mut_ptr();
     let results = db
         .find_all_sites()
@@ -164,6 +168,7 @@ unsafe fn setup_sites_cb<'b>(
 //
 unsafe fn setup_directions_cb<'b>(layout: &mut MutPtr<QHBoxLayout>) -> MutPtr<QComboBox> {
     let mut dir_combobox = QComboBox::new_0a();
+    dir_combobox.set_object_name(&qs("TopCB"));
     let dir_cb_ptr = dir_combobox.as_mut_ptr();
     for r in &["ancestor", "exact", "descendant"] {
         dir_combobox.add_item_q_string(&QString::from_std_str(r));

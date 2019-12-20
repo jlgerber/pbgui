@@ -76,14 +76,14 @@ QFrame > QLabel {
     padding: 10px;
     background: rgb(60,60,60);
 }
-/* QComboBox {
+ QComboBox {
     border: 1px solid gray;
     border-radius: 3px;
     padding: 1px 18px 1px 3px;
     min-width: 6em;
     background: rgb(80,80,80);
-} */
-QComboBox {
+} 
+QComboBox#TopCB {
     border: none;
     padding: 1px 18px 1px 3px;
     min-width: 6em;
@@ -112,7 +112,10 @@ QComboBox::down-arrow {
     image: url(:/images/dropdown.png);
     width: 10px;
     height: 10px;
-    left: 4px;
+   
+}
+QComboBox#TopCB::down-arrow {
+ left: 4px;
 }
 
 QPushButton#QueryButton {
