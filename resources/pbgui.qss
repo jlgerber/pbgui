@@ -2,6 +2,9 @@
     outline: none;
     border-radius: 5px;
 } */
+/* * {
+    border: 1px solid red;
+} */
 QWidget#HistoryWidget {
     padding: 0px;
     margin: 0px;
