@@ -726,6 +726,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "pbgui"
 version = "0.10.0"
 dependencies = [
+ "env_logger 0.7.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "log 0.4.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "packybara 0.23.0 (git+https://github.com/jlgerber/packybara?tag=v0.23.0)",
  "qt_core 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "qt_gui 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
