@@ -10,6 +10,7 @@ use crate::{
     versionpin_table::setup_table,
     {combo_boxes, create_query_button},
 };
+use log;
 use packybara::packrat::PackratDb;
 use qt_core::{
     ContextMenuPolicy, Orientation, QItemSelection, QListOfInt, QPoint, QString, Slot,
@@ -83,6 +84,9 @@ impl<'a> Form<'a> {
             line_edit.set_object_name(&QString::from_std_str("packageLineEdit"));
             let clear_icon = QIcon::from_q_string(&QString::from_std_str(":/images/clear.png"));
             //println!("icon is null {}", clear_icon.is_null());
+            if clear_icon.is_null() {
+                log::warn!("The :/images/clear.png icon was unable to be located.");
+            }
             let clear_action = line_edit.add_action_q_icon_action_position(
                 clear_icon.as_ref(),
                 ActionPosition::TrailingPosition,
