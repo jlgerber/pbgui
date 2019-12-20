@@ -33,7 +33,8 @@ pub fn create_bottom_stacked_widget(
         bottom_stacked_widget.set_object_name(&qs("ContainerWidget"));
         let mut pc_vlayout_ptr = pc_vlayout.as_mut_ptr();
         bottom_stacked_widget.set_layout(pc_vlayout.into_ptr());
-        // create another layout
+        // create top horizontal layout for hosting switches for the stacked
+        // layout as well as context controls.
         let mut top_hlayout = QHBoxLayout::new_0a();
         let mut top_hlayout_ptr = top_hlayout.as_mut_ptr();
         top_hlayout.set_spacing(10);
@@ -54,6 +55,7 @@ pub fn create_bottom_stacked_widget(
         let mut stacked = QStackedWidget::new_0a();
         let mut stacked_ptr = stacked.as_mut_ptr();
         pc_vlayout_ptr.add_widget(stacked.into_ptr());
+        pc_vlayout_ptr.set_stretch_factor_q_widget_int(stacked_ptr, 1);
         //
         // set up the first page of the stacked widget
         //
@@ -84,8 +86,6 @@ pub fn create_bottom_stacked_widget(
         let save_button_ptr = save_button.as_mut_ptr();
         save_layout_ptr.add_widget(save_button.into_ptr());
         controls.push(save_widget);
-        //bottom_vlayout_ptr.add_widget(spacer.into_ptr());
-        //bottom_vlayout_ptr.add_widget(save_button.into_ptr());
         //
         // set up the second page of the stacked widget
         //
