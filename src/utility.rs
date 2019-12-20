@@ -4,14 +4,14 @@ use qt_core::{
 };
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr},
-    QHBoxLayout, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget,
+    QHBoxLayout, QMainWindow, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget,
 };
 /// Given an input of &str or String, return a boxed QString
 pub fn qs<S: AsRef<str>>(input: S) -> CppBox<QString> {
     QString::from_std_str(input.as_ref())
 }
 
-pub fn load_stylesheet(mut parent_widget: MutPtr<QWidget>) {
+pub fn load_stylesheet(mut parent_widget: MutPtr<QMainWindow>) {
     unsafe {
         // Does not work
         //QResource::add_search_path(&QString::from_std_str("/Users/jgerber/bin/"));

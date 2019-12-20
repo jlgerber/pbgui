@@ -20,8 +20,8 @@ use qt_gui::QIcon;
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr, Ref},
     q_line_edit::ActionPosition,
-    QAction, QHBoxLayout, QLineEdit, QMenu, QPushButton, QSplitter, QTableWidget, QVBoxLayout,
-    QWidget, SlotOfQPoint,
+    QAction, QHBoxLayout, QLineEdit, QMainWindow, QMenu, QPushButton, QSplitter, QTableWidget,
+    QVBoxLayout, QWidget, SlotOfQPoint,
 };
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
@@ -29,7 +29,7 @@ use std::rc::Rc;
 
 pub struct Form<'a> {
     _db: &'a mut PackratDb,
-    _widget: CppBox<QWidget>,
+    _main: CppBox<QMainWindow>,
     _query_button: MutPtr<QPushButton>,
     _pkg_line_edit: MutPtr<QLineEdit>,
     _vpin_table: MutPtr<QTableWidget>,
@@ -63,14 +63,17 @@ impl<'a> Form<'a> {
     //
     pub fn new(mut db: &'a mut PackratDb) -> Form<'a> {
         unsafe {
+            let mut main_window = QMainWindow::new_0a();
+            main_window.set_base_size_2a(1200, 800);
             // parent root_widget
             let mut root_widget = QWidget::new_0a();
-            root_widget.set_base_size_2a(1200, 800);
+            //root_widget.set_base_size_2a(1200, 800);
             let root_widget_ptr = root_widget.as_mut_ptr();
             // top vertical layout
             let mut root_layout = QVBoxLayout::new_0a();
             let mut root_layout_ptr = root_layout.as_mut_ptr();
             root_widget.set_layout(root_layout.into_ptr());
+            main_window.set_central_widget(root_widget.into_ptr());
             // header layout
             let mut hlayout = QHBoxLayout::new_0a();
             let mut hlayout_ptr = hlayout.as_mut_ptr();
@@ -128,8 +131,8 @@ impl<'a> Form<'a> {
                 dist_popup_menu.add_action_q_string(&QString::from_std_str("Withs"));
             let mut dist_popup_menu_ptr = dist_popup_menu.as_mut_ptr();
             // set the style sheet
-            load_stylesheet(root_widget_ptr);
-            root_widget.show();
+            load_stylesheet(main_window.as_mut_ptr());
+            main_window.show();
             //
             let usage = Rc::new(RefCell::new(HashMap::<i32, i32>::new()));
             let usage_ptr = Rc::clone(&usage);
@@ -211,7 +214,7 @@ impl<'a> Form<'a> {
                     controls_ptr.set_current_index(1);
                 }),
                 _db: db,
-                _widget: root_widget,
+                _main: main_window,
                 _vpin_table: vpin_tablewidget_ptr,
                 _query_button: button_ptr,
                 _save_button: save_button,
