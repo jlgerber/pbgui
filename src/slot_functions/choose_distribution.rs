@@ -1,6 +1,7 @@
 use crate::constants::*;
 
 pub use crate::ClientProxy;
+use log;
 use packybara::packrat::PackratDb;
 use qt_core::QVariant;
 use qt_gui::{QBrush, QColor};
@@ -13,7 +14,6 @@ use qt_widgets::{
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::rc::Rc;
-
 macro_rules! qcolor_blue {
     () => {
         QColor::from_rgb_3a(100, 150, 255)
@@ -78,24 +78,24 @@ pub fn choose_alternative_distribution(
             ok_or_cancel_ptr,
         );
         if ok_or_cancel_ptr.is_null() {
-            println!("ok_or_cancel_ptr is null. Problem on QT side. Returning");
+            log::error!("ok_or_cancel_ptr is null. Problem on QT side. Returning");
             return;
         }
         if *ok_or_cancel_ptr == false {
-            println!("cancelled");
+            log::info!("cancelled");
         } else {
             let value = new_version.to_std_string();
             let new_dist_id = match dist_versions.get(value.as_str()) {
                 Some(id) => id,
                 // TODO: handle this more appropriately
                 None => {
-                    println!("ERROR: Unable to get dist id.");
+                    log::error!("ERROR: Unable to get dist id.");
                     return;
                 }
             };
             let new_value = format!("{}-{}", package, value);
             if orig_text == new_value {
-                println!("new value and old value match. Skipping");
+                log::info!("new value and old value match. Skipping");
                 return;
             }
             let (level, role, platform, site, vpin_id, dist_id, pkgcoord_id) =
@@ -120,7 +120,7 @@ pub fn choose_alternative_distribution(
                 let row = match row.get(&dist_id) {
                     Some(r) => r,
                     None => {
-                        println!("ERROR: Problem retrieving row from QT");
+                        log::error!("ERROR: Problem retrieving row from QT");
                         return;
                     }
                 };
