@@ -4,7 +4,7 @@ use qt_core::{
 };
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr},
-    QHBoxLayout, QMainWindow, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget,
+    QHBoxLayout, QMainWindow, QTableWidget, QTableWidgetItem, QVBoxLayout,
 };
 /// Given an input of &str or String, return a boxed QString
 pub fn qs<S: AsRef<str>>(input: S) -> CppBox<QString> {
@@ -43,6 +43,7 @@ pub fn update_text_row<T: std::fmt::Display>(
         table.set_item(cnt, column, changes_table_item.into_ptr());
     }
 }
+
 /// Update a row given a RowType
 pub fn update_row(value: RowType, table: &mut MutPtr<QTableWidget>, cnt: i32, column: i32) {
     unsafe {

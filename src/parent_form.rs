@@ -6,7 +6,7 @@ use crate::{
     select_history::select_history,
     update_changes_table::update_changes_table,
     update_versionpin_table::update_vpin_table,
-    utility::load_stylesheet,
+    utility::{create_hlayout, load_stylesheet},
     versionpin_table::setup_table,
     {combo_boxes, create_query_button},
 };
@@ -75,7 +75,7 @@ impl<'a> Form<'a> {
             root_widget.set_layout(root_layout.into_ptr());
             main_window.set_central_widget(root_widget.into_ptr());
             // header layout
-            let mut hlayout = QHBoxLayout::new_0a();
+            let mut hlayout = create_hlayout();
             let mut hlayout_ptr = hlayout.as_mut_ptr();
             root_layout_ptr.add_layout_1a(hlayout.into_ptr());
             // setup comboboxes in header

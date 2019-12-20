@@ -1,7 +1,9 @@
+use crate::utility::{create_hlayout, qs};
 use packybara::packrat::PackratDb;
 use qt_core::{AlignmentFlag, QFlags};
 use qt_widgets::{
-    cpp_core::MutPtr, qt_core::QString, QComboBox, QGroupBox, QHBoxLayout, QPushButton,
+    cpp_core::MutPtr, qt_core::QString, QComboBox, QFrame, QHBoxLayout, QLabel, QPushButton,
+    QWidget,
 };
 
 //------------------------//
@@ -59,17 +61,18 @@ unsafe fn setup_levels_cb<'b>(
         .iter()
         .filter(|s| s.level.as_str() != "facility")
         .for_each(|s| level_combobox.add_item_q_string(&QString::from_std_str(s.level.as_str())));
-    let mut grpbox = QGroupBox::new();
-    let mut hlayout = QHBoxLayout::new_0a();
+    let mut grpbox = QFrame::new_0a();
+    grpbox.set_object_name(&qs("FirstComboWidget"));
+    let label = QLabel::from_q_string(&qs("Level"));
+    let mut hlayout = create_hlayout();
+    hlayout.add_widget(label.into_ptr());
     // assign owner of level
-    hlayout.add_widget_3a(
-        level_combobox.into_ptr(),
-        1,
-        QFlags::from(AlignmentFlag::AlignBottom),
-    );
+    hlayout.add_widget(level_combobox.into_ptr());
+    //layout.add_item(hlayout.into_ptr());
     grpbox.set_layout(hlayout.into_ptr());
-    grpbox.set_title(&QString::from_std_str("Show"));
     layout.add_widget(grpbox.into_ptr());
+
+    //grpbox.set_title(&QString::from_std_str("Show"));
     level_cb_ptr
 }
 //----------------------------//
@@ -90,15 +93,14 @@ unsafe fn setup_roles_cb<'b>(
         .iter()
         .filter(|s| s.role.as_str() != "any")
         .for_each(|s| role_combobox.add_item_q_string(&QString::from_std_str(s.role.as_str())));
-    let mut grpbox = QGroupBox::new();
-    let mut hlayout = QHBoxLayout::new_0a();
-    hlayout.add_widget_3a(
-        role_combobox.into_ptr(),
-        1,
-        QFlags::from(AlignmentFlag::AlignBottom),
-    );
+    let mut grpbox = QFrame::new_0a();
+    grpbox.set_object_name(&qs("ComboWidget"));
+    let label = QLabel::from_q_string(&qs("Role"));
+    let mut hlayout = create_hlayout();
+    hlayout.add_widget(label.into_ptr());
+    hlayout.add_widget(role_combobox.into_ptr());
     grpbox.set_layout(hlayout.into_ptr());
-    grpbox.set_title(&QString::from_std_str("Role"));
+    //grpbox.set_title(&QString::from_std_str("Role"));
     layout.add_widget(grpbox.into_ptr());
     role_cb_ptr
 }
@@ -119,14 +121,12 @@ unsafe fn setup_platforms_cb<'b>(
         let platform_str = r.name.as_str();
         platform_combobox.add_item_q_string(&QString::from_std_str(platform_str));
     }
-    let mut grpbox = QGroupBox::new();
-    let mut hlayout = QHBoxLayout::new_0a();
-    hlayout.add_widget_3a(
-        platform_combobox.into_ptr(),
-        1,
-        QFlags::from(AlignmentFlag::AlignBottom),
-    );
-    grpbox.set_title(&QString::from_std_str("Platform"));
+    let mut grpbox = QFrame::new_0a();
+    grpbox.set_object_name(&qs("ComboWidget"));
+    let label = QLabel::from_q_string(&qs("Platform"));
+    let mut hlayout = create_hlayout();
+    hlayout.add_widget(label.into_ptr());
+    hlayout.add_widget(platform_combobox.into_ptr());
     grpbox.set_layout(hlayout.into_ptr());
     layout.add_widget(grpbox.into_ptr());
     platform_cb_ptr
@@ -149,15 +149,13 @@ unsafe fn setup_sites_cb<'b>(
         let site_str = r.name.as_str();
         site_combobox.add_item_q_string(&QString::from_std_str(site_str));
     }
-    let mut grpbox = QGroupBox::new();
-    let mut hlayout = QHBoxLayout::new_0a();
-    hlayout.add_widget_3a(
-        site_combobox.into_ptr(),
-        1,
-        QFlags::from(AlignmentFlag::AlignBottom),
-    );
+    let mut grpbox = QFrame::new_0a();
+    grpbox.set_object_name(&qs("ComboWidget"));
+    let label = QLabel::from_q_string(&qs("Site"));
+    let mut hlayout = create_hlayout();
+    hlayout.add_widget(label.into_ptr());
+    hlayout.add_widget(site_combobox.into_ptr());
     grpbox.set_layout(hlayout.into_ptr());
-    grpbox.set_title(&QString::from_std_str("Site"));
     layout.add_widget(grpbox.into_ptr());
     site_cb_ptr
 }
@@ -170,15 +168,13 @@ unsafe fn setup_directions_cb<'b>(layout: &mut MutPtr<QHBoxLayout>) -> MutPtr<QC
     for r in &["ancestor", "exact", "descendant"] {
         dir_combobox.add_item_q_string(&QString::from_std_str(r));
     }
-    let mut grpbox = QGroupBox::new();
-    let mut hlayout = QHBoxLayout::new_0a();
-    hlayout.add_widget_3a(
-        dir_combobox.into_ptr(),
-        1,
-        QFlags::from(AlignmentFlag::AlignBottom),
-    );
+    let mut grpbox = QFrame::new_0a();
+    grpbox.set_object_name(&qs("ComboWidget"));
+    let label = QLabel::from_q_string(&qs("Direction"));
+    let mut hlayout = create_hlayout();
+    hlayout.add_widget(label.into_ptr());
+    hlayout.add_widget(dir_combobox.into_ptr());
     grpbox.set_layout(hlayout.into_ptr());
-    grpbox.set_title(&QString::from_std_str("Direction"));
     layout.add_widget(grpbox.into_ptr());
     dir_cb_ptr
 }
@@ -191,9 +187,9 @@ pub fn create_query_button(hlayout_ptr: &mut MutPtr<QHBoxLayout>) -> MutPtr<QPus
         let mut button = QPushButton::from_q_string(&QString::from_std_str("")); //Query
         button.set_object_name(&QString::from_std_str("QueryButton"));
         let button_ptr = button.as_mut_ptr();
-        button.set_minimum_width(60); //70
-        button.set_maximum_width(60); //70
-        button.set_minimum_height(60); //60
+        button.set_minimum_width(40); //70
+        button.set_maximum_width(40); //70
+        button.set_minimum_height(40); //60
         hlayout_ptr.add_widget(button.into_ptr());
         button_ptr
     }
