@@ -1,10 +1,7 @@
 use crate::utility::{create_hlayout, qs};
 use packybara::packrat::PackratDb;
-use qt_core::QSize;
-use qt_gui::QIcon;
 use qt_widgets::{
-    cpp_core::MutPtr, cpp_core::Ref, qt_core::QString, QComboBox, QFrame, QHBoxLayout, QLabel,
-    QPushButton, QWidget,
+    cpp_core::MutPtr, qt_core::QString, QComboBox, QFrame, QHBoxLayout, QLabel, QPushButton,
 };
 //let icon = QIcon::from_q_string(&QString::from_std_str(
 //    ":/images/icons8-volume-level-50.png",

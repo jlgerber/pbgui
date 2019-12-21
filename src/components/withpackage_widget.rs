@@ -1,21 +1,24 @@
-use crate::utility::qs;
-use qt_core::{DockWidgetArea, Orientation};
-use qt_widgets::{cpp_core::MutPtr, QAction, QDockWidget, QListWidget, QMainWindow};
+use crate::utility::{create_vlayout, qs};
+use qt_widgets::{cpp_core::MutPtr, QFrame, QListWidget, QSplitter};
 
 /// Given the  QMainWindow, create and return the withpackage widget.
-pub fn create(window: &mut MutPtr<QMainWindow>) -> (MutPtr<QDockWidget>, MutPtr<QAction>) {
+pub fn create(splitter: &mut MutPtr<QSplitter>) -> MutPtr<QListWidget> {
     unsafe {
+        // create the inner withpackage
         let mut withpackage_listwidget = QListWidget::new_0a();
         withpackage_listwidget.set_object_name(&qs("WithsListWidget"));
-        let mut dock_widget = QDockWidget::from_q_string(&qs("Withs"));
-        let dock_widget_ptr = dock_widget.as_mut_ptr();
-        dock_widget.set_widget(withpackage_listwidget.into_ptr());
-        let dwaction = dock_widget.toggle_view_action();
-        window.add_dock_widget_3a(
-            DockWidgetArea::RightDockWidgetArea,
-            dock_widget.into_ptr(),
-            Orientation::Vertical,
-        );
-        (dock_widget_ptr, dwaction)
+        // create a pointer to it
+        let withpackage_listwidget_ptr = withpackage_listwidget.as_mut_ptr();
+        // create an outer frame widget
+        let mut frame = QFrame::new_0a();
+        // hold a pointer to it
+        let mut frame_ptr = frame.as_mut_ptr();
+        // transfer ownership to the splitter
+        splitter.add_widget(frame.into_ptr());
+        let mut layout = create_vlayout();
+        layout.add_widget(withpackage_listwidget.into_ptr());
+        frame_ptr.set_layout(layout.into_ptr());
+
+        withpackage_listwidget_ptr
     }
 }
