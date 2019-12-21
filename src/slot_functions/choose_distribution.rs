@@ -19,6 +19,7 @@ macro_rules! qcolor_blue {
         QColor::from_rgb_3a(100, 150, 255)
     };
 }
+
 //------------------------------------//
 // choose_alternative_distribution    //
 //------------------------------------//

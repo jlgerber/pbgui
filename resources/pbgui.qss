@@ -5,6 +5,12 @@
 /* * {
     border: 1px solid red;
 } */
+QDockWidget:title {
+    background: rgb(80,80,80);
+    text-align: center;
+
+
+}
 #ButtonFrame {
     margin: 4px;
     margin-right: 6px;

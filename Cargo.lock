@@ -675,8 +675,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "packybara"
-version = "0.23.0"
-source = "git+https://github.com/jlgerber/packybara?tag=v0.23.0#24c5d1d6f1a9beddfaf14a6d5d6dfa3de846995e"
+version = "0.24.0"
+source = "git+https://github.com/jlgerber/packybara?tag=v0.24.0#76fd1994e810f7726b29104c4f7fe34e92af426a"
 dependencies = [
  "chrono 0.4.10 (registry+https://github.com/rust-lang/crates.io-index)",
  "env_logger 0.7.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -728,7 +728,7 @@ version = "0.13.0"
 dependencies = [
  "env_logger 0.7.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.4.8 (registry+https://github.com/rust-lang/crates.io-index)",
- "packybara 0.23.0 (git+https://github.com/jlgerber/packybara?tag=v0.23.0)",
+ "packybara 0.24.0 (git+https://github.com/jlgerber/packybara?tag=v0.24.0)",
  "qt_core 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "qt_gui 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "qt_ui_tools 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1693,7 +1693,7 @@ dependencies = [
 "checksum num-traits 0.2.10 (registry+https://github.com/rust-lang/crates.io-index)" = "d4c81ffc11c212fa327657cb19dd85eb7419e163b5b076bede2bdb5c974c07e4"
 "checksum num_cpus 1.11.1 (registry+https://github.com/rust-lang/crates.io-index)" = "76dac5ed2a876980778b8b85f75a71b6cbf0db0b1232ee12f826bccb00d09d72"
 "checksum opaque-debug 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)" = "2839e79665f131bdb5782e51f2c6c9599c133c6098982a54c794358bf432529c"
-"checksum packybara 0.23.0 (git+https://github.com/jlgerber/packybara?tag=v0.23.0)" = "<none>"
+"checksum packybara 0.24.0 (git+https://github.com/jlgerber/packybara?tag=v0.24.0)" = "<none>"
 "checksum parking_lot 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)" = "92e98c49ab0b7ce5b222f2cc9193fc4efe11c6d0bd4f648e374684a6857b1cfc"
 "checksum parking_lot_core 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)" = "7582838484df45743c8434fbff785e8edf260c28748353d44bc0da32e0ceabf1"
 "checksum pathdiff 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "a3bf70094d203e07844da868b634207e71bfab254fe713171fae9a6e751ccf31"

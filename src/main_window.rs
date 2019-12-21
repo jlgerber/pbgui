@@ -6,9 +6,10 @@ use crate::{
     select_history::select_history,
     update_changes_table::update_changes_table,
     update_versionpin_table::update_vpin_table,
+    update_withpackages::update_withpackages,
     utility::{create_hlayout, load_stylesheet, qs},
     versionpin_table::setup_table,
-    {combo_boxes, create_query_button},
+    withpackage_widget, {combo_boxes, create_query_button},
 };
 use log;
 use packybara::packrat::PackratDb;
@@ -20,8 +21,8 @@ use qt_gui::QIcon;
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr, Ref},
     q_line_edit::ActionPosition,
-    QAction, QLineEdit, QMainWindow, QMenu, QPushButton, QSplitter, QTableWidget, QVBoxLayout,
-    QWidget, SlotOfQPoint,
+    QAction, QLineEdit, QListWidget, QMainWindow, QMenu, QPushButton, QSplitter, QTableWidget,
+    QVBoxLayout, QWidget, SlotOfQPoint,
 };
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
@@ -49,6 +50,7 @@ pub struct MainWindow<'a> {
     select_pin_changes: Slot<'a>,
     select_history: Slot<'a>,
     revision_changed: SlotOfQItemSelectionQItemSelection<'a>,
+    distribution_changed: SlotOfQItemSelectionQItemSelection<'a>,
 }
 
 impl<'a> MainWindow<'a> {
@@ -118,7 +120,7 @@ impl<'a> MainWindow<'a> {
             vsplit.set_orientation(Orientation::Vertical);
             // set splitter sizing
             // setup the main table widget
-            let vpin_tablewidget_ptr = setup_table(&mut vsplit_ptr);
+            let mut vpin_tablewidget_ptr = setup_table(&mut vsplit_ptr);
             let (
                 pinchanges_ptr,
                 mut revisions_ptr,
@@ -129,7 +131,9 @@ impl<'a> MainWindow<'a> {
                 history_button_ptr,
                 mut controls_ptr,
             ) = create_bottom_stacked_widget(&mut vsplit_ptr);
+            //
             // setup popup menu for versionpin table
+            //
             let mut dist_popup_menu = QMenu::new();
             let choose_dist_action =
                 dist_popup_menu.add_action_q_string(&QString::from_std_str("Change Version"));
@@ -138,6 +142,12 @@ impl<'a> MainWindow<'a> {
             let mut dist_popup_menu_ptr = dist_popup_menu.as_mut_ptr();
             // set the style sheet
             load_stylesheet(main_window.as_mut_ptr());
+            //
+            // Setup WithPackage
+            //
+            //create_withpackage_widget
+            let (withpackage_ptr, _with_action) =
+                withpackage_widget::create(&mut main_window.as_mut_ptr());
             main_window.show();
             //
             let usage = Rc::new(RefCell::new(HashMap::<i32, i32>::new()));
@@ -153,6 +163,23 @@ impl<'a> MainWindow<'a> {
             vsplit.set_sizes(&splitter_sizes);
             root_layout_ptr.add_widget(vsplit.into_ptr());
             let form = MainWindow {
+                distribution_changed: SlotOfQItemSelectionQItemSelection::new(
+                    move |selected: Ref<QItemSelection>, _deselected: Ref<QItemSelection>| {
+                        let ind = selected.indexes();
+                        let mut withpackage: MutPtr<QListWidget> =
+                            withpackage_ptr.widget().dynamic_cast_mut();
+                        if ind.count_0a() > 0 {
+                            let txid = ind.at(COL_REV_TXID);
+                            update_withpackages(
+                                txid.row(),
+                                &mut vpin_tablewidget_ptr,
+                                &mut withpackage,
+                            );
+                        } else {
+                            withpackage.clear();
+                        }
+                    },
+                ),
                 revision_changed: SlotOfQItemSelectionQItemSelection::new(
                     move |selected: Ref<QItemSelection>, _deselected: Ref<QItemSelection>| {
                         let ind = selected.indexes();
@@ -173,6 +200,14 @@ impl<'a> MainWindow<'a> {
                         .exec_1a_mut(line_edit_ptr.map_to_global(pos).as_ref());
                 }),
                 show_dist_menu: SlotOfQPoint::new(move |pos: Ref<QPoint>| {
+                    if vpin_tablewidget_ptr.is_null() {
+                        log::error!("vpin_tablewidget_ptr is null");
+                        return;
+                    }
+                    if dist_popup_menu_ptr.is_null() {
+                        log::error!("dist_popup_menu_ptr is null");
+                        return;
+                    }
                     let _action = dist_popup_menu_ptr
                         .exec_1a_mut(vpin_tablewidget_ptr.map_to_global(pos).as_ref());
                 }),
@@ -200,6 +235,9 @@ impl<'a> MainWindow<'a> {
                 // choose_distribution_triggered slot.
                 //
                 choose_distribution_triggered: Slot::new(move || {
+                    if vpin_tablewidget_ptr.row_count() == 0 {
+                        return;
+                    }
                     let current_row = vpin_tablewidget_ptr.current_row();
 
                     choose_alternative_distribution(
@@ -258,6 +296,10 @@ impl<'a> MainWindow<'a> {
                 .selection_model()
                 .selection_changed()
                 .connect(&form.revision_changed);
+            vpin_tablewidget_ptr
+                .selection_model()
+                .selection_changed()
+                .connect(&form.distribution_changed);
             form
         }
     }
