@@ -1,6 +1,7 @@
 pub mod bottom_context_widget;
 pub mod bottom_stacked_widget;
 pub mod changes_table;
+pub mod main_menu_bar;
 pub mod revisions_table;
 pub mod search_bar;
 pub mod table_headers;

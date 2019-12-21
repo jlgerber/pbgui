@@ -2,6 +2,7 @@ use crate::{
     bottom_stacked_widget::create_bottom_stacked_widget,
     choose_distribution::choose_alternative_distribution,
     constants::COL_REV_TXID,
+    main_menu_bar,
     save_versionpin_changes::save_versionpin_changes,
     select_history::select_history,
     update_changes_table::update_changes_table,
@@ -14,15 +15,15 @@ use crate::{
 use log;
 use packybara::packrat::PackratDb;
 use qt_core::{
-    ContextMenuPolicy, Orientation, QItemSelection, QListOfInt, QPoint, QString, Slot,
+    ContextMenuPolicy, Orientation, QItemSelection, QListOfInt, QPoint, QString, Slot, SlotOfBool,
     SlotOfQItemSelectionQItemSelection, WidgetAttribute,
 };
 use qt_gui::QIcon;
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr, Ref},
     q_line_edit::ActionPosition,
-    QAction, QLineEdit, QListWidget, QMainWindow, QMenu, QPushButton, QSplitter, QTableWidget,
-    QVBoxLayout, QWidget, SlotOfQPoint,
+    QAction, QLineEdit, QListWidget, QMainWindow, QMenu, QMenuBar, QPushButton, QSplitter,
+    QTableWidget, QVBoxLayout, QWidget, SlotOfQPoint,
 };
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
@@ -49,6 +50,7 @@ pub struct MainWindow<'a> {
     show_line_edit_menu: SlotOfQPoint<'a>,
     select_pin_changes: Slot<'a>,
     select_history: Slot<'a>,
+    toggle_withs: SlotOfBool<'a>,
     revision_changed: SlotOfQItemSelectionQItemSelection<'a>,
     distribution_changed: SlotOfQItemSelectionQItemSelection<'a>,
 }
@@ -61,9 +63,14 @@ impl<'a> MainWindow<'a> {
         unsafe {
             let mut main_window = QMainWindow::new_0a();
             main_window.set_base_size_2a(1200, 800);
+            // the qmainwindow takes ownership of the menubar,
+            // even though it takes a MutPtr instead of a Cpp
+            let mut main_menu = QMenuBar::new_0a();
+            let mut main_menu_bar = main_menu.as_mut_ptr();
+            main_window.set_menu_bar(main_menu.into_ptr());
+
             // parent root_widget
             let mut root_widget = QWidget::new_0a();
-            //root_widget.set_base_size_2a(1200, 800);
             let root_widget_ptr = root_widget.as_mut_ptr();
             // top vertical layout
             let mut root_layout = QVBoxLayout::new_0a();
@@ -146,7 +153,7 @@ impl<'a> MainWindow<'a> {
             // Setup WithPackage
             //
             //create_withpackage_widget
-            let (withpackage_ptr, _with_action) =
+            let (mut withpackage_ptr, _with_action) =
                 withpackage_widget::create(&mut main_window.as_mut_ptr());
             main_window.show();
             //
@@ -162,6 +169,11 @@ impl<'a> MainWindow<'a> {
             splitter_sizes.append_int(Ref::from_raw_ref(&(300 as i32)));
             vsplit.set_sizes(&splitter_sizes);
             root_layout_ptr.add_widget(vsplit.into_ptr());
+            //
+            // setup the main menu bart
+            //
+            let toggle_withs_action =
+                main_menu_bar::setup(&mut main_window.as_mut_ptr(), &mut withpackage_ptr);
             let form = MainWindow {
                 distribution_changed: SlotOfQItemSelectionQItemSelection::new(
                     move |selected: Ref<QItemSelection>, _deselected: Ref<QItemSelection>| {
@@ -257,6 +269,10 @@ impl<'a> MainWindow<'a> {
                     select_history(&mut revisions_ptr, &mut stacked_ptr);
                     controls_ptr.set_current_index(1);
                 }),
+                // We have a problem here. i have no way of adding
+                toggle_withs: SlotOfBool::new(move |state: bool| {
+                    withpackage_ptr.set_visible(state);
+                }),
                 _db: db,
                 _main: main_window,
                 _vpin_table: vpin_tablewidget_ptr,
@@ -273,6 +289,7 @@ impl<'a> MainWindow<'a> {
             //
             // connect signals to slots
             //
+            toggle_withs_action.toggled().connect(&form.toggle_withs);
             pinchanges_button_ptr
                 .clicked()
                 .connect(&form.select_pin_changes);
@@ -304,3 +321,9 @@ impl<'a> MainWindow<'a> {
         }
     }
 }
+/*
+let slot = SlotOfBool::new(move |on: bool| {
+            println!("toggled");
+        });
+        withs_action.toggled().connect(&slot);
+*/
