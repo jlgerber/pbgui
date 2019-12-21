@@ -148,7 +148,22 @@ QPushButton#RoleIcon {
     margin-top:4px;
     margin-right:5px;
 }
-
+QPushButton#PlatformIcon {
+    background: transparent;
+    image: url(:images/computer2.png);
+    /* margin: 5px; */
+    margin-bottom:6px;
+    margin-top:4px;
+    margin-right:5px;
+}
+QPushButton#SiteIcon {
+    background: transparent;
+    image: url(:images/earth.png);
+    /* margin: 5px; */
+    margin-bottom:6px;
+    margin-top:4px;
+    margin-right:5px;
+}
 QPushButton#QueryButton::hover {
     background: rgb(90,90,90);
     image: url(:/images/query-hilite.png);

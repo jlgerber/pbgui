@@ -142,8 +142,14 @@ unsafe fn setup_platforms_cb<'b>(
     }
     let mut grpbox = QFrame::new_0a();
     grpbox.set_object_name(&qs("ComboWidget"));
+    let mut pxlabel = QPushButton::from_q_string(&QString::from_std_str(""));
+    pxlabel.set_object_name(&qs("PlatformIcon"));
+    pxlabel.set_minimum_width(24);
+    pxlabel.set_maximum_width(24);
+    pxlabel.set_minimum_height(24);
     let label = QLabel::from_q_string(&qs("Platform"));
     let mut hlayout = create_hlayout();
+    hlayout.add_widget(pxlabel.into_ptr());
     hlayout.add_widget(label.into_ptr());
     hlayout.add_widget(platform_combobox.into_ptr());
     grpbox.set_layout(hlayout.into_ptr());
@@ -171,8 +177,14 @@ unsafe fn setup_sites_cb<'b>(
     }
     let mut grpbox = QFrame::new_0a();
     grpbox.set_object_name(&qs("ComboWidget"));
+    let mut pxlabel = QPushButton::from_q_string(&QString::from_std_str(""));
+    pxlabel.set_object_name(&qs("SiteIcon"));
+    pxlabel.set_minimum_width(24);
+    pxlabel.set_maximum_width(24);
+    pxlabel.set_minimum_height(24);
     let label = QLabel::from_q_string(&qs("Site"));
     let mut hlayout = create_hlayout();
+    hlayout.add_widget(pxlabel.into_ptr());
     hlayout.add_widget(label.into_ptr());
     hlayout.add_widget(site_combobox.into_ptr());
     grpbox.set_layout(hlayout.into_ptr());
