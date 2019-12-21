@@ -5,5 +5,10 @@
     <file>../images/query-hilite.png</file>
     <file>../images/query-shaded.png</file>
     <file>../images/clear.png</file>
+    <file>../images/icons8-america-50.png</file>
+    <file>../images/icons8-centos-50.png</file>
+    <file>../images/icons8-comedy-50.png</file>
+    <file>../images/icons8-linux-50.png</file>
+    <file>../images/icons8-volume-50.png</file>
 </qresource>
 </RCC>
