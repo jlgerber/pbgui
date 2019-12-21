@@ -6,6 +6,7 @@ use crate::{
     save_versionpin_changes::save_versionpin_changes,
     search_comboboxes,
     select_history::select_history,
+    top_toolbar,
     update_changes_table::update_changes_table,
     update_versionpin_table::update_vpin_table,
     update_withpackages::update_withpackages,
@@ -42,6 +43,7 @@ pub struct MainWindow<'a> {
     _dist_popup_menu: CppBox<QMenu>,
     _package_popup_menu: CppBox<QMenu>,
     _dist_popup_action: MutPtr<QAction>,
+    // Slots
     query_button_clicked: Slot<'a>,
     save_clicked: Slot<'a>,
     choose_distribution_triggered: Slot<'a>,
@@ -100,13 +102,14 @@ impl<'a> MainWindow<'a> {
             // Menubar Contents
             //
             // header layout
+            //create(main_window: &mut MutPtr<QMainWindow>, hlayout: CppBox<QHBoxLayout>)
             let mut hlayout = create_hlayout();
             let mut hlayout_ptr = hlayout.as_mut_ptr();
             // setup comboboxes in header
             let (level_ptr, role_ptr, platform_ptr, site_ptr, dir_ptr) =
                 search_comboboxes::create(&mut db, &mut hlayout_ptr);
             // LINE EDIT
-            let (mut line_edit_ptr, mut line_edit_popup_menu, mut choose_line_edit_clear_action) =
+            let (mut line_edit_ptr, mut line_edit_popup_menu, choose_line_edit_clear_action) =
                 package_lineedit::create(&mut hlayout_ptr);
             let mut line_edit_popup_menu_ptr = line_edit_popup_menu.as_mut_ptr();
             // create query button
@@ -115,14 +118,8 @@ impl<'a> MainWindow<'a> {
             //
             // qtoolbar setup
             //
-            let mut top_toolbar = main_window.add_tool_bar_q_string(&qs("TopToolPar"));
-            top_toolbar.set_floatable(false);
-            top_toolbar.set_movable(false);
+            top_toolbar::create(&mut main_window.as_mut_ptr(), hlayout);
 
-            let mut toolbar_widget = QWidget::new_0a();
-            toolbar_widget.set_object_name(&qs("ToobarWidget"));
-            toolbar_widget.set_layout(hlayout.into_ptr());
-            top_toolbar.add_widget(toolbar_widget.into_ptr());
             // Create Splitter between query results and action logger
             let mut vsplit = QSplitter::new();
             let mut vsplit_ptr = vsplit.as_mut_ptr();

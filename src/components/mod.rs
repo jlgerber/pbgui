@@ -7,6 +7,7 @@ pub mod query_button;
 pub mod revisions_table;
 pub mod search_comboboxes;
 pub mod table_headers;
+pub mod top_toolbar;
 pub mod versionpin_changes_table;
 pub mod versionpin_table;
 pub mod withpackage_widget;

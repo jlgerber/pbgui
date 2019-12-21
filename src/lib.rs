@@ -7,7 +7,7 @@ pub use api::client_proxy::ClientProxy;
 pub mod components;
 pub use components::{
     bottom_stacked_widget, main_menu_bar, package_lineedit, query_button, revisions_table,
-    search_comboboxes, table_headers, versionpin_changes_table, versionpin_table,
+    search_comboboxes, table_headers, top_toolbar, versionpin_changes_table, versionpin_table,
     withpackage_widget,
 };
 pub use slot_functions::{
