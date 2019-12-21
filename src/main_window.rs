@@ -6,7 +6,7 @@ use crate::{
     select_history::select_history,
     update_changes_table::update_changes_table,
     update_versionpin_table::update_vpin_table,
-    utility::{create_hlayout, load_stylesheet},
+    utility::{create_hlayout, load_stylesheet, qs},
     versionpin_table::setup_table,
     {combo_boxes, create_query_button},
 };
@@ -20,14 +20,14 @@ use qt_gui::QIcon;
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr, Ref},
     q_line_edit::ActionPosition,
-    QAction, QHBoxLayout, QLineEdit, QMainWindow, QMenu, QPushButton, QSplitter, QTableWidget,
-    QVBoxLayout, QWidget, SlotOfQPoint,
+    QAction, QLineEdit, QMainWindow, QMenu, QPushButton, QSplitter, QTableWidget, QVBoxLayout,
+    QWidget, SlotOfQPoint,
 };
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::rc::Rc;
 
-pub struct Form<'a> {
+pub struct MainWindow<'a> {
     _db: &'a mut PackratDb,
     _main: CppBox<QMainWindow>,
     _query_button: MutPtr<QPushButton>,
@@ -37,15 +37,9 @@ pub struct Form<'a> {
     _save_button: MutPtr<QPushButton>,
     _pin_changes_button: MutPtr<QPushButton>,
     _history_button: MutPtr<QPushButton>,
-    // needed so that qt wont segfault
-    #[allow(dead_code)]
-    dist_popup_menu: CppBox<QMenu>,
-    // needed so that qt wont segfault
-    #[allow(dead_code)]
-    package_popup_menu: CppBox<QMenu>,
-    // needed so that qt wont segfault
-    #[allow(dead_code)]
-    dist_popup_action: MutPtr<QAction>,
+    _dist_popup_menu: CppBox<QMenu>,
+    _package_popup_menu: CppBox<QMenu>,
+    _dist_popup_action: MutPtr<QAction>,
     query_button_clicked: Slot<'a>,
     save_clicked: Slot<'a>,
     choose_distribution_triggered: Slot<'a>,
@@ -57,11 +51,11 @@ pub struct Form<'a> {
     revision_changed: SlotOfQItemSelectionQItemSelection<'a>,
 }
 
-impl<'a> Form<'a> {
+impl<'a> MainWindow<'a> {
     //
     // Create Main Widget
     //
-    pub fn new(mut db: &'a mut PackratDb) -> Form<'a> {
+    pub fn new(mut db: &'a mut PackratDb) -> MainWindow<'a> {
         unsafe {
             let mut main_window = QMainWindow::new_0a();
             main_window.set_base_size_2a(1200, 800);
@@ -77,7 +71,7 @@ impl<'a> Form<'a> {
             // header layout
             let mut hlayout = create_hlayout();
             let mut hlayout_ptr = hlayout.as_mut_ptr();
-            root_layout_ptr.add_layout_1a(hlayout.into_ptr());
+            //root_layout_ptr.add_layout_1a(hlayout.into_ptr());
             // setup comboboxes in header
             let (level_ptr, role_ptr, platform_ptr, site_ptr, dir_ptr) =
                 combo_boxes(&mut db, &mut hlayout_ptr);
@@ -105,7 +99,19 @@ impl<'a> Form<'a> {
 
             hlayout_ptr.add_widget(line_edit.into_ptr());
             // create query button
-            let button_ptr = create_query_button(&mut hlayout_ptr);
+            let mut button_ptr = create_query_button(&mut hlayout_ptr);
+            button_ptr.set_object_name(&qs("QueryButton"));
+            //
+            // qtoolbar setup
+            //
+            let mut top_toolbar = main_window.add_tool_bar_q_string(&qs("TopToolPar"));
+            top_toolbar.set_floatable(false);
+            top_toolbar.set_movable(false);
+
+            let mut toolbar_widget = QWidget::new_0a();
+            toolbar_widget.set_object_name(&qs("ToobarWidget"));
+            toolbar_widget.set_layout(hlayout.into_ptr());
+            top_toolbar.add_widget(toolbar_widget.into_ptr());
             // Create Splitter between query results and action logger
             let mut vsplit = QSplitter::new();
             let mut vsplit_ptr = vsplit.as_mut_ptr();
@@ -146,7 +152,7 @@ impl<'a> Form<'a> {
             splitter_sizes.append_int(Ref::from_raw_ref(&(300 as i32)));
             vsplit.set_sizes(&splitter_sizes);
             root_layout_ptr.add_widget(vsplit.into_ptr());
-            let form = Form {
+            let form = MainWindow {
                 revision_changed: SlotOfQItemSelectionQItemSelection::new(
                     move |selected: Ref<QItemSelection>, _deselected: Ref<QItemSelection>| {
                         let ind = selected.indexes();
@@ -220,9 +226,9 @@ impl<'a> Form<'a> {
                 _save_button: save_button,
                 _pkg_line_edit: line_edit_ptr,
                 _pinchanges_list: pinchanges_ptr,
-                dist_popup_menu: dist_popup_menu,
-                dist_popup_action: choose_dist_action,
-                package_popup_menu: line_edit_popup_menu,
+                _dist_popup_menu: dist_popup_menu,
+                _dist_popup_action: choose_dist_action,
+                _package_popup_menu: line_edit_popup_menu,
                 _pin_changes_button: pinchanges_button_ptr,
                 _history_button: history_button_ptr,
             };

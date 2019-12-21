@@ -3,7 +3,7 @@ use env_logger;
 use env_logger::Env;
 use log;
 use packybara::packrat::PackratDb;
-use pbgui::{parent_form, ClientProxy};
+use pbgui::{main_window, ClientProxy};
 use qt_widgets::QApplication;
 use std::env;
 use structopt::StructOpt;
@@ -31,7 +31,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = ClientProxy::connect()?;
     let mut vpin_finder = PackratDb::new(client);
     QApplication::init(|_| unsafe {
-        let mut _form = parent_form::Form::new(&mut vpin_finder);
+        let mut _form = main_window::MainWindow::new(&mut vpin_finder);
         QApplication::exec()
     });
 }

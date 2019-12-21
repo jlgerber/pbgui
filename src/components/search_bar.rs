@@ -3,7 +3,7 @@ use packybara::packrat::PackratDb;
 use qt_core::{AlignmentFlag, QFlags};
 use qt_widgets::{
     cpp_core::MutPtr, qt_core::QString, QComboBox, QFrame, QHBoxLayout, QLabel, QPushButton,
-    QWidget,
+    QVBoxLayout, QWidget,
 };
 
 //------------------------//
@@ -195,7 +195,12 @@ pub fn create_query_button(hlayout_ptr: &mut MutPtr<QHBoxLayout>) -> MutPtr<QPus
         button.set_minimum_width(40); //70
         button.set_maximum_width(40); //70
         button.set_minimum_height(40); //60
-        hlayout_ptr.add_widget(button.into_ptr());
+        let mut widget = QFrame::new_0a();
+        widget.set_object_name(&qs("ButtonFrame"));
+        let mut widget_layout = create_hlayout();
+        widget_layout.add_widget(button.into_ptr());
+        widget.set_layout(widget_layout.into_ptr());
+        hlayout_ptr.add_widget(widget.into_ptr());
         button_ptr
     }
 }

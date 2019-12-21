@@ -5,6 +5,14 @@
 /* * {
     border: 1px solid red;
 } */
+#ButtonFrame {
+    margin: 4px;
+    margin-right: 6px;
+}
+#QueryButton {
+    padding: 6px;
+}
+
 QWidget#HistoryWidget {
     padding: 0px;
     margin: 0px;
