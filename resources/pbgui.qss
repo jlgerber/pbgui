@@ -130,8 +130,23 @@ QPushButton#QueryButton {
     border: 1px solid rgb(101,101,101);
     border-radius: 20px; /*30*/ 
     background: rgb(80,80,80);
-        image: url(:/images/query-shaded.png);
+    image: url(:/images/query-shaded.png);
 
+}
+QPushButton#LevelIcon {
+    background: transparent;
+    image: url(:images/volume.png);
+    margin-bottom:6px;
+    margin-top:4px;
+    margin-right:5px;
+}
+QPushButton#RoleIcon {
+    background: transparent;
+    image: url(:images/facehappy.png);
+    /* margin: 5px; */
+    margin-bottom:6px;
+    margin-top:4px;
+    margin-right:5px;
 }
 
 QPushButton#QueryButton::hover {

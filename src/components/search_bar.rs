@@ -1,11 +1,14 @@
 use crate::utility::{create_hlayout, qs};
 use packybara::packrat::PackratDb;
-use qt_core::{AlignmentFlag, QFlags};
+use qt_core::QSize;
+use qt_gui::QIcon;
 use qt_widgets::{
-    cpp_core::MutPtr, qt_core::QString, QComboBox, QFrame, QHBoxLayout, QLabel, QPushButton,
-    QVBoxLayout, QWidget,
+    cpp_core::MutPtr, cpp_core::Ref, qt_core::QString, QComboBox, QFrame, QHBoxLayout, QLabel,
+    QPushButton, QWidget,
 };
-
+//let icon = QIcon::from_q_string(&QString::from_std_str(
+//    ":/images/icons8-volume-level-50.png",
+//));
 //------------------------//
 // build the combo boxes  //
 //------------------------//
@@ -64,8 +67,15 @@ unsafe fn setup_levels_cb<'b>(
         .for_each(|s| level_combobox.add_item_q_string(&QString::from_std_str(s.level.as_str())));
     let mut grpbox = QFrame::new_0a();
     grpbox.set_object_name(&qs("FirstComboWidget"));
+    //let pixmap = icon.pixmap_q_size(&QSize::new_2a(50, 50));
+    let mut pxlabel = QPushButton::from_q_string(&QString::from_std_str(""));
+    pxlabel.set_object_name(&qs("LevelIcon"));
+    pxlabel.set_minimum_width(24); //70
+    pxlabel.set_maximum_width(24); //70
+    pxlabel.set_minimum_height(24);
     let label = QLabel::from_q_string(&qs("Level"));
     let mut hlayout = create_hlayout();
+    hlayout.add_widget(pxlabel.into_ptr());
     hlayout.add_widget(label.into_ptr());
     // assign owner of level
     hlayout.add_widget(level_combobox.into_ptr());
@@ -97,8 +107,14 @@ unsafe fn setup_roles_cb<'b>(
         .for_each(|s| role_combobox.add_item_q_string(&QString::from_std_str(s.role.as_str())));
     let mut grpbox = QFrame::new_0a();
     grpbox.set_object_name(&qs("ComboWidget"));
+    let mut pxlabel = QPushButton::from_q_string(&QString::from_std_str(""));
+    pxlabel.set_object_name(&qs("RoleIcon"));
+    pxlabel.set_minimum_width(24); //70
+    pxlabel.set_maximum_width(24); //70
+    pxlabel.set_minimum_height(24);
     let label = QLabel::from_q_string(&qs("Role"));
     let mut hlayout = create_hlayout();
+    hlayout.add_widget(pxlabel.into_ptr());
     hlayout.add_widget(label.into_ptr());
     hlayout.add_widget(role_combobox.into_ptr());
     grpbox.set_layout(hlayout.into_ptr());
