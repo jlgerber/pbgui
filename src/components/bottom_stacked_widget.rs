@@ -1,6 +1,6 @@
-use super::bottom_context_widget::create_bottom_context_widget;
-use super::changes_table::setup_changes_table;
-use super::revisions_table::setup_revisions_table;
+use super::bottom_context_widget;
+use super::changes_table;
+use super::revisions_table;
 use super::versionpin_changes_table::setup_pinchanges_table;
 
 use crate::utility::{create_hlayout, create_vlayout, qs};
@@ -113,16 +113,16 @@ pub fn create_bottom_stacked_widget(
         revisions_widget.set_layout(rw_layout.into_ptr());
         pg2_layout_ptr.add_widget(revisions_widget.into_ptr());
 
-        let mut revisions_table = setup_revisions_table();
+        let mut revisions_table = revisions_table::create();
         let revisions_table_ptr = revisions_table.as_mut_ptr();
-        let mut changes_table = setup_changes_table();
+        let mut changes_table = changes_table::create();
         let changes_table_ptr = changes_table.as_mut_ptr();
         rsplitter_ptr.add_widget(revisions_table.into_ptr());
         rsplitter_ptr.add_widget(changes_table.into_ptr());
 
         // add the bottom_context_widget which gives us the ablitity
         // to add controls per page
-        let controls_widget_ptr = create_bottom_context_widget(&mut top_hlayout_ptr, controls);
+        let controls_widget_ptr = bottom_context_widget::create(&mut top_hlayout_ptr, controls);
         (
             pinchanges_ptr,
             revisions_table_ptr,

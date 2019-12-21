@@ -6,9 +6,9 @@ pub use api::client_proxy::ClientProxy;
 // needed so that qt wont segfault
 pub mod components;
 pub use components::{
-    bottom_stacked_widget, main_menu_bar, revisions_table,
-    search_bar::{combo_boxes, create_query_button},
-    table_headers, versionpin_changes_table, versionpin_table, withpackage_widget,
+    bottom_stacked_widget, main_menu_bar, package_lineedit, query_button, revisions_table,
+    search_comboboxes, table_headers, versionpin_changes_table, versionpin_table,
+    withpackage_widget,
 };
 pub use slot_functions::{
     choose_distribution, save_versionpin_changes, select_history, update_changes_table,

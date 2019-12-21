@@ -5,10 +5,7 @@ use qt_widgets::{cpp_core::MutPtr, QTableWidget, QTableWidgetItem};
 // setup the headers matching   //
 // the provided header vector   //
 //------------------------------//
-pub fn setup_table_headers(
-    vpin_tablewidget: &mut MutPtr<QTableWidget>,
-    headers: &[(i32, &'static str, bool)],
-) {
+pub fn setup(vpin_tablewidget: &mut MutPtr<QTableWidget>, headers: &[(i32, &'static str, bool)]) {
     unsafe {
         for (idx, val, hidden) in headers.into_iter() {
             if !hidden {

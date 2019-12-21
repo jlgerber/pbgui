@@ -9,7 +9,7 @@ use qt_widgets::{
 //------------------------//
 // build the combo boxes  //
 //------------------------//
-pub fn combo_boxes<'b>(
+pub fn create<'b>(
     db: &'b mut PackratDb,
     layout: &mut MutPtr<QHBoxLayout>,
 ) -> (
@@ -207,25 +207,4 @@ unsafe fn setup_directions_cb<'b>(layout: &mut MutPtr<QHBoxLayout>) -> MutPtr<QC
     grpbox.set_layout(hlayout.into_ptr());
     layout.add_widget(grpbox.into_ptr());
     dir_cb_ptr
-}
-
-//
-// Create Query Button
-//
-pub fn create_query_button(hlayout_ptr: &mut MutPtr<QHBoxLayout>) -> MutPtr<QPushButton> {
-    unsafe {
-        let mut button = QPushButton::from_q_string(&QString::from_std_str("")); //Query
-        button.set_object_name(&QString::from_std_str("QueryButton"));
-        let button_ptr = button.as_mut_ptr();
-        button.set_minimum_width(40); //70
-        button.set_maximum_width(40); //70
-        button.set_minimum_height(40); //60
-        let mut widget = QFrame::new_0a();
-        widget.set_object_name(&qs("ButtonFrame"));
-        let mut widget_layout = create_hlayout();
-        widget_layout.add_widget(button.into_ptr());
-        widget.set_layout(widget_layout.into_ptr());
-        hlayout_ptr.add_widget(widget.into_ptr());
-        button_ptr
-    }
 }

@@ -1,10 +1,7 @@
 use crate::utility::qs;
 use qt_widgets::{cpp_core::MutPtr, QAction, QMainWindow, QMenuBar};
 
-pub fn setup<'a>(
-    main_window: &mut MutPtr<QMainWindow>,
-    //withs_dockwidget: &mut MutPtr<QDockWidget>,
-) -> MutPtr<QAction> {
+pub fn setup<'a>(main_window: &mut MutPtr<QMainWindow>) -> MutPtr<QAction> {
     unsafe {
         let mut menubar: MutPtr<QMenuBar> = main_window.menu_bar();
         let mut windows_menu = menubar.add_menu_q_string(&qs("Windows"));

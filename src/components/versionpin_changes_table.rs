@@ -1,5 +1,5 @@
 use crate::constants::*;
-use crate::table_headers::setup_table_headers;
+use crate::table_headers;
 use qt_core::QFlags;
 use qt_widgets::{
     cpp_core::CppBox,
@@ -15,7 +15,7 @@ pub fn setup_pinchanges_table() -> CppBox<QTableWidget> {
     unsafe {
         let mut pinchanges = QTableWidget::new_2a(0, PC_HEADERS.len() as i32);
         let mut pinchanges_ptr = pinchanges.as_mut_ptr();
-        setup_table_headers(&mut pinchanges_ptr, &PC_HEADERS);
+        table_headers::setup(&mut pinchanges_ptr, &PC_HEADERS);
         pinchanges.vertical_header().hide();
         pinchanges.horizontal_header().hide();
         pinchanges.set_selection_behavior(SelectionBehavior::SelectRows);

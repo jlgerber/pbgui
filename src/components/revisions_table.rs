@@ -1,5 +1,5 @@
 use crate::constants::*;
-use crate::table_headers::setup_table_headers;
+use crate::table_headers;
 use crate::utility::qs;
 use qt_core::AlignmentFlag;
 use qt_core::QFlags;
@@ -13,7 +13,7 @@ use qt_widgets::{
 //--------------------------
 // Setup revisions Changes Table
 //--------------------------
-pub fn setup_revisions_table() -> CppBox<QTableWidget> {
+pub fn create() -> CppBox<QTableWidget> {
     unsafe {
         let mut revisions = QTableWidget::new_2a(0, REV_HEADERS.len() as i32);
         let mut revisions_ptr = revisions.as_mut_ptr();
@@ -36,7 +36,7 @@ pub fn setup_revisions_table() -> CppBox<QTableWidget> {
         revisions
             .vertical_header()
             .set_section_resize_mode_1a(ResizeMode::ResizeToContents);
-        setup_table_headers(&mut revisions_ptr, &REV_HEADERS);
+        table_headers::setup(&mut revisions_ptr, &REV_HEADERS);
         revisions
             .horizontal_header()
             .set_object_name(&qs("RevisionsHeader"));

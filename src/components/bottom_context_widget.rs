@@ -20,7 +20,7 @@ use qt_widgets::{
 /// on the right hand side of the window, next to
 /// the context switching buttons that drive the
 /// main bottom stacked widget
-pub fn create_bottom_context_widget(
+pub fn create(
     parent_layout: &mut MutPtr<QHBoxLayout>,
     children: Vec<CppBox<QWidget>>,
 ) -> MutPtr<QStackedWidget> {

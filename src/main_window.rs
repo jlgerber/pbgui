@@ -2,14 +2,15 @@ use crate::{
     bottom_stacked_widget::create_bottom_stacked_widget,
     choose_distribution::choose_alternative_distribution,
     constants::COL_REV_TXID,
+    package_lineedit, query_button,
     save_versionpin_changes::save_versionpin_changes,
+    search_comboboxes,
     select_history::select_history,
     update_changes_table::update_changes_table,
     update_versionpin_table::update_vpin_table,
     update_withpackages::update_withpackages,
     utility::{create_hlayout, create_vlayout, load_stylesheet, qs},
-    versionpin_table::setup_table,
-    withpackage_widget, {combo_boxes, create_query_button},
+    versionpin_table, withpackage_widget,
 };
 use log;
 use packybara::packrat::PackratDb;
@@ -64,14 +65,13 @@ impl<'a> MainWindow<'a> {
             main_window.set_base_size_2a(1200, 800);
             // the qmainwindow takes ownership of the menubar,
             // even though it takes a MutPtr instead of a Cpp
-            let mut main_menu = QMenuBar::new_0a();
-            let mut main_menu_bar = main_menu.as_mut_ptr();
-            main_window.set_menu_bar(main_menu.into_ptr());
+            let main_menu_bar = QMenuBar::new_0a();
+            main_window.set_menu_bar(main_menu_bar.into_ptr());
             //
             // parent root_widget
             //
             let mut root_widget = QWidget::new_0a();
-            let mut root_widget_ptr = root_widget.as_mut_ptr();
+            let root_widget_ptr = root_widget.as_mut_ptr();
             //
             // create root layout
             //
@@ -95,40 +95,22 @@ impl<'a> MainWindow<'a> {
             center_widget.set_layout(center_layout.into_ptr());
             // add widget into splitter
             with_splitter_ptr.add_widget(center_widget.into_ptr());
-            // tmp
-            //with_splitter_ptr.add_widget(QWidget::new_0a().into_ptr());
             main_window.set_central_widget(root_widget.into_ptr());
             //
-            // layout to house the splitter
+            // Menubar Contents
             //
             // header layout
             let mut hlayout = create_hlayout();
             let mut hlayout_ptr = hlayout.as_mut_ptr();
             // setup comboboxes in header
             let (level_ptr, role_ptr, platform_ptr, site_ptr, dir_ptr) =
-                combo_boxes(&mut db, &mut hlayout_ptr);
+                search_comboboxes::create(&mut db, &mut hlayout_ptr);
             // LINE EDIT
-            let mut line_edit = QLineEdit::new();
-            line_edit.set_attribute_2a(WidgetAttribute::WAMacShowFocusRect, false);
-            line_edit.set_object_name(&QString::from_std_str("packageLineEdit"));
-            let clear_icon = QIcon::from_q_string(&QString::from_std_str(":/images/clear.png"));
-            if clear_icon.is_null() {
-                log::warn!("The :/images/clear.png icon was unable to be located.");
-            }
-            let clear_action = line_edit.add_action_q_icon_action_position(
-                clear_icon.as_ref(),
-                ActionPosition::TrailingPosition,
-            );
-            line_edit.set_context_menu_policy(ContextMenuPolicy::CustomContextMenu);
-            let mut line_edit_popup_menu = QMenu::new();
+            let (mut line_edit_ptr, mut line_edit_popup_menu, mut choose_line_edit_clear_action) =
+                package_lineedit::create(&mut hlayout_ptr);
             let mut line_edit_popup_menu_ptr = line_edit_popup_menu.as_mut_ptr();
-            let choose_line_edit_clear_action =
-                line_edit_popup_menu.add_action_q_string(&QString::from_std_str("Clear"));
-
-            let mut line_edit_ptr = line_edit.as_mut_ptr();
-            hlayout_ptr.add_widget(line_edit.into_ptr());
             // create query button
-            let mut button_ptr = create_query_button(&mut hlayout_ptr);
+            let mut button_ptr = query_button::create(&mut hlayout_ptr);
             button_ptr.set_object_name(&qs("QueryButton"));
             //
             // qtoolbar setup
@@ -147,7 +129,7 @@ impl<'a> MainWindow<'a> {
             vsplit.set_orientation(Orientation::Vertical);
             // set splitter sizing
             // setup the main table widget
-            let mut vpin_tablewidget_ptr = setup_table(&mut vsplit_ptr);
+            let mut vpin_tablewidget_ptr = versionpin_table::setup(&mut vsplit_ptr);
             let (
                 pinchanges_ptr,
                 mut revisions_ptr,
@@ -322,7 +304,7 @@ impl<'a> MainWindow<'a> {
             choose_dist_action
                 .triggered()
                 .connect(&form.choose_distribution_triggered);
-            clear_action.triggered().connect(&form.clear_package);
+            // clear_action.triggered().connect(&form.clear_package);
             line_edit_ptr
                 .custom_context_menu_requested()
                 .connect(&form.show_line_edit_menu);
