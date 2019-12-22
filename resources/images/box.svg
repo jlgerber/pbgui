@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="44px" height="44px" viewBox="0 0 44 44" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 61 (89581) - https://sketch.com -->
+    <title>box</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="12.9″-iPad-Pro" transform="translate(-500.000000, -910.000000)">
+            <g id="box" transform="translate(500.000000, 910.000000)">
+                <rect id="Rectangle" stroke="#FFFFFF" stroke-width="1.75" x="0.875" y="10.2856445" width="41.5" height="32.25" rx="2"></rect>
+                <path d="M0.887114612,10.8307753 L2.3209868,10.2897949 L41.2179704,10.2897949 L42.452259,11.0911822 C42.4619504,10.8384515 42.3951839,10.5821918 42.2491103,10.3588532 L36.3345336,1.31579196 C36.1036349,0.962760541 35.710253,0.75 35.2884173,0.75 L7.36385808,0.75 C6.91591068,0.75 6.50220765,0.989695389 6.27942085,1.37831207 L0.98602673,10.6118091 C0.945939962,10.6817342 0.912874772,10.7550812 0.887114612,10.8307753 Z" id="Combined-Shape" stroke="#FFFFFF" stroke-width="1.5"></path>
+                <rect id="Rectangle" fill="#FFFFFF" x="15" y="17.4106445" width="13" height="4.25" rx="2"></rect>
+            </g>
+        </g>
+    </g>
+</svg>
