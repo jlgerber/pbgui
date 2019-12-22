@@ -10,9 +10,9 @@ use qt_widgets::{
     q_size_policy::Policy,
     QHBoxLayout, QPushButton, QSizePolicy, QSplitter, QStackedWidget, QTableWidget, QWidget,
 };
-//---------------------------//
-// Create pinchanges widget  //
-//---------------------------//
+//
+// Create pinchanges widget
+//
 pub fn create_bottom_stacked_widget(
     splitter: &mut MutPtr<QSplitter>,
 ) -> (
@@ -33,7 +33,7 @@ pub fn create_bottom_stacked_widget(
         bottom_stacked_widget.set_object_name(&qs("ContainerWidget"));
         let mut pc_vlayout_ptr = pc_vlayout.as_mut_ptr();
         bottom_stacked_widget.set_layout(pc_vlayout.into_ptr());
-        // create top horizontal layout for hosting switches for the stacked
+        // Create top horizontal layout for hosting switches for the stacked
         // layout as well as context controls.
         let mut top_hlayout = QHBoxLayout::new_0a();
         let mut top_hlayout_ptr = top_hlayout.as_mut_ptr();

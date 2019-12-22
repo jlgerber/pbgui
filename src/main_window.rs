@@ -82,23 +82,9 @@ impl<'a> MainWindow<'a> {
     /// ```
     pub fn new(mut db: &'a mut PackratDb) -> MainWindow<'a> {
         unsafe {
-            let mut main_window = QMainWindow::new_0a();
+            // create the main window, menus, central widget and layout
+            let (mut main_window, main_widget_ptr, mut main_layout_ptr) = create_main_window();
             let mut main_window_ptr = main_window.as_mut_ptr();
-            // the qmainwindow takes ownership of the menubar,
-            // even though it takes a MutPtr instead of a Cpp
-            let main_menu_bar = QMenuBar::new_0a();
-            main_window.set_menu_bar(main_menu_bar.into_ptr());
-            //
-            // main_widget - central widget of teh main_window
-            //
-            let mut main_widget = QWidget::new_0a();
-            let main_widget_ptr = main_widget.as_mut_ptr();
-            //
-            // main_layout
-            //
-            let mut main_layout = create_vlayout();
-            let mut main_layout_ptr = main_layout.as_mut_ptr();
-            main_widget.set_layout(main_layout.into_ptr());
             //
             // Create the top toolbar which contains the search controls
             //
@@ -140,7 +126,6 @@ impl<'a> MainWindow<'a> {
             center_widget.set_layout(center_layout.into_ptr());
             // add center widget into splitter
             with_splitter_ptr.add_widget(center_widget.into_ptr());
-            main_window.set_central_widget(main_widget.into_ptr());
 
             // Create a horizontally running Splitter (the splitter divides
             // the widget horizontally. Qt refers to this as vertical
@@ -193,7 +178,7 @@ impl<'a> MainWindow<'a> {
             center_layout_ptr.add_widget(vsplit.into_ptr());
 
             resize_window_to_screen(&mut main_window_ptr, 0.8);
-            main_window.show();
+            main_window_ptr.show();
             //
             // setup the main menu bart
             //
@@ -354,3 +339,29 @@ let slot = SlotOfBool::new(move |on: bool| {
         });
         withs_action.toggled().connect(&slot);
 */
+
+// create the main window, the main menubar, and the central widget
+fn create_main_window() -> (CppBox<QMainWindow>, MutPtr<QWidget>, MutPtr<QVBoxLayout>) {
+    unsafe {
+        let mut main_window = QMainWindow::new_0a();
+        // the qmainwindow takes ownership of the menubar,
+        // even though it takes a MutPtr instead of a Cpp
+        let main_menu_bar = QMenuBar::new_0a();
+        main_window.set_menu_bar(main_menu_bar.into_ptr());
+        //
+        // main_widget - central widget of teh main_window
+        //
+        let mut main_widget = QWidget::new_0a();
+        let main_widget_ptr = main_widget.as_mut_ptr();
+        //
+        // main_layout
+        //
+        let mut main_layout = create_vlayout();
+        let main_layout_ptr = main_layout.as_mut_ptr();
+        main_widget.set_layout(main_layout.into_ptr());
+        // set main_widget as the central widget in main_window
+        main_window.set_central_widget(main_widget.into_ptr());
+
+        (main_window, main_widget_ptr, main_layout_ptr)
+    }
+}
