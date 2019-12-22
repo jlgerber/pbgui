@@ -3,7 +3,16 @@ use qt_widgets::{
     cpp_core::{MutPtr, Ref},
     QSplitter, QVBoxLayout,
 };
-/// create versionpin table splitter
+/// Create VersionPin Table Splitter
+/// This splitter separates the VersionPin table, from the
+/// stackwidget below, owning both of them.
+///
+/// # Arguments
+/// * `center_layout_ptr` - the center layout, which will be given ownership
+/// of the splitter
+///
+/// # Returns
+/// * A pointer to the splitter
 pub fn create(center_layout_ptr: &mut MutPtr<QVBoxLayout>) -> MutPtr<QSplitter> {
     unsafe {
         // Create a horizontally running Splitter (the splitter divides

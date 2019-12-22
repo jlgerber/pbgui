@@ -1,7 +1,7 @@
 use super::bottom_context_widget;
 use super::changes_table;
 use super::revisions_table;
-use super::versionpin_changes_table::setup_pinchanges_table;
+use super::versionpin_changes_table;
 
 use crate::utility::{create_hlayout, create_vlayout, qs};
 use qt_core::{Orientation, QString};
@@ -73,7 +73,7 @@ pub fn create_bottom_stacked_widget(
         //
         // set up the pinchanges table
         //
-        let mut pinchanges = setup_pinchanges_table();
+        let mut pinchanges = versionpin_changes_table::create();
         let pinchanges_ptr = pinchanges.as_mut_ptr();
         pg1_layout_ptr.add_widget(pinchanges.into_ptr());
         // save button

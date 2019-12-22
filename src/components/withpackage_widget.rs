@@ -1,7 +1,13 @@
 use crate::utility::{create_vlayout, qs};
 use qt_widgets::{cpp_core::MutPtr, QFrame, QListWidget, QSplitter};
 
-/// Given the  QMainWindow, create and return the withpackage widget.
+/// create and return the withpackage list widget, given the parent splitter.
+///
+/// # Arguments
+/// * `splitter` - The  splitter which we will give ownership of the widget to.
+///
+/// # Returns
+/// * A pointer to the Withs List Widget
 pub fn create(splitter: &mut MutPtr<QSplitter>) -> MutPtr<QListWidget> {
     unsafe {
         // create the inner withpackage

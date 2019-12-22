@@ -15,11 +15,18 @@ use qt_widgets::{
     QHBoxLayout, QStackedWidget, QWidget,
 };
 
-/// Create a stacked widget housing context
-/// specific controls (buttons etc) that sits
-/// on the right hand side of the window, next to
-/// the context switching buttons that drive the
-/// main bottom stacked widget
+/// Create a stacked widget housing context specific controls (buttons etc) that
+/// sits on the right hand side of the window, next to the context switching
+/// buttons that drive the main bottom stacked widget
+///
+/// # Arguments
+/// * `parent_layout` The layout which will own the bottom context widget
+/// * `children` - vector of child widgets which we will take ownership of. Each
+/// widget extends the stack. Any custom controls for the companion stacked widget
+/// should be children of these widgets.
+///
+/// # Returns
+/// * A pointer to the bottom_context_widget we have just created
 pub fn create(
     parent_layout: &mut MutPtr<QHBoxLayout>,
     children: Vec<CppBox<QWidget>>,

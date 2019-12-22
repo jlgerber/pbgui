@@ -36,7 +36,10 @@ macro_rules! table_header_text_color {
     };
 }
 
-/// Setup the main VersionPin Table
+/// Setup the main VersionPin Table.
+///
+/// This table presents VersionPins, populated in response to the user's request via
+/// the top push button.
 ///
 /// # Arguments
 /// * `vsplit_ptr` Pointer to the main vertical splitter (running horizontally)

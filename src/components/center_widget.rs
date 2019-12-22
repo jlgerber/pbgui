@@ -2,6 +2,13 @@ use crate::utility::qs;
 use qt_widgets::{cpp_core::MutPtr, QSplitter, QVBoxLayout, QWidget};
 
 /// Create and configure the center widget,
+///
+/// # Arguments
+/// * `with_splitter_ptr` - Pointer to the splitter between the center area
+/// and the side, withs widget
+///
+/// # Returns
+/// * A pointer to the center widget's layout
 pub fn create(with_splitter_ptr: &mut MutPtr<QSplitter>) -> MutPtr<QVBoxLayout> {
     unsafe {
         // The center widget is the most prominent of the of the

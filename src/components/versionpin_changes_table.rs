@@ -8,10 +8,16 @@ use qt_widgets::{
     QTableWidget,
 };
 
-//--------------------------
-// Setup Pin Changes Table
-//--------------------------
-pub fn setup_pinchanges_table() -> CppBox<QTableWidget> {
+/// Create the Table tracking Changes per Revision. For each Revision, there
+/// are 1 to N Changes, desplayed within this table. The user selects a
+/// Revision from the revision table and this table is populated in response.
+///
+/// # Arguments
+/// * None
+///
+/// # Returns
+/// * The Revision Table
+pub fn create() -> CppBox<QTableWidget> {
     unsafe {
         let mut pinchanges = QTableWidget::new_2a(0, PC_HEADERS.len() as i32);
         let mut pinchanges_ptr = pinchanges.as_mut_ptr();

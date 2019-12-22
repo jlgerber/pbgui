@@ -10,9 +10,16 @@ use qt_widgets::{
     QTableWidget,
 };
 
-//--------------------------
-// Setup revisions Changes Table
-//--------------------------
+/// Create the Table of Revisions.
+/// Each transaction executed by a user results in a Revision tracking the
+/// event. For each Revision, there are 1 to N number of Changes, presented
+/// in the companion Changes Table.
+///
+/// # Arguments
+/// * None
+///
+/// # Returns
+/// * The Revisions Table
 pub fn create() -> CppBox<QTableWidget> {
     unsafe {
         let mut revisions = QTableWidget::new_2a(0, REV_HEADERS.len() as i32);
