@@ -11,7 +11,7 @@ use crate::{
     update_versionpin_table::update_vpin_table,
     update_withpackages::update_withpackages,
     utility::{create_hlayout, create_vlayout, load_stylesheet, qs, resize_window_to_screen},
-    versionpin_table, withpackage_widget,
+    versionpin_table, versionpin_table_splitter, withpackage_widget,
 };
 use log;
 use packybara::packrat::PackratDb;
@@ -126,17 +126,10 @@ impl<'a> MainWindow<'a> {
             center_widget.set_layout(center_layout.into_ptr());
             // add center widget into splitter
             with_splitter_ptr.add_widget(center_widget.into_ptr());
-
-            // Create a horizontally running Splitter (the splitter divides
-            // the widget horizontally. Qt refers to this as vertical
-            // orientation. I find it confusing.)
-            let mut vsplit = QSplitter::new();
-            let mut vsplit_ptr = vsplit.as_mut_ptr();
-            vsplit.set_orientation(Orientation::Vertical);
-            //
-            // create the main, versionpin table widget
-            //
-            let mut vpin_tablewidget_ptr = versionpin_table::setup(&mut vsplit_ptr);
+            // create the splitter
+            let mut vpin_table_splitter = versionpin_table_splitter::create(&mut center_layout_ptr);
+            // create the versionpin table
+            let mut vpin_tablewidget_ptr = versionpin_table::create(&mut vpin_table_splitter);
             let (
                 pinchanges_ptr,
                 mut revisions_ptr,
@@ -146,7 +139,7 @@ impl<'a> MainWindow<'a> {
                 pinchanges_button_ptr,
                 history_button_ptr,
                 mut controls_ptr,
-            ) = create_bottom_stacked_widget(&mut vsplit_ptr);
+            ) = create_bottom_stacked_widget(&mut vpin_table_splitter);
             //
             // setup popup menu for versionpin table
             //
@@ -156,14 +149,11 @@ impl<'a> MainWindow<'a> {
             let _choose_withs_action =
                 dist_popup_menu.add_action_q_string(&QString::from_std_str("Withs"));
             let mut dist_popup_menu_ptr = dist_popup_menu.as_mut_ptr();
-            // set the style sheet
-            load_stylesheet(main_window_ptr);
             //
             // create the WithPackage
             //
-            //create_withpackage_widget
             let mut withpackage_ptr = withpackage_widget::create(&mut with_splitter_ptr);
-            //with_splitter_ptr.add_widget(withpackage_ptr);
+            // prepare data for slot closures
             let usage = Rc::new(RefCell::new(HashMap::<i32, i32>::new()));
             let usage_ptr = Rc::clone(&usage);
             let update_cnt = Rc::new(Cell::new(0));
@@ -171,25 +161,21 @@ impl<'a> MainWindow<'a> {
             let mut pinchanges_ptr = pinchanges_ptr.clone();
             let dist_usage_ptr = usage_ptr.clone();
             let dist_update_cnt_ptr = update_cnt_ptr.clone();
-            let mut splitter_sizes = QListOfInt::new();
-            splitter_sizes.append_int(Ref::from_raw_ref(&(500 as i32)));
-            splitter_sizes.append_int(Ref::from_raw_ref(&(300 as i32)));
-            vsplit.set_sizes(&splitter_sizes);
-            center_layout_ptr.add_widget(vsplit.into_ptr());
-
+            //
+            // final housekeeping before showing main window
+            //
             resize_window_to_screen(&mut main_window_ptr, 0.8);
+            load_stylesheet(main_window_ptr);
             main_window_ptr.show();
             //
-            // setup the main menu bart
-            //
-            // no longer valid as we no longer have a docking widget
-            // let toggle_withs_action =
-            // main_menu_bar::setup(&mut main_window_ptr, &mut withpackage_ptr);
-
+            // Create the MainWindow instance, set up signals and slots, and return
+            // the newly minted instance. We are done.
             let form = MainWindow {
                 distribution_changed: SlotOfQItemSelectionQItemSelection::new(
                     move |selected: Ref<QItemSelection>, _deselected: Ref<QItemSelection>| {
                         let ind = selected.indexes();
+                        // dont need this anymore. However, this is how you go about
+                        // casting...
                         //let mut withpackage: MutPtr<QListWidget> =
                         //    withpackage_ptr.widget().dynamic_cast_mut();
                         if ind.count_0a() > 0 {
@@ -236,7 +222,9 @@ impl<'a> MainWindow<'a> {
                         .exec_1a_mut(vpin_tablewidget_ptr.map_to_global(pos).as_ref());
                 }),
                 //
-                // save clicked
+                // The save button governing versionpin distribution changes has been clicked.
+                // Gather distribution updates from the versionpin table and update the
+                // database
                 //
                 save_clicked: Slot::new(move || {
                     save_versionpin_changes(main_widget_ptr, &mut pinchanges_ptr);

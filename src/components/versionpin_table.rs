@@ -43,7 +43,7 @@ macro_rules! table_header_text_color {
 ///
 /// # Returns
 /// * `MutPtr<QTableWidget>` - a mutable pointer to the main table
-pub fn setup(vsplit_ptr: &mut MutPtr<QSplitter>) -> MutPtr<QTableWidget> {
+pub fn create(vsplit_ptr: &mut MutPtr<QSplitter>) -> MutPtr<QTableWidget> {
     unsafe {
         // create the tablewidget
         let mut vpin_tablewidget = QTableWidget::new_2a(0, HEADERS.len() as i32);
