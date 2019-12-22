@@ -1,7 +1,7 @@
 #![windows_subsystem = "windows"]
 use env_logger;
 use env_logger::Env;
-use log;
+//use log;
 use packybara::packrat::PackratDb;
 use pbgui::{main_window, ClientProxy};
 use qt_widgets::QApplication;
@@ -30,7 +30,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let client = ClientProxy::connect()?;
     let mut vpin_finder = PackratDb::new(client);
-    QApplication::init(|app| unsafe {
+    QApplication::init(|_app| unsafe {
         let mut _form = main_window::MainWindow::new(&mut vpin_finder);
         //let available_size = app.desktop().available_geometry().size();
         QApplication::exec()

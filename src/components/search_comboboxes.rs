@@ -3,11 +3,8 @@ use packybara::packrat::PackratDb;
 use qt_widgets::{
     cpp_core::MutPtr, qt_core::QString, QComboBox, QFrame, QHBoxLayout, QLabel, QPushButton,
 };
-//let icon = QIcon::from_q_string(&QString::from_std_str(
-//    ":/images/icons8-volume-level-50.png",
-//));
 
-/// Holds references to topbar's controls
+/// Holds references to the Top Navbar's controls
 pub struct ComboBoxes {
     level: MutPtr<QComboBox>,
     role: MutPtr<QComboBox>,
@@ -17,6 +14,8 @@ pub struct ComboBoxes {
 }
 
 impl ComboBoxes {
+    /// new up a ComboBoxes instance, given pointers to level, role, platform, site
+    /// and dir combo-boxes.
     pub fn new(
         level: MutPtr<QComboBox>,
         role: MutPtr<QComboBox>,
@@ -33,24 +32,30 @@ impl ComboBoxes {
         }
     }
 
+    /// Get a mutable reference to the mutable pointer to the level
+    /// combobox.
     pub fn level(&mut self) -> &mut MutPtr<QComboBox> {
-        unsafe { return &mut self.level }
+        &mut self.level
     }
-
+    /// Get a mutable reference to the mutable pointer to the role
+    /// combobox.
     pub fn role(&mut self) -> &mut MutPtr<QComboBox> {
-        unsafe { return &mut self.role }
+        &mut self.role
     }
-
+    /// Get a mutable reference to the mutable pointer to the platform
+    /// combobox.
     pub fn platform(&mut self) -> &mut MutPtr<QComboBox> {
-        unsafe { return &mut self.platform }
+        &mut self.platform
     }
-
+    /// Get a mutable reference to the mutable pointer to the site
+    /// combobox.
     pub fn site(&mut self) -> &mut MutPtr<QComboBox> {
-        unsafe { return &mut self.site }
+        &mut self.site
     }
-
+    /// Get a mutable reference to the mutable pointer to the dir
+    /// combobox.
     pub fn dir(&mut self) -> &mut MutPtr<QComboBox> {
-        unsafe { return &mut self.dir }
+        &mut self.dir
     }
 }
 
