@@ -6,19 +6,58 @@ use qt_widgets::{
 //let icon = QIcon::from_q_string(&QString::from_std_str(
 //    ":/images/icons8-volume-level-50.png",
 //));
+
+/// Holds references to topbar's controls
+pub struct ComboBoxes {
+    level: MutPtr<QComboBox>,
+    role: MutPtr<QComboBox>,
+    platform: MutPtr<QComboBox>,
+    site: MutPtr<QComboBox>,
+    dir: MutPtr<QComboBox>,
+}
+
+impl ComboBoxes {
+    pub fn new(
+        level: MutPtr<QComboBox>,
+        role: MutPtr<QComboBox>,
+        platform: MutPtr<QComboBox>,
+        site: MutPtr<QComboBox>,
+        dir: MutPtr<QComboBox>,
+    ) -> Self {
+        Self {
+            level,
+            role,
+            platform,
+            site,
+            dir,
+        }
+    }
+
+    pub fn level(&mut self) -> &mut MutPtr<QComboBox> {
+        unsafe { return &mut self.level }
+    }
+
+    pub fn role(&mut self) -> &mut MutPtr<QComboBox> {
+        unsafe { return &mut self.role }
+    }
+
+    pub fn platform(&mut self) -> &mut MutPtr<QComboBox> {
+        unsafe { return &mut self.platform }
+    }
+
+    pub fn site(&mut self) -> &mut MutPtr<QComboBox> {
+        unsafe { return &mut self.site }
+    }
+
+    pub fn dir(&mut self) -> &mut MutPtr<QComboBox> {
+        unsafe { return &mut self.dir }
+    }
+}
+
 //------------------------//
 // build the combo boxes  //
 //------------------------//
-pub fn create<'b>(
-    db: &'b mut PackratDb,
-    layout: &mut MutPtr<QHBoxLayout>,
-) -> (
-    MutPtr<QComboBox>,
-    MutPtr<QComboBox>,
-    MutPtr<QComboBox>,
-    MutPtr<QComboBox>,
-    MutPtr<QComboBox>,
-) {
+pub fn create<'b>(db: &'b mut PackratDb, layout: &mut MutPtr<QHBoxLayout>) -> ComboBoxes {
     unsafe {
         //results
         let level_cb_ptr = setup_levels_cb(db, layout);
@@ -32,7 +71,16 @@ pub fn create<'b>(
         let dir_cb_ptr = setup_directions_cb(layout);
 
         // return tuple
+        /*
         (
+            level_cb_ptr,
+            role_cb_ptr,
+            platform_cb_ptr,
+            site_cb_ptr,
+            dir_cb_ptr,
+        )
+        */
+        ComboBoxes::new(
             level_cb_ptr,
             role_cb_ptr,
             platform_cb_ptr,

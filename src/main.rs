@@ -30,8 +30,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let client = ClientProxy::connect()?;
     let mut vpin_finder = PackratDb::new(client);
-    QApplication::init(|_| unsafe {
+    QApplication::init(|app| unsafe {
         let mut _form = main_window::MainWindow::new(&mut vpin_finder);
+        //let available_size = app.desktop().available_geometry().size();
         QApplication::exec()
     });
 }

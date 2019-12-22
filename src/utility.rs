@@ -1,10 +1,10 @@
 use log;
 use qt_core::{
-    q_io_device::OpenModeFlag, QFile, QFlags, QResource, QString, QTextStream, QVariant,
+    q_io_device::OpenModeFlag, QFile, QFlags, QResource, QSize, QString, QTextStream, QVariant,
 };
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr},
-    QHBoxLayout, QMainWindow, QTableWidget, QTableWidgetItem, QVBoxLayout,
+    QDesktopWidget, QHBoxLayout, QMainWindow, QTableWidget, QTableWidgetItem, QVBoxLayout,
 };
 /// Given an input of &str or String, return a boxed QString
 pub fn qs<S: AsRef<str>>(input: S) -> CppBox<QString> {
@@ -70,6 +70,29 @@ pub fn update_row(value: RowType, table: &mut MutPtr<QTableWidget>, cnt: i32, co
 pub enum RowType<'a> {
     Str(&'a str),
     Int(i32),
+}
+
+/// Resize the window to some scale of the current screen.
+///
+/// # Arguments
+/// * `main_window`: The main window of the gui application
+/// * `scale`: A scale factor applied to the full size of the main screen in
+/// order to arrive at the requested size
+pub fn resize_window_to_screen(main_window: &mut MutPtr<QMainWindow>, scale: f32) {
+    unsafe {
+        let desktop = QDesktopWidget::new();
+        let screen_size = desktop.available_geometry();
+        let new_size = QSize::new_2a(
+            (screen_size.width() as f32 * scale) as i32,
+            (screen_size.height() as f32 * scale) as i32,
+        );
+        main_window.set_geometry_4a(
+            ((screen_size.width() - new_size.width()) as f32 / 2.0) as i32,
+            ((screen_size.height() - new_size.height()) as f32 / 2.0) as i32,
+            new_size.width(),
+            new_size.height(),
+        );
+    }
 }
 
 pub fn create_vlayout() -> CppBox<QVBoxLayout> {

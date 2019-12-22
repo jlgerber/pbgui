@@ -10,19 +10,17 @@ use crate::{
     update_changes_table::update_changes_table,
     update_versionpin_table::update_vpin_table,
     update_withpackages::update_withpackages,
-    utility::{create_hlayout, create_vlayout, load_stylesheet, qs},
+    utility::{create_hlayout, create_vlayout, load_stylesheet, qs, resize_window_to_screen},
     versionpin_table, withpackage_widget,
 };
 use log;
 use packybara::packrat::PackratDb;
 use qt_core::{
-    ContextMenuPolicy, Orientation, QItemSelection, QListOfInt, QPoint, QString, Slot, SlotOfBool,
-    SlotOfQItemSelectionQItemSelection, WidgetAttribute,
+    Orientation, QItemSelection, QListOfInt, QPoint, QString, Slot, SlotOfBool,
+    SlotOfQItemSelectionQItemSelection,
 };
-use qt_gui::QIcon;
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr, Ref},
-    q_line_edit::ActionPosition,
     QAction, QLineEdit, QMainWindow, QMenu, QMenuBar, QPushButton, QSplitter, QTableWidget,
     QVBoxLayout, QWidget, SlotOfQPoint,
 };
@@ -52,80 +50,107 @@ pub struct MainWindow<'a> {
     show_line_edit_menu: SlotOfQPoint<'a>,
     select_pin_changes: Slot<'a>,
     select_history: Slot<'a>,
-    toggle_withs: SlotOfBool<'a>,
+    _toggle_withs: SlotOfBool<'a>,
     revision_changed: SlotOfQItemSelectionQItemSelection<'a>,
     distribution_changed: SlotOfQItemSelectionQItemSelection<'a>,
 }
 
 impl<'a> MainWindow<'a> {
-    //
-    // Create Main Widget
-    //
+    /// New up the MainWindow. The MainWindow's primary job is to
+    /// ensure that needed widgets and data remain in scope for the
+    /// lifetime of the application. Other than that, it is fairly
+    /// inert. This is more than in part due to the fact that the
+    /// initialization of QT happens during new, including wiring up
+    /// of signals and slots. Thus, nothing is relying on MainWindow
+    /// methods.
+    ///
+    /// In order to avoid MainWindow becoming completely unreadable,
+    /// MainWindow::new delegates a good deal of construction to
+    /// crate::components, and the bulk of the business logic in
+    /// slot implementation to crate::slot_functions.
+    /// Even so, the main structure is a bit nested.
+    ///
+    /// ```
+    /// main_window (QMainApplication)
+    /// - main_window_bar (QMenuBar)
+    /// - main_widget (QWidget)
+    /// -- main_layout (QHBoxLayout)
+    /// --- with_splitter (QSplitter)
+    /// ---- center_widget (QWidget)
+    /// ----- center_layout (QVBoxLayourt)
+    /// ---- withpackage_ptr (MutPtr<QListWidget>)
+    /// ```
     pub fn new(mut db: &'a mut PackratDb) -> MainWindow<'a> {
         unsafe {
             let mut main_window = QMainWindow::new_0a();
-            main_window.set_base_size_2a(1200, 800);
+            let mut main_window_ptr = main_window.as_mut_ptr();
             // the qmainwindow takes ownership of the menubar,
             // even though it takes a MutPtr instead of a Cpp
             let main_menu_bar = QMenuBar::new_0a();
             main_window.set_menu_bar(main_menu_bar.into_ptr());
             //
-            // parent root_widget
+            // main_widget - central widget of teh main_window
             //
-            let mut root_widget = QWidget::new_0a();
-            let root_widget_ptr = root_widget.as_mut_ptr();
+            let mut main_widget = QWidget::new_0a();
+            let main_widget_ptr = main_widget.as_mut_ptr();
             //
-            // create root layout
+            // main_layout
             //
-            let mut root_layout = create_vlayout();
-            let mut root_layout_ptr = root_layout.as_mut_ptr();
-            root_widget.set_layout(root_layout.into_ptr());
+            let mut main_layout = create_vlayout();
+            let mut main_layout_ptr = main_layout.as_mut_ptr();
+            main_widget.set_layout(main_layout.into_ptr());
+            //
+            // Create the top toolbar which contains the search controls
+            //
+            // create the horizontal layout
+            let mut top_toolbar_hlayout = create_hlayout();
+            let mut top_toolbar_hlayout_ptr = top_toolbar_hlayout.as_mut_ptr();
+            // create the comboboxes
+            let mut combobox_ctrls =
+                search_comboboxes::create(&mut db, &mut top_toolbar_hlayout_ptr);
+            // create the package line edit
+            let (mut line_edit_ptr, mut line_edit_popup_menu, choose_line_edit_clear_action) =
+                package_lineedit::create(&mut top_toolbar_hlayout_ptr);
+            let mut line_edit_popup_menu_ptr = line_edit_popup_menu.as_mut_ptr();
+            // create query button
+            let mut button_ptr = query_button::create(&mut top_toolbar_hlayout_ptr);
+            button_ptr.set_object_name(&qs("QueryButton"));
+            // create the toolbar, passing in its layout with previosly registered
+            // widgets. The QToolBar will assume ownership
+            top_toolbar::create(&mut main_window_ptr, top_toolbar_hlayout);
             //
             // create the splitter between the center widget and the withs
             //
             let mut with_splitter = QSplitter::new();
             let mut with_splitter_ptr = with_splitter.as_mut_ptr();
             with_splitter.set_orientation(Orientation::Horizontal);
-            // add splitter into root layout
-            root_layout_ptr.add_widget(with_splitter.into_ptr());
-            // root_widget->root_layout->with_splitter->center_widget->center_layout
-            // top vertical layout
+            // add the splitter into the main layout
+            main_layout_ptr.add_widget(with_splitter.into_ptr());
+            //
+            // create the center widget
+            //
+            // The center widget is the most prominent of the of the
+            // two widgets contained in the splitter. The other -
+            // the withpackages widget -- is intended to sit off to the
+            // right and take up relatively little space, when displayed.
             let mut center_widget = QWidget::new_0a();
             center_widget.set_object_name(&qs("CenterWidget"));
             let mut center_layout = QVBoxLayout::new_0a();
             let mut center_layout_ptr = center_layout.as_mut_ptr();
             center_widget.set_layout(center_layout.into_ptr());
-            // add widget into splitter
+            // add center widget into splitter
             with_splitter_ptr.add_widget(center_widget.into_ptr());
-            main_window.set_central_widget(root_widget.into_ptr());
-            //
-            // Menubar Contents
-            //
-            // header layout
-            //create(main_window: &mut MutPtr<QMainWindow>, hlayout: CppBox<QHBoxLayout>)
-            let mut hlayout = create_hlayout();
-            let mut hlayout_ptr = hlayout.as_mut_ptr();
-            // setup comboboxes in header
-            let (level_ptr, role_ptr, platform_ptr, site_ptr, dir_ptr) =
-                search_comboboxes::create(&mut db, &mut hlayout_ptr);
-            // LINE EDIT
-            let (mut line_edit_ptr, mut line_edit_popup_menu, choose_line_edit_clear_action) =
-                package_lineedit::create(&mut hlayout_ptr);
-            let mut line_edit_popup_menu_ptr = line_edit_popup_menu.as_mut_ptr();
-            // create query button
-            let mut button_ptr = query_button::create(&mut hlayout_ptr);
-            button_ptr.set_object_name(&qs("QueryButton"));
-            //
-            // qtoolbar setup
-            //
-            top_toolbar::create(&mut main_window.as_mut_ptr(), hlayout);
+            main_window.set_central_widget(main_widget.into_ptr());
 
-            // Create Splitter between query results and action logger
+            // Create a horizontally running Splitter (the splitter divides
+            // the widget horizontally. Qt refers to this as vertical
+            // orientation. I find it confusing.)
             let mut vsplit = QSplitter::new();
             let mut vsplit_ptr = vsplit.as_mut_ptr();
             vsplit.set_orientation(Orientation::Vertical);
-            // set splitter sizing
-            // setup the main table widget
+            //
+            // create the main, versionpin table widget
+            //
             let mut vpin_tablewidget_ptr = versionpin_table::setup(&mut vsplit_ptr);
             let (
                 pinchanges_ptr,
@@ -147,9 +172,9 @@ impl<'a> MainWindow<'a> {
                 dist_popup_menu.add_action_q_string(&QString::from_std_str("Withs"));
             let mut dist_popup_menu_ptr = dist_popup_menu.as_mut_ptr();
             // set the style sheet
-            load_stylesheet(main_window.as_mut_ptr());
+            load_stylesheet(main_window_ptr);
             //
-            // Setup WithPackage
+            // create the WithPackage
             //
             //create_withpackage_widget
             let mut withpackage_ptr = withpackage_widget::create(&mut with_splitter_ptr);
@@ -166,13 +191,16 @@ impl<'a> MainWindow<'a> {
             splitter_sizes.append_int(Ref::from_raw_ref(&(300 as i32)));
             vsplit.set_sizes(&splitter_sizes);
             center_layout_ptr.add_widget(vsplit.into_ptr());
+
+            resize_window_to_screen(&mut main_window_ptr, 0.8);
             main_window.show();
             //
             // setup the main menu bart
             //
             // no longer valid as we no longer have a docking widget
             // let toggle_withs_action =
-            // main_menu_bar::setup(&mut main_window.as_mut_ptr(), &mut withpackage_ptr);
+            // main_menu_bar::setup(&mut main_window_ptr, &mut withpackage_ptr);
+
             let form = MainWindow {
                 distribution_changed: SlotOfQItemSelectionQItemSelection::new(
                     move |selected: Ref<QItemSelection>, _deselected: Ref<QItemSelection>| {
@@ -226,19 +254,19 @@ impl<'a> MainWindow<'a> {
                 // save clicked
                 //
                 save_clicked: Slot::new(move || {
-                    save_versionpin_changes(root_widget_ptr, &mut pinchanges_ptr);
+                    save_versionpin_changes(main_widget_ptr, &mut pinchanges_ptr);
                 }),
                 //
                 // Add query_button_clicked Slot
                 //
                 query_button_clicked: Slot::new(move || {
                     update_vpin_table(
-                        dir_ptr,
+                        *combobox_ctrls.dir(),
                         line_edit_ptr,
-                        level_ptr,
-                        role_ptr,
-                        platform_ptr,
-                        site_ptr,
+                        *combobox_ctrls.level(),
+                        *combobox_ctrls.role(),
+                        *combobox_ctrls.platform(),
+                        *combobox_ctrls.site(),
                         vpin_tablewidget_ptr,
                     );
                 }),
@@ -255,7 +283,7 @@ impl<'a> MainWindow<'a> {
                         current_row,
                         vpin_tablewidget_ptr,
                         dist_usage_ptr.clone(),
-                        root_widget_ptr,
+                        main_widget_ptr,
                         pinchanges_ptr,
                         dist_update_cnt_ptr.clone(),
                     );
@@ -269,7 +297,7 @@ impl<'a> MainWindow<'a> {
                     controls_ptr.set_current_index(1);
                 }),
                 // We have a problem here. i have no way of adding
-                toggle_withs: SlotOfBool::new(move |state: bool| {
+                _toggle_withs: SlotOfBool::new(move |state: bool| {
                     withpackage_ptr.set_visible(state);
                 }),
                 _db: db,
