@@ -3,7 +3,7 @@ use crate::{
     center_widget,
     choose_distribution::choose_alternative_distribution,
     constants::COL_REV_TXID,
-    package_lineedit, query_button,
+    left_toolbar, package_lineedit, query_button,
     save_versionpin_changes::save_versionpin_changes,
     search_comboboxes,
     select_history::select_history,
@@ -12,7 +12,7 @@ use crate::{
     update_versionpin_table::update_vpin_table,
     update_withpackages::update_withpackages,
     utility::{create_hlayout, create_vlayout, load_stylesheet, qs, resize_window_to_screen},
-    versionpin_table, versionpin_table_splitter, withpackage_widget,
+    versionpin_table, versionpin_table_splitter, withpackage_widget, LeftToolBarActions,
 };
 use log;
 use packybara::packrat::PackratDb;
@@ -42,6 +42,7 @@ pub struct MainWindow<'a> {
     _dist_popup_menu: CppBox<QMenu>,
     _package_popup_menu: CppBox<QMenu>,
     _dist_popup_action: MutPtr<QAction>,
+    _left_toolbar_actions: LeftToolBarActions,
     // Slots
     query_button_clicked: Slot<'a>,
     save_clicked: Slot<'a>,
@@ -105,6 +106,10 @@ impl<'a> MainWindow<'a> {
             // create the toolbar, passing in its layout with previosly registered
             // widgets. The QToolBar will assume ownership
             top_toolbar::create(&mut main_window_ptr, top_toolbar_hlayout);
+            //
+            // create left toolbar
+            //
+            let left_toolbar_actions = left_toolbar::create(&mut main_window_ptr);
             //
             // create the splitter between the center widget and the withs
             //
@@ -279,6 +284,7 @@ impl<'a> MainWindow<'a> {
                 _package_popup_menu: line_edit_popup_menu,
                 _pin_changes_button: pinchanges_button_ptr,
                 _history_button: history_button_ptr,
+                _left_toolbar_actions: left_toolbar_actions,
             };
             //
             // connect signals to slots

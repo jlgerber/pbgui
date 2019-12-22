@@ -131,7 +131,9 @@ QComboBox::down-arrow {
 QComboBox#TopCB::down-arrow {
  left: 4px;
 }
-
+QToolButton:checked {
+    background: rgb(30,30,32);
+}
 QPushButton#QueryButton {
     border: 1px solid rgb(101,101,101);
     border-radius: 20px; /*30*/ 

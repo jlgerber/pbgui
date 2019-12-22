@@ -3,7 +3,9 @@ use env_logger;
 use env_logger::Env;
 //use log;
 use packybara::packrat::PackratDb;
+use pbgui::utility::qs;
 use pbgui::{main_window, ClientProxy};
+use qt_core::QResource;
 use qt_widgets::QApplication;
 use std::env;
 use structopt::StructOpt;
@@ -31,6 +33,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = ClientProxy::connect()?;
     let mut vpin_finder = PackratDb::new(client);
     QApplication::init(|_app| unsafe {
+        let _result = QResource::register_resource_q_string(&qs("/Users/jgerber/bin/pbgui.rcc"));
         let mut _form = main_window::MainWindow::new(&mut vpin_finder);
         //let available_size = app.desktop().available_geometry().size();
         QApplication::exec()
