@@ -1,5 +1,6 @@
 use crate::{
     bottom_stacked_widget::create_bottom_stacked_widget,
+    center_widget,
     choose_distribution::choose_alternative_distribution,
     constants::COL_REV_TXID,
     package_lineedit, query_button,
@@ -16,7 +17,7 @@ use crate::{
 use log;
 use packybara::packrat::PackratDb;
 use qt_core::{
-    Orientation, QItemSelection, QListOfInt, QPoint, QString, Slot, SlotOfBool,
+    Orientation, QItemSelection, QPoint, QString, Slot, SlotOfBool,
     SlotOfQItemSelectionQItemSelection,
 };
 use qt_widgets::{
@@ -115,18 +116,11 @@ impl<'a> MainWindow<'a> {
             //
             // create the center widget
             //
-            // The center widget is the most prominent of the of the
-            // two widgets contained in the splitter. The other -
-            // the withpackages widget -- is intended to sit off to the
-            // right and take up relatively little space, when displayed.
-            let mut center_widget = QWidget::new_0a();
-            center_widget.set_object_name(&qs("CenterWidget"));
-            let mut center_layout = QVBoxLayout::new_0a();
-            let mut center_layout_ptr = center_layout.as_mut_ptr();
-            center_widget.set_layout(center_layout.into_ptr());
-            // add center widget into splitter
-            with_splitter_ptr.add_widget(center_widget.into_ptr());
-            // create the splitter
+            let mut center_layout_ptr = center_widget::create(&mut with_splitter_ptr);
+            //
+            // Versionpin Table
+            //
+            // create the versionpin table splitter
             let mut vpin_table_splitter = versionpin_table_splitter::create(&mut center_layout_ptr);
             // create the versionpin table
             let mut vpin_tablewidget_ptr = versionpin_table::create(&mut vpin_table_splitter);

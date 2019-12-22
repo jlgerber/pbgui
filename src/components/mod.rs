@@ -7,6 +7,7 @@ pub use top::package_lineedit;
 pub use top::query_button;
 pub use top::search_comboboxes;
 pub use top::toolbar as top_toolbar;
+pub mod center_widget;
 pub mod revisions_table;
 pub mod table_headers;
 pub mod versionpin_changes_table;
