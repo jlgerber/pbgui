@@ -11,9 +11,10 @@
     <file>images/computer2.png</file>
     <file>images/wheel_us.png</file>
     <file>images/spyglass_us.png</file>
-    <file>images/anchor.png</file>
+    <file>images/anchor_us.png</file>
     <file>images/sailboat.png</file>
     <file>images/tea_madleine.png</file>
     <file>images/box.png</file>
+
 </qresource>
 </RCC>
