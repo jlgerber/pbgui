@@ -21,12 +21,17 @@ pub fn create(center_layout_ptr: &mut MutPtr<QVBoxLayout>) -> MutPtr<QSplitter> 
         let mut vsplit = QSplitter::new();
         let vsplit_ptr = vsplit.as_mut_ptr();
         vsplit.set_orientation(Orientation::Vertical);
-        // set up splitter sizing
-        let mut splitter_sizes = QListOfInt::new();
-        splitter_sizes.append_int(Ref::from_raw_ref(&(500 as i32)));
-        splitter_sizes.append_int(Ref::from_raw_ref(&(300 as i32)));
-        vsplit.set_sizes(&splitter_sizes);
         center_layout_ptr.add_widget(vsplit.into_ptr());
         vsplit_ptr
+    }
+}
+
+/// Set the sizes of the splitter
+pub fn set_sizes(splitter: &mut MutPtr<QSplitter>) {
+    unsafe {
+        let mut splitter_sizes = QListOfInt::new();
+        splitter_sizes.append_int(Ref::from_raw_ref(&(1000 as i32)));
+        splitter_sizes.append_int(Ref::from_raw_ref(&(500 as i32)));
+        splitter.set_sizes(&splitter_sizes);
     }
 }

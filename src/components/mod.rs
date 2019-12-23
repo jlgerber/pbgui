@@ -15,3 +15,4 @@ pub mod versionpin_changes_table;
 pub mod versionpin_table;
 pub mod versionpin_table_splitter;
 pub mod withpackage_widget;
+pub mod withs_splitter;

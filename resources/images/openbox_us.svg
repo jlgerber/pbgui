@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="59px" height="40px" viewBox="0 0 59 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg width="58px" height="40px" viewBox="0 0 58 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
     <!-- Generator: Sketch 61 (89581) - https://sketch.com -->
     <title>openbox_us</title>
     <desc>Created with Sketch.</desc>
     <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="12.9″-iPad-Pro" transform="translate(-585.000000, -1053.000000)" stroke="#979797">
+        <g id="12.9″-iPad-Pro" transform="translate(-586.000000, -1053.000000)">
             <g id="openbox_us" transform="translate(586.000000, 1054.000000)">
-                <path d="M26.754,6.999 L27,7.04792579 L27,38 L4.00015895,23.5209543 L4,11.745 L23.2106069,19.4747292 L26.754,6.999 Z" id="Combined-Shape"></path>
-                <path d="M28,9.769 L31.1329809,19.2852147 L53,12.801 L53,25.7570922 L28,38 L28,9.769 Z M53,3 L53,3.086 L43.509,4.416 L53,3 Z" id="Combined-Shape"></path>
-                <polygon id="Path-30" points="7 1.82987578 27.533071 6 51 2.57918049 29 0"></polygon>
-                <polygon id="Path-31" fill="#979797" points="4.00015895 2.13671875 0 9.56869949 23.2275681 19 27 6"></polygon>
-                <polygon id="Path-32" points="27 6.66593579 31.1620561 19 57 11.5251395 53.7992153 3"></polygon>
-                <polygon id="Path-33" fill="#979797" points="29 0 29 6 47 3"></polygon>
-                <polygon id="Path-34" fill="#979797" points="27 9 25.1487004 26.7427744 4 16.6724176 4 23.3313293 27 38"></polygon>
+                <path d="M26.754,6.999 L27,7.04792579 L27,38 L4.00015895,23.5209543 L4,11.745 L23.2106069,19.4747292 L26.754,6.999 Z" id="Combined-Shape" stroke="#979797"></path>
+                <path d="M28,9.769 L31.1329809,19.2852147 L53,12.801 L53,25.7570922 L28,38 L28,9.769 Z M53,3 L53,3.086 L43.509,4.416 L53,3 Z" id="Combined-Shape" stroke="#4D4D4D"></path>
+                <polygon id="Path-30" stroke="#979797" points="7.54931641 2.30615234 27.5187988 6.21154785 50.3548584 3 29 0"></polygon>
+                <polygon id="Path-31" fill="#616161" points="4.00015895 2.13671875 0 9.56869949 23.2275681 19 27 6"></polygon>
+                <polygon id="Path-32" stroke="#616161" points="27 6.66593579 31.1620561 19 57 11.5251395 53.7992153 3"></polygon>
+                <polygon id="Path-33" fill="#616161" points="29 0 29 6 47 3"></polygon>
+                <polygon id="Path-34" fill="#616161" points="27 9 25.1487004 26.7427744 4 16.6724176 4 23.3313293 27 38"></polygon>
             </g>
         </g>
     </g>

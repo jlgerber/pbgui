@@ -12,7 +12,8 @@ use crate::{
     update_versionpin_table::update_vpin_table,
     update_withpackages::update_withpackages,
     utility::{create_hlayout, create_vlayout, load_stylesheet, qs, resize_window_to_screen},
-    versionpin_table, versionpin_table_splitter, withpackage_widget, LeftToolBarActions,
+    versionpin_table, versionpin_table_splitter, withpackage_widget, withs_splitter,
+    LeftToolBarActions,
 };
 use log;
 use packybara::packrat::PackratDb;
@@ -113,11 +114,13 @@ impl<'a> MainWindow<'a> {
             //
             // create the splitter between the center widget and the withs
             //
-            let mut with_splitter = QSplitter::new();
-            let mut with_splitter_ptr = with_splitter.as_mut_ptr();
-            with_splitter.set_orientation(Orientation::Horizontal);
-            // add the splitter into the main layout
-            main_layout_ptr.add_widget(with_splitter.into_ptr());
+            let mut with_splitter_ptr = withs_splitter::create(&mut main_layout_ptr);
+            // let mut with_splitter = QSplitter::new();
+            // let mut with_splitter_ptr = with_splitter.as_mut_ptr();
+            // with_splitter.set_orientation(Orientation::Horizontal);
+            // // add the splitter into the main layout
+            // main_layout_ptr.add_widget(with_splitter.into_ptr());
+
             //
             // create the center widget
             //
@@ -163,6 +166,8 @@ impl<'a> MainWindow<'a> {
             //
             // final housekeeping before showing main window
             //
+            versionpin_table_splitter::set_sizes(&mut vpin_table_splitter);
+            withs_splitter::set_sizes(&mut with_splitter_ptr);
             resize_window_to_screen(&mut main_window_ptr, 0.8);
             load_stylesheet(main_window_ptr);
             main_window_ptr.show();

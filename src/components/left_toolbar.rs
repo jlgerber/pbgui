@@ -1,9 +1,13 @@
 use crate::utility::qs;
-use qt_core::ToolBarArea;
-use qt_gui::QIcon;
+use log;
+use qt_core::{QSize, ToolBarArea};
+use qt_gui::{
+    q_icon::{Mode, State},
+    QIcon,
+};
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr},
-    QAction, QActionGroup, QMainWindow, QToolBar,
+    QAction, QActionGroup, QMainWindow, QToolBar, QToolButton,
 };
 
 pub struct LeftToolBarActions {
@@ -71,7 +75,15 @@ pub fn create(main_window: &mut MutPtr<QMainWindow>) -> LeftToolBarActions {
         let bottom_mode_action_group_ptr = bottom_mode_action_group.as_mut_ptr();
 
         //shows
-        let search_shows_icon = QIcon::from_q_string(&qs(":/images/wheel_us.png"));
+        let mut search_shows_icon = QIcon::new(); //from_q_string(&qs(":/images/wheel_us.png"));
+        let size = QSize::new_0a();
+        search_shows_icon.add_file_4a(&qs(":/images/wheel.png"), &size, Mode::Normal, State::On);
+        search_shows_icon.add_file_4a(
+            &qs(":/images/wheel_us.png"),
+            &size,
+            Mode::Normal,
+            State::Off,
+        );
         let mut search_shows_action = QAction::from_q_icon_q_string_q_object(
             &search_shows_icon,
             &qs("Shows"),
@@ -82,7 +94,20 @@ pub fn create(main_window: &mut MutPtr<QMainWindow>) -> LeftToolBarActions {
         left_toolbar.add_action(search_shows_action.as_mut_ptr());
 
         //properties
-        let search_properties_icon = QIcon::from_q_string(&qs(":/images/spyglass_us.png"));
+        let mut search_properties_icon = QIcon::new(); //from_q_string(&qs(":/images/spyglass_us.png"));
+        let size = QSize::new_0a();
+        search_properties_icon.add_file_4a(
+            &qs(":/images/spyglass_us.png"),
+            &size,
+            Mode::Normal,
+            State::Off,
+        );
+        search_properties_icon.add_file_4a(
+            &qs(":/images/spyglass.png"),
+            &size,
+            Mode::Normal,
+            State::On,
+        );
         let mut search_properties_action = QAction::from_q_icon_q_string_q_object(
             &search_properties_icon,
             &qs("Props"),
@@ -93,18 +118,28 @@ pub fn create(main_window: &mut MutPtr<QMainWindow>) -> LeftToolBarActions {
         left_toolbar.add_action(search_properties_action.as_mut_ptr());
 
         //packages
-        let view_packages_icon = QIcon::from_q_string(&qs(":/images/openbox_us.png"));
+        let mut view_packages_icon = QIcon::new(); //from_q_string(&qs(":/images/openbox_us.png"));
+        view_packages_icon.add_file_4a(
+            &qs(":/images/openbox_us.png"),
+            &size,
+            Mode::Normal,
+            State::Off,
+        );
+        view_packages_icon.add_file_4a(&qs(":/images/openbox.png"), &size, Mode::Normal, State::On);
         let mut view_packages_action = QAction::from_q_icon_q_string(
             //_q_object(
             &view_packages_icon,
             &qs("Packages"),
             //mode_action_group_ptr,
         );
+
         view_packages_action.set_tool_tip(&qs("Display / Hide Withs List"));
         view_packages_action.set_checkable(true);
         left_toolbar.add_action(view_packages_action.as_mut_ptr());
         //withs
-        let view_withs_icon = QIcon::from_q_string(&qs(":/images/box_us.png"));
+        let mut view_withs_icon = QIcon::new(); //from_q_string(&qs(":/images/box_us.png"));
+        view_withs_icon.add_file_4a(&qs(":/images/box_us.png"), &size, Mode::Normal, State::Off);
+        view_withs_icon.add_file_4a(&qs(":/images/box.png"), &size, Mode::Normal, State::On);
         let mut view_withs_action = QAction::from_q_icon_q_string(
             //_q_object(
             &view_withs_icon,
@@ -116,7 +151,14 @@ pub fn create(main_window: &mut MutPtr<QMainWindow>) -> LeftToolBarActions {
         left_toolbar.add_action(view_withs_action.as_mut_ptr());
 
         //change pins
-        let change_pins_icon = QIcon::from_q_string(&qs(":/images/anchor_us.png"));
+        let mut change_pins_icon = QIcon::new(); //from_q_string(&qs(":/images/anchor_us.png"));
+        change_pins_icon.add_file_4a(
+            &qs(":/images/anchor_us.png"),
+            &size,
+            Mode::Normal,
+            State::Off,
+        );
+        change_pins_icon.add_file_4a(&qs(":/images/anchor.png"), &size, Mode::Normal, State::On);
         let mut change_pins_action = QAction::from_q_icon_q_string_q_object(
             &change_pins_icon,
             &qs("ChangeVpins"),
@@ -127,7 +169,19 @@ pub fn create(main_window: &mut MutPtr<QMainWindow>) -> LeftToolBarActions {
         left_toolbar.add_action(change_pins_action.as_mut_ptr());
 
         //revisiions pins
-        let view_revisions_icon = QIcon::from_q_string(&qs(":/images/tea_madleine_us.png"));
+        let mut view_revisions_icon = QIcon::new(); //from_q_string(&qs(":/images/tea_madleine_us.png"));
+        view_revisions_icon.add_file_4a(
+            &qs(":/images/tea_madleine_us.png"),
+            &size,
+            Mode::Normal,
+            State::Off,
+        );
+        view_revisions_icon.add_file_4a(
+            &qs(":/images/tea_madleine.png"),
+            &size,
+            Mode::Normal,
+            State::On,
+        );
         let mut view_revisions_action = QAction::from_q_icon_q_string_q_object(
             &view_revisions_icon,
             &qs("ViewRevision"),
