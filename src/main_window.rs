@@ -42,7 +42,7 @@ pub struct MainWindow<'a> {
     _dist_popup_menu: CppBox<QMenu>,
     _package_popup_menu: CppBox<QMenu>,
     _dist_popup_action: MutPtr<QAction>,
-    left_toolbar_actions: LeftToolBarActions,
+    _left_toolbar_actions: LeftToolBarActions,
     // Slots
     query_button_clicked: Slot<'a>,
     save_clicked: Slot<'a>,
@@ -299,7 +299,7 @@ impl<'a> MainWindow<'a> {
                 _package_popup_menu: line_edit_popup_menu,
                 _pin_changes_button: pinchanges_button_ptr,
                 _history_button: history_button_ptr,
-                left_toolbar_actions: left_toolbar_actions,
+                _left_toolbar_actions: left_toolbar_actions,
             };
             //
             // connect signals to slots
