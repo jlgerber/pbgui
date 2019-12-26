@@ -1,6 +1,7 @@
 use crate::constants::*;
 use crate::utility::{update_row, RowType};
 use crate::ClientProxy;
+use log;
 use packybara::packrat::PackratDb;
 use qt_widgets::{cpp_core::MutPtr, QTableWidget};
 
@@ -15,7 +16,7 @@ pub fn update_changes_table(
         let client = match ClientProxy::connect() {
             Ok(c) => c,
             Err(e) => {
-                println!("Problem getting proxy client to db {}", e);
+                log::error!("Problem getting proxy client to db {}", e);
                 return;
             }
         };

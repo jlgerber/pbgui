@@ -67,7 +67,6 @@ pub fn save_versionpin_changes(
             pinchanges_ptr.set_row_count(0);
             let mut mb = QMessageBox::new();
             // re-execute query
-            println!("calling query button clicked");
             query_button_ptr.click();
             mb.set_text(&qs("Success"));
             mb.exec();
@@ -77,7 +76,6 @@ pub fn save_versionpin_changes(
             let mut mb = QMessageBox::new();
             mb.set_text(&qs("Error Occured"));
             mb.set_detailed_text(&qs(format!("{:#?}", results)));
-            //println!("{:#?}", results);
             mb.exec();
         }
     }
