@@ -5,12 +5,12 @@ authors = ["jgerber <jlgerber@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-packybara = {git= "https://github.com/jlgerber/packybara", tag="v0.24.0"}
-qt_core = "0.4.0"
-qt_gui = "0.4.0"
-qt_widgets = "0.4.0"
-qt_ui_tools = "0.4.0"
-whoami = "0.6.0"
+packybara = {git= "https://github.com/jlgerber/packybara", tag="v0.25.0"}
+qt_core = "0.4.1"
+qt_gui = "0.4.1"
+qt_widgets = "0.4.1"
+qt_ui_tools = "0.4.1"
+whoami = "0.7.0"
 log = "0.4.8"
 env_logger = "0.7.1"
 structopt = "0.3.5"

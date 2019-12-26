@@ -18,13 +18,12 @@ use crate::{
 use log;
 use packybara::packrat::PackratDb;
 use qt_core::{
-    Orientation, QItemSelection, QPoint, QString, Slot, SlotOfBool,
-    SlotOfQItemSelectionQItemSelection,
+    QItemSelection, QPoint, QString, Slot, SlotOfBool, SlotOfQItemSelectionQItemSelection,
 };
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr, Ref},
-    QAction, QLineEdit, QMainWindow, QMenu, QMenuBar, QPushButton, QSplitter, QTableWidget,
-    QVBoxLayout, QWidget, SlotOfQPoint,
+    QAction, QLineEdit, QMainWindow, QMenu, QMenuBar, QPushButton, QTableWidget, QVBoxLayout,
+    QWidget, SlotOfQPoint,
 };
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
@@ -43,7 +42,7 @@ pub struct MainWindow<'a> {
     _dist_popup_menu: CppBox<QMenu>,
     _package_popup_menu: CppBox<QMenu>,
     _dist_popup_action: MutPtr<QAction>,
-    _left_toolbar_actions: LeftToolBarActions,
+    left_toolbar_actions: LeftToolBarActions,
     // Slots
     query_button_clicked: Slot<'a>,
     save_clicked: Slot<'a>,
@@ -54,6 +53,7 @@ pub struct MainWindow<'a> {
     select_pin_changes: Slot<'a>,
     select_history: Slot<'a>,
     _toggle_withs: SlotOfBool<'a>,
+    _toggle_vpin_changes: SlotOfBool<'a>,
     revision_changed: SlotOfQItemSelectionQItemSelection<'a>,
     distribution_changed: SlotOfQItemSelectionQItemSelection<'a>,
 }
@@ -111,6 +111,9 @@ impl<'a> MainWindow<'a> {
             // create left toolbar
             //
             let left_toolbar_actions = left_toolbar::create(&mut main_window_ptr);
+            let view_withs = left_toolbar_actions.view_withs;
+            let view_pin_changes = left_toolbar_actions.view_vpin_changes;
+            let search_shows = left_toolbar_actions.search_shows;
             //
             // create the splitter between the center widget and the withs
             //
@@ -244,6 +247,7 @@ impl<'a> MainWindow<'a> {
                         *combobox_ctrls.role(),
                         *combobox_ctrls.platform(),
                         *combobox_ctrls.site(),
+                        &search_shows,
                         vpin_tablewidget_ptr,
                     );
                 }),
@@ -275,7 +279,13 @@ impl<'a> MainWindow<'a> {
                 }),
                 // We have a problem here. i have no way of adding
                 _toggle_withs: SlotOfBool::new(move |state: bool| {
-                    withpackage_ptr.set_visible(state);
+                    let mut frame = with_splitter_ptr.widget(1);
+                    frame.set_visible(state);
+                    //withpackage_ptr.set_visible(state);
+                }),
+                _toggle_vpin_changes: SlotOfBool::new(move |state: bool| {
+                    let mut frame = vpin_table_splitter.widget(1);
+                    frame.set_visible(state);
                 }),
                 _db: db,
                 _main: main_window,
@@ -289,7 +299,7 @@ impl<'a> MainWindow<'a> {
                 _package_popup_menu: line_edit_popup_menu,
                 _pin_changes_button: pinchanges_button_ptr,
                 _history_button: history_button_ptr,
-                _left_toolbar_actions: left_toolbar_actions,
+                left_toolbar_actions: left_toolbar_actions,
             };
             //
             // connect signals to slots
@@ -322,6 +332,10 @@ impl<'a> MainWindow<'a> {
                 .selection_model()
                 .selection_changed()
                 .connect(&form.distribution_changed);
+            view_withs.toggled().connect(&form._toggle_withs);
+            view_pin_changes
+                .toggled()
+                .connect(&form._toggle_vpin_changes);
             form
         }
     }

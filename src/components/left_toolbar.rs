@@ -1,5 +1,4 @@
 use crate::utility::qs;
-use log;
 use qt_core::{QSize, ToolBarArea};
 use qt_gui::{
     q_icon::{Mode, State},
@@ -7,7 +6,7 @@ use qt_gui::{
 };
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr},
-    QAction, QActionGroup, QMainWindow, QToolBar, QToolButton,
+    QAction, QActionGroup, QMainWindow, QToolBar,
 };
 
 pub struct LeftToolBarActions {
@@ -25,6 +24,8 @@ pub struct LeftToolBarActions {
     _view_packages_icon: CppBox<QIcon>,
     pub view_withs: MutPtr<QAction>,
     _view_withs_icon: CppBox<QIcon>,
+    pub view_vpin_changes: MutPtr<QAction>,
+    _view_vpin_changes_icon: CppBox<QIcon>,
 }
 
 impl LeftToolBarActions {
@@ -43,6 +44,8 @@ impl LeftToolBarActions {
         view_packages_icon: CppBox<QIcon>,
         view_withs: CppBox<QAction>,
         view_withs_icon: CppBox<QIcon>,
+        view_vpin_changes: CppBox<QAction>,
+        view_vpin_changes_icon: CppBox<QIcon>,
     ) -> Self {
         unsafe {
             Self {
@@ -60,6 +63,8 @@ impl LeftToolBarActions {
                 _view_packages_icon: view_packages_icon,
                 view_withs: view_withs.into_ptr(),
                 _view_withs_icon: view_withs_icon,
+                view_vpin_changes: view_vpin_changes.into_ptr(),
+                _view_vpin_changes_icon: view_vpin_changes_icon,
             }
         }
     }
@@ -68,7 +73,7 @@ impl LeftToolBarActions {
 /// Create the left toolbar and return the resulting actions
 pub fn create(main_window: &mut MutPtr<QMainWindow>) -> LeftToolBarActions {
     unsafe {
-        let mut left_toolbar = QToolBar::new();
+        let mut left_toolbar = QToolBar::from_q_string(&qs("Left Toolbar"));
         let mut mode_action_group = QActionGroup::new(left_toolbar.as_mut_ptr());
         let mode_action_group_ptr = mode_action_group.as_mut_ptr();
         let mut bottom_mode_action_group = QActionGroup::new(left_toolbar.as_mut_ptr());
@@ -91,6 +96,7 @@ pub fn create(main_window: &mut MutPtr<QMainWindow>) -> LeftToolBarActions {
         );
         search_shows_action.set_tool_tip(&qs("Set the search mode to be show-centric"));
         search_shows_action.set_checkable(true);
+        search_shows_action.set_checked(true);
         left_toolbar.add_action(search_shows_action.as_mut_ptr());
 
         //properties
@@ -115,6 +121,7 @@ pub fn create(main_window: &mut MutPtr<QMainWindow>) -> LeftToolBarActions {
         );
         search_properties_action.set_tool_tip(&qs("Set the search mode to be property-centric"));
         search_properties_action.set_checkable(true);
+        //search_properties_action.set_checked(true);
         left_toolbar.add_action(search_properties_action.as_mut_ptr());
 
         //packages
@@ -136,6 +143,7 @@ pub fn create(main_window: &mut MutPtr<QMainWindow>) -> LeftToolBarActions {
         view_packages_action.set_tool_tip(&qs("Display / Hide Withs List"));
         view_packages_action.set_checkable(true);
         left_toolbar.add_action(view_packages_action.as_mut_ptr());
+
         //withs
         let mut view_withs_icon = QIcon::new(); //from_q_string(&qs(":/images/box_us.png"));
         view_withs_icon.add_file_4a(&qs(":/images/box_us.png"), &size, Mode::Normal, State::Off);
@@ -148,10 +156,26 @@ pub fn create(main_window: &mut MutPtr<QMainWindow>) -> LeftToolBarActions {
         );
         view_withs_action.set_tool_tip(&qs("Display / Hide Withs List"));
         view_withs_action.set_checkable(true);
+        view_withs_action.set_checked(true);
         left_toolbar.add_action(view_withs_action.as_mut_ptr());
+        //view_vpin_changes
+        let mut view_vpin_changes_icon = QIcon::new();
+        view_vpin_changes_icon.add_file_4a(
+            &qs(":/images/pin_us.png"),
+            &size,
+            Mode::Normal,
+            State::Off,
+        );
+        view_vpin_changes_icon.add_file_4a(&qs(":/images/pin.png"), &size, Mode::Normal, State::On);
+        let mut view_vpin_changes_action =
+            QAction::from_q_icon_q_string(&view_vpin_changes_icon, &qs("VpinChanges"));
+        view_vpin_changes_action.set_tool_tip(&qs("Display / Hide Withs List"));
+        view_vpin_changes_action.set_checkable(true);
+        view_vpin_changes_action.set_checked(true);
+        left_toolbar.add_action(view_vpin_changes_action.as_mut_ptr());
 
         //change pins
-        let mut change_pins_icon = QIcon::new(); //from_q_string(&qs(":/images/anchor_us.png"));
+        let mut change_pins_icon = QIcon::new();
         change_pins_icon.add_file_4a(
             &qs(":/images/anchor_us.png"),
             &size,
@@ -210,6 +234,8 @@ pub fn create(main_window: &mut MutPtr<QMainWindow>) -> LeftToolBarActions {
             view_packages_icon,
             view_withs_action,
             view_withs_icon,
+            view_vpin_changes_action,
+            view_vpin_changes_icon,
         )
     }
 }

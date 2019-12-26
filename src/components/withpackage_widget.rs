@@ -24,7 +24,6 @@ pub fn create(splitter: &mut MutPtr<QSplitter>) -> MutPtr<QListWidget> {
         let mut layout = create_vlayout();
         layout.add_widget(withpackage_listwidget.into_ptr());
         frame_ptr.set_layout(layout.into_ptr());
-
         withpackage_listwidget_ptr
     }
 }
