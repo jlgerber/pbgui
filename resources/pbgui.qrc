@@ -21,6 +21,8 @@
     <file>images/anchor.png</file>
     <file>images/tea_madleine_us.png</file>
     <file>images/tea_madleine.png</file>
+    <file>images/pin_us.png</file>
+    <file>images/pin.png</file>
     <file>images/sailboat.png</file>
 </qresource>
 </RCC>
