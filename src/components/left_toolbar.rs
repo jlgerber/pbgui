@@ -74,6 +74,7 @@ impl LeftToolBarActions {
 pub fn create(main_window: &mut MutPtr<QMainWindow>) -> LeftToolBarActions {
     unsafe {
         let mut left_toolbar = QToolBar::from_q_string(&qs("Left Toolbar"));
+        left_toolbar.set_object_name(&qs("LeftToolBar"));
         let mut mode_action_group = QActionGroup::new(left_toolbar.as_mut_ptr());
         let mode_action_group_ptr = mode_action_group.as_mut_ptr();
         let mut bottom_mode_action_group = QActionGroup::new(left_toolbar.as_mut_ptr());

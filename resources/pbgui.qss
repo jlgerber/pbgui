@@ -145,9 +145,11 @@ QComboBox::down-arrow {
 QComboBox#TopCB::down-arrow {
  left: 4px;
 }
-QToolBar {
-    /* border: none; */
+QToolBar#LeftToolBar {
+    border: none; 
     spacing: 20px;
+    padding-right: 10px;
+    padding-left: 10px;
 }
 
 QToolButton {
