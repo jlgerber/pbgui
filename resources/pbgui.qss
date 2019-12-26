@@ -66,9 +66,11 @@ QWidget#HistoryWidget {
     /* border: 1px solid red; */
 }
 QLineEdit {
-    border-radius: 8px;
+    border-radius: 14px;
     padding-left: 8px;
     padding-right: 8px;
+    padding-top: 4px;
+    padding-bottom: 4px;
     border: 1px solid rgb(80,80,80);
     margin-left:10px;
     margin-right:10px;
