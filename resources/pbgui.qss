@@ -24,7 +24,21 @@ QWidget#HistoryWidget {
     margin: 0px;
 }
 
-
+#VersionPinTable {
+    /* ligth color */
+    alternate-background-color:rgb(35,35,35);
+    /*dark color */
+    background-color:rgb(30,30,30);      
+    color:rgb(200,200,200);        
+}
+#VersionPinTableHeader {
+    background-color:rgb(80,80,80);   
+    color: white;   
+    border: none; 
+    outline:none; 
+    border-left: 0px; 
+    border-right: 0px;
+}
 #StackWidgetButton {
     color:grey;
     background: rgba(255,255,255,0);
