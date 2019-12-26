@@ -4,7 +4,8 @@ use packybara::packrat::PackratDb;
 use packybara::LtreeSearchMode;
 use qt_core::QVariant;
 use qt_widgets::{
-    cpp_core::MutPtr, qt_core::QString, QComboBox, QLineEdit, QTableWidget, QTableWidgetItem,
+    cpp_core::MutPtr, qt_core::QString, QAction, QComboBox, QLineEdit, QTableWidget,
+    QTableWidgetItem,
 };
 use std::str::FromStr;
 //-----------------------------------------------//
@@ -16,12 +17,15 @@ use std::str::FromStr;
 // and updating the table                        //
 //-----------------------------------------------//
 pub fn update_vpin_table(
+    // direction
     dir_ptr: MutPtr<QComboBox>,
+    // package
     line_edit_ptr: MutPtr<QLineEdit>,
     level_ptr: MutPtr<QComboBox>,
     role_ptr: MutPtr<QComboBox>,
     platform_ptr: MutPtr<QComboBox>,
     site_ptr: MutPtr<QComboBox>,
+    search_shows: &MutPtr<QAction>,
     mut vpin_tablewidget_ptr: MutPtr<QTableWidget>,
 ) {
     // will do better
@@ -39,6 +43,7 @@ pub fn update_vpin_table(
 
         vpin_finder
             .level(showtxt.as_str())
+            .isolate_facility(search_shows.is_checked())
             .role(roletxt.as_str())
             .platform(platformtxt.as_str())
             .site(sitetxt.as_str())
