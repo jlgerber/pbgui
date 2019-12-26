@@ -289,7 +289,7 @@ impl<'a> MainWindow<'a> {
                 //
                 choose_distribution_triggered: Slot::new(move || {
                     if vpin_tablewidget_ptr.is_null() {
-                        println!("Error: attempted to access null pointer in choose_distribution_tribbered");
+                        log::error!("Error: attempted to access null pointer in choose_distribution_tribbered");
                         return;
                     }
                     if vpin_tablewidget_ptr.row_count() == 0 {
