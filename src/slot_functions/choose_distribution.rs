@@ -35,6 +35,19 @@ pub fn choose_alternative_distribution(
     update_cnt_ptr: Rc<Cell<i32>>,
 ) {
     unsafe {
+        // check all ptrs
+        if vpin_tablewidget_ptr.is_null() {
+            log::error!("vpin_tablewidget_ptr is null");
+            return;
+        }
+        if root_widget_ptr.is_null() {
+            log::error!("root_widget_ptr is null");
+            return;
+        }
+        if pinchanges_ptr.is_null() {
+            log::error!("pinchanges_ptr is null. returning");
+            return;
+        }
         let mut dist_item = vpin_tablewidget_ptr.item(r, COL_DISTRIBUTION);
         let mut orig_qstr = dist_item.text();
         let orig_text = orig_qstr.to_std_string();
@@ -125,7 +138,16 @@ pub fn choose_alternative_distribution(
                         return;
                     }
                 };
+                if pinchanges_ptr.is_null() {
+                    log::error!("pinchanges_ptr is now null");
+                    return;
+                }
+
                 let mut item = pinchanges_ptr.item(*row, COL_PC_DISPLAY);
+                if item.is_null() {
+                    log::error!("problem retreiving row from pinchanges_ptr using cached row number. item is null");
+                    return;
+                }
                 item.set_text(&orig_qstr);
             } else {
                 let row_cnt = pinchanges_ptr.row_count() + 1;
