@@ -18,12 +18,29 @@ use crate::{
 use log;
 use packybara::packrat::PackratDb;
 use qt_core::{
-    QItemSelection, QPoint, QString, Slot, SlotOfBool, SlotOfQItemSelectionQItemSelection,
+    QItemSelection,
+    //QListOfQModelIndex,
+    QPoint,
+    QString,
+    Slot,
+    SlotOfBool,
+    //SlotOfInt,
+    SlotOfQItemSelectionQItemSelection,
 };
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr, Ref},
-    QAction, QLineEdit, QMainWindow, QMenu, QMenuBar, QPushButton, QTableWidget, QVBoxLayout,
-    QWidget, SlotOfQPoint,
+    QAction,
+    QLineEdit,
+    //QListWidgetItem,
+    QMainWindow,
+    QMenu,
+    QMenuBar,
+    QPushButton,
+    QTableWidget,
+    QVBoxLayout,
+    QWidget,
+    //SlotOfQListOfQModelIndex,
+    SlotOfQPoint,
 };
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
@@ -56,6 +73,7 @@ pub struct MainWindow<'a> {
     _toggle_vpin_changes: SlotOfBool<'a>,
     revision_changed: SlotOfQItemSelectionQItemSelection<'a>,
     distribution_changed: SlotOfQItemSelectionQItemSelection<'a>,
+    //withpackage_moved: SlotOfQListOfQModelIndex<'a>,
 }
 
 impl<'a> MainWindow<'a> {
@@ -158,7 +176,9 @@ impl<'a> MainWindow<'a> {
             // create the WithPackage
             //
             let mut withpackage_ptr = withpackage_widget::create(&mut with_splitter_ptr);
-            // prepare data for slot closures
+            //
+            // persist data
+            //
             let usage = Rc::new(RefCell::new(HashMap::<i32, i32>::new()));
             let usage_ptr = Rc::clone(&usage);
             let update_cnt = Rc::new(Cell::new(0));
@@ -178,6 +198,12 @@ impl<'a> MainWindow<'a> {
             // Create the MainWindow instance, set up signals and slots, and return
             // the newly minted instance. We are done.
             let form = MainWindow {
+                // problem with signal signature in library being incompatible with slot. wait for a fix.
+                // withpackage_moved: SlotOfQListOfQModelIndex::new(
+                //     |item: Ref<QListOfQModelIndex>| {
+                //         println!("item moved");
+                //     },
+                // ),
                 distribution_changed: SlotOfQItemSelectionQItemSelection::new(
                     move |selected: Ref<QItemSelection>, _deselected: Ref<QItemSelection>| {
                         let ind = selected.indexes();
@@ -234,10 +260,13 @@ impl<'a> MainWindow<'a> {
                 // database
                 //
                 save_clicked: Slot::new(move || {
+                    let changes_usage_cache = dist_usage_ptr.clone();
                     save_versionpin_changes(
                         main_widget_ptr,
                         &mut pinchanges_ptr,
                         &mut query_button_ptr,
+                        update_cnt_ptr.clone(),
+                        changes_usage_cache,
                     );
                 }),
                 //
@@ -259,6 +288,10 @@ impl<'a> MainWindow<'a> {
                 // choose_distribution_triggered slot.
                 //
                 choose_distribution_triggered: Slot::new(move || {
+                    if vpin_tablewidget_ptr.is_null() {
+                        println!("Error: attempted to access null pointer in choose_distribution_tribbered");
+                        return;
+                    }
                     if vpin_tablewidget_ptr.row_count() == 0 {
                         return;
                     }
@@ -267,7 +300,8 @@ impl<'a> MainWindow<'a> {
                     choose_alternative_distribution(
                         current_row,
                         vpin_tablewidget_ptr,
-                        dist_usage_ptr.clone(),
+                        //dist_usage_ptr.clone(),
+                        usage_ptr.clone(),
                         main_widget_ptr,
                         pinchanges_ptr,
                         dist_update_cnt_ptr.clone(),
@@ -342,16 +376,14 @@ impl<'a> MainWindow<'a> {
             view_pin_changes
                 .toggled()
                 .connect(&form._toggle_vpin_changes);
+            // signal and slot incompatible. waiting for fix
+            // withpackage_ptr
+            //     .indexes_moved()
+            //     .connect(&form.withpackage_moved);
             form
         }
     }
 }
-/*
-let slot = SlotOfBool::new(move |on: bool| {
-            println!("toggled");
-        });
-        withs_action.toggled().connect(&slot);
-*/
 
 // create the main window, the main menubar, and the central widget
 fn create_main_window() -> (CppBox<QMainWindow>, MutPtr<QWidget>, MutPtr<QVBoxLayout>) {
