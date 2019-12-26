@@ -102,8 +102,8 @@ impl<'a> MainWindow<'a> {
                 package_lineedit::create(&mut top_toolbar_hlayout_ptr);
             let mut line_edit_popup_menu_ptr = line_edit_popup_menu.as_mut_ptr();
             // create query button
-            let mut button_ptr = query_button::create(&mut top_toolbar_hlayout_ptr);
-            button_ptr.set_object_name(&qs("QueryButton"));
+            let mut query_button_ptr = query_button::create(&mut top_toolbar_hlayout_ptr);
+            query_button_ptr.set_object_name(&qs("QueryButton"));
             // create the toolbar, passing in its layout with previosly registered
             // widgets. The QToolBar will assume ownership
             top_toolbar::create(&mut main_window_ptr, top_toolbar_hlayout);
@@ -234,7 +234,11 @@ impl<'a> MainWindow<'a> {
                 // database
                 //
                 save_clicked: Slot::new(move || {
-                    save_versionpin_changes(main_widget_ptr, &mut pinchanges_ptr);
+                    save_versionpin_changes(
+                        main_widget_ptr,
+                        &mut pinchanges_ptr,
+                        &mut query_button_ptr,
+                    );
                 }),
                 //
                 // Add query_button_clicked Slot
@@ -290,7 +294,7 @@ impl<'a> MainWindow<'a> {
                 _db: db,
                 _main: main_window,
                 _vpin_table: vpin_tablewidget_ptr,
-                _query_button: button_ptr,
+                _query_button: query_button_ptr,
                 _save_button: save_button,
                 _pkg_line_edit: line_edit_ptr,
                 _pinchanges_list: pinchanges_ptr,
@@ -309,7 +313,9 @@ impl<'a> MainWindow<'a> {
                 .clicked()
                 .connect(&form.select_pin_changes);
             history_button_ptr.clicked().connect(&form.select_history);
-            button_ptr.clicked().connect(&form.query_button_clicked);
+            query_button_ptr
+                .clicked()
+                .connect(&form.query_button_clicked);
             save_button.clicked().connect(&form.save_clicked);
             vpin_tablewidget_ptr
                 .custom_context_menu_requested()

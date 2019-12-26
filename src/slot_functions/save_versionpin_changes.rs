@@ -4,12 +4,13 @@ use crate::ClientProxy;
 use log;
 use packybara::db::update::versionpins::VersionPinChange;
 use packybara::packrat::PackratDb;
-use qt_widgets::{cpp_core::MutPtr, QInputDialog, QMessageBox, QTableWidget, QWidget};
+use qt_widgets::{cpp_core::MutPtr, QInputDialog, QMessageBox, QPushButton, QTableWidget, QWidget};
 use whoami;
 
 pub fn save_versionpin_changes(
     root_widget_ptr: MutPtr<QWidget>,
     pinchanges_ptr: &mut MutPtr<QTableWidget>,
+    query_button_ptr: &mut MutPtr<QPushButton>,
 ) {
     let client = ClientProxy::connect().expect("unable to connect via ClientProxy");
     unsafe {
@@ -55,8 +56,12 @@ pub fn save_versionpin_changes(
             pinchanges_ptr.clear();
             pinchanges_ptr.set_row_count(0);
             let mut mb = QMessageBox::new();
+            // re-execute query
+            println!("calling query button clicked");
+            query_button_ptr.click();
             mb.set_text(&qs("Success"));
             mb.exec();
+
         //todo - reset color of query
         } else {
             let mut mb = QMessageBox::new();
