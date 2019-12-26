@@ -1,6 +1,6 @@
 use crate::utility::{create_vlayout, qs};
+use qt_widgets::q_abstract_item_view::DragDropMode;
 use qt_widgets::{cpp_core::MutPtr, QFrame, QListWidget, QSplitter};
-
 /// create and return the withpackage list widget, given the parent splitter.
 ///
 /// # Arguments
@@ -13,6 +13,8 @@ pub fn create(splitter: &mut MutPtr<QSplitter>) -> MutPtr<QListWidget> {
         // create the inner withpackage
         let mut withpackage_listwidget = QListWidget::new_0a();
         withpackage_listwidget.set_object_name(&qs("WithsListWidget"));
+        withpackage_listwidget.set_drag_enabled(true);
+        withpackage_listwidget.set_drag_drop_mode(DragDropMode::InternalMove);
         // create a pointer to it
         let withpackage_listwidget_ptr = withpackage_listwidget.as_mut_ptr();
         // create an outer frame widget
