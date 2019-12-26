@@ -251,6 +251,7 @@ unsafe fn setup_directions_cb<'b>(layout: &mut MutPtr<QHBoxLayout>) -> MutPtr<QC
     for r in &["ancestor", "exact", "descendant"] {
         dir_combobox.add_item_q_string(&QString::from_std_str(r));
     }
+    dir_combobox.set_current_index(2);
     let mut grpbox = QFrame::new_0a();
     grpbox.set_object_name(&qs("ComboWidget"));
     let label = QLabel::from_q_string(&qs("Direction"));
