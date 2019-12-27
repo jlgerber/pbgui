@@ -45,6 +45,43 @@ use qt_widgets::{
 };
 use std::rc::Rc;
 
+// makes it simpler to deal with the need to clone. Saw this here:
+// https://github.com/rust-webplatform/rust-todomvc/blob/master/src/main.rs#L142
+macro_rules! enclose {
+    ( ($(  $x:ident ),*) $y:expr ) => {
+        {
+            $(let $x = $x.clone();)*
+            $y
+        }
+    };
+}
+
+#[allow(unused_macros)]
+macro_rules! enclose_mut {
+    ( ($( mut $x:ident ),*) $y:expr ) => {
+        {
+            $(let mut $x = $x.clone();)*
+            $y
+        }
+    };
+}
+
+/// clone both immutable and mutable vars. Useful for
+/// qt, which has a lot more mutable
+/// use like so:
+/// ```ignore
+/// Slot::,new(enclose_all!{ (foo, bar) (mut bla) move || {}}),
+/// ```
+macro_rules! enclose_all {
+    ( ($(  $x:ident ),*) ($( mut $mx:ident ),*) $y:expr ) => {
+        {
+            $(let $x = $x.clone();)*
+            $(let mut $mx = $mx.clone();)*
+            $y
+        }
+    };
+}
+
 pub struct MainWindow<'a> {
     _db: &'a mut PackratDb,
     _main: CppBox<QMainWindow>,
@@ -137,12 +174,6 @@ impl<'a> MainWindow<'a> {
             // create the splitter between the center widget and the withs
             //
             let mut with_splitter_ptr = withs_splitter::create(&mut main_layout_ptr);
-            // let mut with_splitter = QSplitter::new();
-            // let mut with_splitter_ptr = with_splitter.as_mut_ptr();
-            // with_splitter.set_orientation(Orientation::Horizontal);
-            // // add the splitter into the main layout
-            // main_layout_ptr.add_widget(with_splitter.into_ptr());
-
             //
             // create the center widget
             //
@@ -155,7 +186,7 @@ impl<'a> MainWindow<'a> {
             // create the versionpin table
             let mut vpin_tablewidget_ptr = versionpin_table::create(&mut vpin_table_splitter);
             let (
-                pinchanges_ptr,
+                mut pinchanges_ptr,
                 mut revisions_ptr,
                 mut changes_table_ptr,
                 save_button,
@@ -181,8 +212,6 @@ impl<'a> MainWindow<'a> {
             // persist data
             //
             let pinchange_cache = Rc::new(PinChangesCache::new());
-            let pinchange_cache_ptr = pinchange_cache.clone();
-            let mut pinchanges_ptr = pinchanges_ptr.clone();
             //
             // final housekeeping before showing main window
             //
@@ -195,7 +224,6 @@ impl<'a> MainWindow<'a> {
             let withpackage_edit = withpackage_ptr.edit.clone();
             let withpackage_list = withpackage_ptr.list.clone();
             let versionpin_table = vpin_tablewidget_ptr.clone();
-            let changes_table = pinchanges_ptr.clone();
             //
             // Create the MainWindow instance, set up signals and slots, and return
             // the newly minted instance. We are done.
@@ -206,19 +234,17 @@ impl<'a> MainWindow<'a> {
                 //         println!("item moved");
                 //     },
                 // ),
-                save_withpackages: Slot::new(move || {
-                    store_withpackage_changes::store_withpackage_changes(
-                        /*
-                         withpackage_list: MutPtr<QListWidget>,
-                            versionpin_list: MutPtr<QTableWidget>,
-                        changes_list: MutPtr<QTableWidget>,
-                        */
-                        withpackage_list,
-                        versionpin_table,
-                        changes_table,
-                    );
-                    println!("save");
-                }),
+                save_withpackages: Slot::new(
+                    enclose_all! { (pinchange_cache) (mut pinchanges_ptr) move || {
+                        store_withpackage_changes::store_withpackage_changes(
+                            withpackage_list,
+                            versionpin_table,
+                            &mut pinchanges_ptr,//changes_table,
+                            pinchange_cache.clone(),
+                        );
+                        println!("save");
+                    }},
+                ),
                 edit_withpackages: Slot::new(move || {
                     println!("edit");
                 }),
@@ -277,15 +303,14 @@ impl<'a> MainWindow<'a> {
                 // Gather distribution updates from the versionpin table and update the
                 // database
                 //
-                save_clicked: Slot::new(move || {
-                    let pinchange_cache = pinchange_cache_ptr.clone();
+                save_clicked: Slot::new(enclose! { (pinchange_cache) move || {
                     save_versionpin_changes(
                         main_widget_ptr,
                         &mut pinchanges_ptr,
                         &mut query_button_ptr,
-                        pinchange_cache,
+                        pinchange_cache.clone(),
                     );
-                }),
+                } }),
                 //
                 // Add query_button_clicked Slot
                 //
@@ -304,7 +329,7 @@ impl<'a> MainWindow<'a> {
                 //
                 // choose_distribution_triggered slot.
                 //
-                choose_distribution_triggered: Slot::new(move || {
+                choose_distribution_triggered: Slot::new(enclose! { (pinchange_cache) move || {
                     if vpin_tablewidget_ptr.is_null() {
                         log::error!("Error: attempted to access null pointer in choose_distribution_tribbered");
                         return;
@@ -313,7 +338,7 @@ impl<'a> MainWindow<'a> {
                         return;
                     }
                     let current_row = vpin_tablewidget_ptr.current_row();
-
+                    //let pinchange_cache = pinchange_cache.clone();
                     choose_alternative_distribution(
                         current_row,
                         vpin_tablewidget_ptr,
@@ -321,7 +346,7 @@ impl<'a> MainWindow<'a> {
                         pinchanges_ptr,
                         pinchange_cache.clone(),
                     );
-                }),
+                }}),
                 select_pin_changes: Slot::new(move || {
                     stacked_ptr.set_current_index(0);
                     controls_ptr.set_current_index(0);
