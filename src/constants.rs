@@ -19,12 +19,14 @@ pub const HEADERS: &[(i32, &'static str, bool)] = &[
     (COL_PKGCOORD_ID, "PkdCoord Id", true),
 ];
 
-pub const COL_PC_VPINID: i32 = 0;
-pub const COL_PC_DISTID: i32 = 1;
-pub const COL_PC_PKGCOORDID: i32 = 2;
-pub const COL_PC_DISPLAY: i32 = 3;
+pub const COL_PC_CHANGETYPE: i32 = 0;
+pub const COL_PC_VPINID: i32 = 1;
+pub const COL_PC_DISTID: i32 = 2;
+pub const COL_PC_PKGCOORDID: i32 = 3;
+pub const COL_PC_DISPLAY: i32 = 4;
 
 pub const PC_HEADERS: &[(i32, &'static str, bool)] = &[
+    (COL_PC_CHANGETYPE, "ChangeType", true),
     (COL_PC_VPINID, "Vpinid", true),
     (COL_PC_DISTID, "Distid", true),
     (COL_PC_PKGCOORDID, "Pkgcoordid", true),
