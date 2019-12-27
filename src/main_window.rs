@@ -8,7 +8,7 @@ use crate::{
     save_versionpin_changes::save_versionpin_changes,
     search_comboboxes,
     select_history::select_history,
-    top_toolbar,
+    store_withpackage_changes, top_toolbar,
     update_changes_table::update_changes_table,
     update_versionpin_table::update_vpin_table,
     update_withpackages::update_withpackages,
@@ -73,6 +73,8 @@ pub struct MainWindow<'a> {
     revision_changed: SlotOfQItemSelectionQItemSelection<'a>,
     distribution_changed: SlotOfQItemSelectionQItemSelection<'a>,
     //withpackage_moved: SlotOfQListOfQModelIndex<'a>,
+    edit_withpackages: Slot<'a>,
+    save_withpackages: Slot<'a>,
 }
 
 impl<'a> MainWindow<'a> {
@@ -189,6 +191,11 @@ impl<'a> MainWindow<'a> {
             resize_window_to_screen(&mut main_window_ptr, 0.8);
             load_stylesheet(main_window_ptr);
             main_window_ptr.show();
+            let withpackage_save = withpackage_ptr.save.clone();
+            let withpackage_edit = withpackage_ptr.edit.clone();
+            let withpackage_list = withpackage_ptr.list.clone();
+            let versionpin_table = vpin_tablewidget_ptr.clone();
+            let changes_table = pinchanges_ptr.clone();
             //
             // Create the MainWindow instance, set up signals and slots, and return
             // the newly minted instance. We are done.
@@ -199,22 +206,38 @@ impl<'a> MainWindow<'a> {
                 //         println!("item moved");
                 //     },
                 // ),
+                save_withpackages: Slot::new(move || {
+                    store_withpackage_changes::store_withpackage_changes(
+                        /*
+                         withpackage_list: MutPtr<QListWidget>,
+                            versionpin_list: MutPtr<QTableWidget>,
+                        changes_list: MutPtr<QTableWidget>,
+                        */
+                        withpackage_list,
+                        versionpin_table,
+                        changes_table,
+                    );
+                    println!("save");
+                }),
+                edit_withpackages: Slot::new(move || {
+                    println!("edit");
+                }),
                 distribution_changed: SlotOfQItemSelectionQItemSelection::new(
                     move |selected: Ref<QItemSelection>, _deselected: Ref<QItemSelection>| {
                         let ind = selected.indexes();
                         // dont need this anymore. However, this is how you go about
                         // casting...
                         //let mut withpackage: MutPtr<QListWidget> =
-                        //    withpackage_ptr.widget().dynamic_cast_mut();
+                        //    withpackage_ptr.list.widget().dynamic_cast_mut();
                         if ind.count_0a() > 0 {
                             let txid = ind.at(COL_REV_TXID);
                             update_withpackages(
                                 txid.row(),
                                 &mut vpin_tablewidget_ptr,
-                                &mut withpackage_ptr,
+                                &mut withpackage_ptr.list,
                             );
                         } else {
-                            withpackage_ptr.clear();
+                            withpackage_ptr.list.clear();
                         }
                     },
                 ),
@@ -372,6 +395,12 @@ impl<'a> MainWindow<'a> {
             // withpackage_ptr
             //     .indexes_moved()
             //     .connect(&form.withpackage_moved);
+            withpackage_edit
+                .triggered()
+                .connect(&form.edit_withpackages);
+            withpackage_save
+                .triggered()
+                .connect(&form.save_withpackages);
             form
         }
     }
