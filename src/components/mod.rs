@@ -12,6 +12,7 @@ pub mod left_toolbar;
 pub mod revisions_table;
 pub mod table_headers;
 pub mod versionpin_changes_table;
+pub mod versionpin_row;
 pub mod versionpin_table;
 pub mod versionpin_table_splitter;
 pub mod withpackage_widget;

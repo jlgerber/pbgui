@@ -10,8 +10,8 @@ pub use components::left_toolbar::LeftToolBarActions;
 pub use components::{
     bottom_stacked_widget, center_widget, left_toolbar, main_menu_bar, package_lineedit,
     query_button, revisions_table, search_comboboxes, table_headers, top_toolbar,
-    versionpin_changes_table, versionpin_table, versionpin_table_splitter, withpackage_widget,
-    withs_splitter,
+    versionpin_changes_table, versionpin_row, versionpin_table, versionpin_table_splitter,
+    withpackage_widget, withs_splitter,
 };
 pub use slot_functions::{
     choose_distribution, save_versionpin_changes, select_history, store_withpackage_changes,
