@@ -1,14 +1,14 @@
 use crate::constants::*;
 
 use crate::cache::PinChangesCache;
-use crate::change_type::{ChangeType, FromQString, ToQString};
+use crate::change_type::ChangeType;
 pub use crate::ClientProxy;
 use log;
 use packybara::packrat::PackratDb;
 use qt_core::QVariant;
 use qt_gui::{QBrush, QColor};
 use qt_widgets::{
-    cpp_core::{CppBox, MutPtr, MutRef, Ref /*Ptr,*/},
+    cpp_core::{CppBox, MutPtr, Ref /*Ptr,*/},
     qt_core::QString,
     qt_core::QStringList,
     QInputDialog, QTableWidget, QTableWidgetItem, QWidget,
