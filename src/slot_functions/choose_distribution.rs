@@ -1,14 +1,14 @@
 use crate::constants::*;
 
 use crate::cache::PinChangesCache;
+use crate::change_type::{ChangeType, FromQString, ToQString};
 pub use crate::ClientProxy;
-
 use log;
 use packybara::packrat::PackratDb;
 use qt_core::QVariant;
 use qt_gui::{QBrush, QColor};
 use qt_widgets::{
-    cpp_core::{CppBox, MutPtr /*Ptr,*/},
+    cpp_core::{CppBox, MutPtr, MutRef, Ref /*Ptr,*/},
     qt_core::QString,
     qt_core::QStringList,
     QInputDialog, QTableWidget, QTableWidgetItem, QWidget,
@@ -129,8 +129,8 @@ pub fn choose_alternative_distribution(
                 pkgcoord_id
             )));
 
-            if pinchange_cache.has_key(dist_id) {
-                let row = match pinchange_cache.index(dist_id) {
+            if pinchange_cache.has_key(pkgcoord_id) {
+                let row = match pinchange_cache.index(pkgcoord_id) {
                     Some(r) => r,
                     None => {
                         log::error!("ERROR: Problem retrieving row from QT");
@@ -151,42 +151,74 @@ pub fn choose_alternative_distribution(
             } else {
                 let row_cnt = pinchanges_ptr.row_count() + 1;
                 pinchanges_ptr.set_row_count(row_cnt);
-                // VPIN ID
-                let mut pinchanges_item = QTableWidgetItem::new();
-                let variant = QVariant::from_int(vpin_id);
-                pinchanges_item.set_data(
-                    2, // EditRole
-                    variant.as_ref(),
-                );
-                pinchanges_ptr.set_item(row_cnt - 1, COL_PC_VPINID, pinchanges_item.into_ptr());
-                // DIST ID
-                let mut pinchanges_item = QTableWidgetItem::new();
-                let variant = QVariant::from_int(*new_dist_id);
-                pinchanges_item.set_data(
-                    2, // EditRole
-                    variant.as_ref(),
-                );
-                pinchanges_ptr.set_item(row_cnt - 1, COL_PC_DISTID, pinchanges_item.into_ptr());
-                // PKGCOORD ID
-                let mut pinchanges_item = QTableWidgetItem::new();
-                let variant = QVariant::from_int(pkgcoord_id);
-                pinchanges_item.set_data(
-                    2, // EditRole
-                    variant.as_ref(),
-                );
-                pinchanges_ptr.set_item(row_cnt - 1, COL_PC_PKGCOORDID, pinchanges_item.into_ptr());
-                // DISPLAY
-                let pinchanges_item = QTableWidgetItem::from_q_string(&orig_qstr);
-                pinchanges_ptr.set_item(row_cnt - 1, COL_PC_DISPLAY, pinchanges_item.into_ptr());
 
+                set_pinchange(
+                    &mut pinchanges_ptr,
+                    row_cnt,
+                    ChangeType::Distribution,
+                    vpin_id,
+                    *new_dist_id,
+                    pkgcoord_id,
+                    orig_qstr.as_ref(),
+                );
                 let update_color = qcolor_blue!();
                 dist_item.set_foreground(&QBrush::from_q_color(update_color.as_ref()));
                 dist_item.table_widget().clear_selection();
                 let idx = pinchange_cache.row_count();
-                pinchange_cache.cache_dist(dist_id, idx);
+                pinchange_cache.cache_dist(pkgcoord_id, idx);
                 pinchange_cache.increment_rowcount();
             }
         }
+    }
+}
+
+// insert a row into teh pinchanges table
+fn set_pinchange(
+    pinchanges_table: &mut MutPtr<QTableWidget>,
+    row_cnt: i32,
+    changetype: ChangeType,
+    vpin_id: i32,
+    dist_id: i32,
+    pkgcoord_id: i32,
+    display: Ref<QString>,
+) {
+    unsafe {
+        // CHANGETYPE
+        let mut pinchanges_item = QTableWidgetItem::new();
+        let dist_idx: i32 = changetype.into();
+        let variant = QVariant::from_int(dist_idx);
+        pinchanges_item.set_data(
+            2, // EditRole
+            variant.as_ref(),
+        );
+        pinchanges_table.set_item(row_cnt - 1, COL_PC_CHANGETYPE, pinchanges_item.into_ptr());
+        // VPIN ID
+        let mut pinchanges_item = QTableWidgetItem::new();
+        let variant = QVariant::from_int(vpin_id);
+        pinchanges_item.set_data(
+            2, // EditRole
+            variant.as_ref(),
+        );
+        pinchanges_table.set_item(row_cnt - 1, COL_PC_VPINID, pinchanges_item.into_ptr());
+        // DIST ID
+        let mut pinchanges_item = QTableWidgetItem::new();
+        let variant = QVariant::from_int(dist_id);
+        pinchanges_item.set_data(
+            2, // EditRole
+            variant.as_ref(),
+        );
+        pinchanges_table.set_item(row_cnt - 1, COL_PC_DISTID, pinchanges_item.into_ptr());
+        // PKGCOORD ID
+        let mut pinchanges_item = QTableWidgetItem::new();
+        let variant = QVariant::from_int(pkgcoord_id);
+        pinchanges_item.set_data(
+            2, // EditRole
+            variant.as_ref(),
+        );
+        pinchanges_table.set_item(row_cnt - 1, COL_PC_PKGCOORDID, pinchanges_item.into_ptr());
+        // DISPLAY
+        let pinchanges_item = QTableWidgetItem::from_q_string(display);
+        pinchanges_table.set_item(row_cnt - 1, COL_PC_DISPLAY, pinchanges_item.into_ptr());
     }
 }
 

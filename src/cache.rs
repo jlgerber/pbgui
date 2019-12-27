@@ -9,7 +9,8 @@ pub struct PinChangesCache {
     /// The number of rows in the changes ui widget
     row_count: Cell<i32>,
     /// a cache of distribution id => changes ui cache
-    dist_index: RefCell<HashMap<i32, i32>>,
+    pkgcoord_index: RefCell<HashMap<i32, i32>>,
+    with_updates: RefCell<HashMap<i32, Vec<String>>>,
 }
 
 impl PinChangesCache {
@@ -24,14 +25,16 @@ impl PinChangesCache {
     pub fn new() -> Self {
         Self {
             row_count: Cell::new(0),
-            dist_index: RefCell::new(HashMap::new()),
+            pkgcoord_index: RefCell::new(HashMap::new()),
+            with_updates: RefCell::new(HashMap::new()),
         }
     }
     /// Reset the instance to its initial value, with the row_count at `0`
-    /// and the dist_index empty
+    /// and the pkgcoord_index empty
     pub fn reset(&self) {
         self.row_count.set(0);
-        self.dist_index.borrow_mut().clear();
+        self.pkgcoord_index.borrow_mut().clear();
+        self.with_updates.borrow_mut().clear();
     }
 
     /// Return the number of rows in the ui
@@ -51,13 +54,13 @@ impl PinChangesCache {
     /// Retreive the index in the cache for the provided distribution id.
     ///
     /// # Arguments
-    /// * `dist_id` The distribution's id
+    /// * `pkgcoord_id` The distribution's id
     ///
     /// # Returns
     /// * A Some(index) if exant
     /// * Otherwise None
-    pub fn index(&self, dist_id: i32) -> Option<i32> {
-        match self.dist_index.borrow().get(&dist_id) {
+    pub fn index(&self, pkgcoord_id: i32) -> Option<i32> {
+        match self.pkgcoord_index.borrow().get(&pkgcoord_id) {
             None => None,
             Some(v) => Some(*v),
         }
@@ -65,20 +68,74 @@ impl PinChangesCache {
     /// Inserts a distribution's id and index into the cache
     ///
     /// # Argument
-    /// * `dist_id` - The distribution's id
+    /// * `pkgcoord_id` - The distribution's package coordinate id
     /// * `dist_idx - THe distribution's index in the ui element
-    pub fn cache_dist(&self, dist_id: i32, dist_idx: i32) {
-        self.dist_index.borrow_mut().insert(dist_id, dist_idx);
+    pub fn cache_dist(&self, pkgcoord_id: i32, dist_idx: i32) {
+        self.pkgcoord_index
+            .borrow_mut()
+            .insert(pkgcoord_id, dist_idx);
     }
     /// Test to see if the cache has the distribution id
     ///
     /// # arguments
-    /// * `dist_id` - The distribution id to test
+    /// * `pkgcoord_id` - The distribution's package coordinate id to test
     ///
     /// # Returns
-    /// * true if dist_id in cache.
-    /// * false if dist_id is not in cache
-    pub fn has_key(&self, dist_id: i32) -> bool {
-        self.dist_index.borrow().contains_key(&dist_id)
+    /// * true if pkgcoord_id in cache.
+    /// * false if pkgcoord_id is not in cache
+    pub fn has_key(&self, pkgcoord_id: i32) -> bool {
+        self.pkgcoord_index.borrow().contains_key(&pkgcoord_id)
+    }
+
+    /// Check to see if the cache has withs for a particular distribution, given its id
+    ///
+    /// # Arguments
+    /// * `pkgcoord_id` The distribution's package coordinate id of interest
+    ///
+    /// # Returns
+    /// * bool - Indicating the presence or absence of withs for a given distribution
+    pub fn has_withs(&self, pkgcoord_id: i32) -> bool {
+        self.with_updates.borrow().contains_key(&pkgcoord_id)
+    }
+    /// Set the withs for
+    ///
+    /// # Arguments
+    /// * `pkgcoord_id` - The pkgcoord id for which we are recording withs
+    /// * `withs` - a vector of with name strings
+    pub fn set_withs_for(&self, pkgcoord_id: i32, withs: Vec<String>) {
+        self.with_updates.borrow_mut().insert(pkgcoord_id, withs);
+    }
+    /// Return the withs as either a Some wrapped vec of &str or None
+    ///
+    /// # Arguments
+    /// * `pkgcoord_id` - The pkgcoord id we wish to lookup withs for
+    ///
+    /// # Returns
+    /// * If pkgcoord_id is extant, a vector of package names wrapped in a Some
+    /// * if non-extant, None
+    pub fn withs(&self, pkgcoord_id: i32) -> Option<Vec<String>> {
+        match self.with_updates.borrow().get(&pkgcoord_id) {
+            None => None,
+            Some(vals) => {
+                let vals_ref = vals.iter().map(|x| x.clone()).collect::<Vec<String>>();
+                Some(vals_ref)
+            }
+        }
+    }
+    /// return a comma separated list of withs converted to a string
+    ///
+    /// # Arguments
+    /// * `pkgcoord_id`: The pkgcoord id whose withs we want
+    ///
+    /// # Returns
+    /// * If pkgcoord_id is extant, a Some wrapped string
+    /// * If pkgcoord_id is non-extant, None
+    //TODO: figure out if there is a way of returning a non-owned vec of
+    // &strs so we dont have to allocate
+    pub fn withs_string(&self, pkgcoord_id: i32) -> Option<String> {
+        match self.with_updates.borrow().get(&pkgcoord_id) {
+            None => None,
+            Some(vals) => Some(vals.join(",")),
+        }
     }
 }
