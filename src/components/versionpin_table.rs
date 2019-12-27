@@ -1,11 +1,9 @@
 use crate::constants::*;
 use crate::table_headers;
 use crate::utility::qs;
-use packybara::types::IdType;
-
-use qt_core::{QFlags, QString};
+use qt_core::QFlags;
 use qt_widgets::{
-    cpp_core::{CppBox, MutPtr},
+    cpp_core::MutPtr,
     q_abstract_item_view::{EditTrigger, SelectionBehavior, SelectionMode},
     q_header_view::ResizeMode,
     qt_core::ContextMenuPolicy,
@@ -51,86 +49,5 @@ pub fn create(vsplit_ptr: &mut MutPtr<QSplitter>) -> MutPtr<QTableWidget> {
             .horizontal_header()
             .set_section_resize_mode_2a(COL_WITHS, ResizeMode::ResizeToContents);
         tablewidget_ptr
-    }
-}
-
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub struct VersionPinRow {
-    pub id: IdType,
-    pub dist_id: IdType,
-    pub pkgcoord_id: IdType,
-    pub distribtution: String,
-    pub level: String,
-    pub role: String,
-    pub platform: String,
-    pub site: String,
-    pub withs: i32,
-}
-
-impl VersionPinRow {
-    pub fn new(
-        id: IdType,
-        dist_id: IdType,
-        pkgcoord_id: IdType,
-        distribution: CppBox<QString>,
-        level: CppBox<QString>,
-        role: CppBox<QString>,
-        platform: CppBox<QString>,
-        site: CppBox<QString>,
-        withs: i32,
-    ) -> Self {
-        Self {
-            id,
-            dist_id,
-            pkgcoord_id,
-            distribtution: distribution.to_std_string(),
-            level: level.to_std_string(),
-            role: role.to_std_string(),
-            platform: platform.to_std_string(),
-            site: site.to_std_string(),
-            withs,
-        }
-    }
-    /// Given a reference to the versionpin table, and a row number. return the row
-    pub fn from_table_at_row(
-        versionpin_table: &MutPtr<QTableWidget>,
-        row: i32,
-    ) -> Option<VersionPinRow> {
-        unsafe {
-            if row < 0 || versionpin_table.row_count() <= row {
-                log::warn!(
-                    "row requested out of bounds: row count:{} requested:{}",
-                    versionpin_table.row_count(),
-                    row
-                );
-                return None;
-            }
-            let vpin_id = versionpin_table.item(row, COL_ID).data(2).to_int_0a();
-            let dist_id = versionpin_table
-                .item(row, COL_DISTRIBUTION_ID)
-                .data(2)
-                .to_int_0a();
-            let pkgcoord_id = versionpin_table
-                .item(row, COL_PKGCOORD_ID)
-                .data(2)
-                .to_int_0a();
-            let distribtution = versionpin_table.item(row, COL_DISTRIBUTION).text();
-            let level = versionpin_table.item(row, COL_LEVEL).text();
-            let role = versionpin_table.item(row, COL_ROLE).text();
-            let platform = versionpin_table.item(row, COL_PLATFORM).text();
-            let site = versionpin_table.item(row, COL_SITE).text();
-            let withs = versionpin_table.item(row, COL_WITHS).data(2).to_int_0a();
-            Some(VersionPinRow::new(
-                vpin_id,
-                dist_id,
-                pkgcoord_id,
-                distribtution,
-                level,
-                role,
-                platform,
-                site,
-                withs,
-            ))
-        }
     }
 }
