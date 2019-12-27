@@ -1,21 +1,15 @@
-use crate::constants::*;
+use crate::versionpin_row::VersionPinRowSetterTrait;
 use crate::ClientProxy;
 use packybara::packrat::PackratDb;
 use packybara::LtreeSearchMode;
-use qt_core::QVariant;
-use qt_widgets::{
-    cpp_core::MutPtr, qt_core::QString, QAction, QComboBox, QLineEdit, QTableWidget,
-    QTableWidgetItem,
-};
+use qt_widgets::{cpp_core::MutPtr, QAction, QComboBox, QLineEdit, QTableWidget};
 use std::str::FromStr;
-//-----------------------------------------------//
-//            update_vpin_table                  //
-//-----------------------------------------------//
-// update the main versionpin table by gathering //
-// the user's requested query parameters from    //
-// the comboboxes up top, querying the database, //
-// and updating the table                        //
-//-----------------------------------------------//
+
+/// update the main versionpin table by gathering the user's requested query parameters from    
+/// the comboboxes up top, querying the database, and updating the table.alloc
+///
+/// # Arguments
+///                         
 pub fn update_vpin_table(
     // direction
     dir_ptr: MutPtr<QComboBox>,
@@ -68,78 +62,14 @@ pub fn update_vpin_table(
                     continue;
                 }
             }
-            let mut vpin_table_widget_item = QTableWidgetItem::new();
-            let variant = QVariant::from_int(result.versionpin_id);
-            vpin_table_widget_item.set_data(
-                2, // EditRole
-                variant.as_ref(),
-            );
-            vpin_tablewidget_ptr.set_item(cnt, COL_ID, vpin_table_widget_item.into_ptr());
-            // DISTRIBUTION
-            let mut vpin_table_widget_item = QTableWidgetItem::new();
-            vpin_table_widget_item.set_text(&QString::from_std_str(
-                result.distribution.to_string().as_str(),
-            ));
-            vpin_tablewidget_ptr.set_item(cnt, COL_DISTRIBUTION, vpin_table_widget_item.into_ptr());
-            // LEVEL
-            let mut vpin_table_widget_item = QTableWidgetItem::new();
-            vpin_table_widget_item.set_text(&QString::from_std_str(
-                result.coords.level.to_string().as_str(),
-            ));
-            vpin_tablewidget_ptr.set_item(cnt, COL_LEVEL, vpin_table_widget_item.into_ptr());
-            // ROLE
-            let mut vpin_table_widget_item = QTableWidgetItem::new();
-            vpin_table_widget_item.set_text(&QString::from_std_str(
-                result.coords.role.to_string().as_str(),
-            ));
-            vpin_tablewidget_ptr.set_item(cnt, COL_ROLE, vpin_table_widget_item.into_ptr());
-            // PLATFORM
-            let mut vpin_table_widget_item = QTableWidgetItem::new();
-            vpin_table_widget_item.set_text(&QString::from_std_str(
-                result.coords.platform.to_string().as_str(),
-            ));
-            vpin_tablewidget_ptr.set_item(cnt, COL_PLATFORM, vpin_table_widget_item.into_ptr());
-            // SITE
-            let mut vpin_table_widget_item = QTableWidgetItem::new();
-            vpin_table_widget_item.set_text(&QString::from_std_str(
-                result.coords.site.to_string().as_str(),
-            ));
-            vpin_tablewidget_ptr.set_item(cnt, COL_SITE, vpin_table_widget_item.into_ptr());
-            // WITHS
-            let mut vpin_table_widget_item = QTableWidgetItem::new();
-            let variant = QVariant::from_int(result.withs.unwrap_or(vec![]).len() as i32);
-            vpin_table_widget_item.set_data(
-                2, // EditRole
-                variant.as_ref(),
-            );
-            vpin_tablewidget_ptr.set_item(cnt, COL_WITHS, vpin_table_widget_item.into_ptr());
-            // Coord Id
-            let mut vpin_table_widget_item = QTableWidgetItem::new();
-            let variant = QVariant::from_int(result.distribution_id);
-            vpin_table_widget_item.set_data(
-                2, // EditRole
-                variant.as_ref(),
-            );
-            vpin_tablewidget_ptr.set_item(
-                cnt,
-                COL_DISTRIBUTION_ID,
-                vpin_table_widget_item.into_ptr(),
-            );
-            vpin_tablewidget_ptr.set_column_hidden(COL_DISTRIBUTION_ID, true);
-            // Coord Id
-            let mut vpin_table_widget_item = QTableWidgetItem::new();
-            let variant = QVariant::from_int(result.pkgcoord_id);
-            vpin_table_widget_item.set_data(
-                2, // EditRole
-                variant.as_ref(),
-            );
-            vpin_tablewidget_ptr.set_item(cnt, COL_PKGCOORD_ID, vpin_table_widget_item.into_ptr());
-            vpin_tablewidget_ptr.set_column_hidden(COL_PKGCOORD_ID, true);
-
+            result.set_table_row(&mut vpin_tablewidget_ptr, cnt);
             cnt += 1;
         }
         if filtered_cnt > 0 {
             let rc = vpin_tablewidget_ptr.row_count() - filtered_cnt;
+            if rc != cnt {
+                log::warn!("Row count: {} not equal to cnt {}", rc, cnt);
+            }
             vpin_tablewidget_ptr.set_row_count(rc);
         }
         vpin_tablewidget_ptr.set_sorting_enabled(true);
