@@ -1,6 +1,8 @@
 use crate::constants::*;
 
+use crate::cache::PinChangesCache;
 pub use crate::ClientProxy;
+
 use log;
 use packybara::packrat::PackratDb;
 use qt_core::QVariant;
@@ -11,7 +13,6 @@ use qt_widgets::{
     qt_core::QStringList,
     QInputDialog, QTableWidget, QTableWidgetItem, QWidget,
 };
-use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::rc::Rc;
 macro_rules! qcolor_blue {
@@ -29,10 +30,9 @@ macro_rules! qcolor_blue {
 pub fn choose_alternative_distribution(
     r: i32,
     mut vpin_tablewidget_ptr: MutPtr<QTableWidget>,
-    usage_ptr: Rc<RefCell<HashMap<i32, i32>>>,
     root_widget_ptr: MutPtr<QWidget>,
     mut pinchanges_ptr: MutPtr<QTableWidget>,
-    update_cnt_ptr: Rc<Cell<i32>>,
+    pinchange_cache: Rc<PinChangesCache>,
 ) {
     unsafe {
         // check all ptrs
@@ -129,9 +129,8 @@ pub fn choose_alternative_distribution(
                 pkgcoord_id
             )));
 
-            if usage_ptr.borrow().contains_key(&dist_id) {
-                let row = usage_ptr.borrow();
-                let row = match row.get(&dist_id) {
+            if pinchange_cache.has_key(dist_id) {
+                let row = match pinchange_cache.index(dist_id) {
                     Some(r) => r,
                     None => {
                         log::error!("ERROR: Problem retrieving row from QT");
@@ -143,7 +142,7 @@ pub fn choose_alternative_distribution(
                     return;
                 }
 
-                let mut item = pinchanges_ptr.item(*row, COL_PC_DISPLAY);
+                let mut item = pinchanges_ptr.item(row, COL_PC_DISPLAY);
                 if item.is_null() {
                     log::error!("problem retreiving row from pinchanges_ptr using cached row number. item is null");
                     return;
@@ -183,9 +182,9 @@ pub fn choose_alternative_distribution(
                 let update_color = qcolor_blue!();
                 dist_item.set_foreground(&QBrush::from_q_color(update_color.as_ref()));
                 dist_item.table_widget().clear_selection();
-                let idx = update_cnt_ptr.get();
-                usage_ptr.borrow_mut().insert(dist_id, idx);
-                update_cnt_ptr.set(idx + 1);
+                let idx = pinchange_cache.row_count();
+                pinchange_cache.cache_dist(dist_id, idx);
+                pinchange_cache.increment_rowcount();
             }
         }
     }

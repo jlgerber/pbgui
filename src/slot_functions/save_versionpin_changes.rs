@@ -1,13 +1,12 @@
+use crate::cache::PinChangesCache;
 use crate::constants::*;
 use crate::utility::qs;
 use crate::ClientProxy;
+
 use log;
 use packybara::db::update::versionpins::VersionPinChange;
 use packybara::packrat::PackratDb;
 use qt_widgets::{cpp_core::MutPtr, QInputDialog, QMessageBox, QPushButton, QTableWidget, QWidget};
-use std::cell::Cell;
-use std::cell::RefCell;
-use std::collections::HashMap;
 use std::rc::Rc;
 use whoami;
 // TODO: clear usage_ptr
@@ -15,8 +14,7 @@ pub fn save_versionpin_changes(
     root_widget_ptr: MutPtr<QWidget>,
     pinchanges_ptr: &mut MutPtr<QTableWidget>,
     query_button_ptr: &mut MutPtr<QPushButton>,
-    versionpin_rowcount: Rc<Cell<i32>>,
-    versionpin_changes_cache: Rc<RefCell<HashMap<i32, i32>>>,
+    pinchange_cache: Rc<PinChangesCache>,
 ) {
     let client = ClientProxy::connect().expect("unable to connect via ClientProxy");
     unsafe {
@@ -45,8 +43,7 @@ pub fn save_versionpin_changes(
             return;
         }
         // reset book keeping
-        versionpin_rowcount.set(0);
-        versionpin_changes_cache.borrow_mut().clear();
+        pinchange_cache.reset();
         // update fields.
         let mut pb = PackratDb::new(client);
         let user = whoami::username();

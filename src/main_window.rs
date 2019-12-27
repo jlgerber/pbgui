@@ -1,5 +1,6 @@
 use crate::{
     bottom_stacked_widget::create_bottom_stacked_widget,
+    cache::PinChangesCache,
     center_widget,
     choose_distribution::choose_alternative_distribution,
     constants::COL_REV_TXID,
@@ -42,8 +43,6 @@ use qt_widgets::{
     //SlotOfQListOfQModelIndex,
     SlotOfQPoint,
 };
-use std::cell::{Cell, RefCell};
-use std::collections::HashMap;
 use std::rc::Rc;
 
 pub struct MainWindow<'a> {
@@ -179,13 +178,9 @@ impl<'a> MainWindow<'a> {
             //
             // persist data
             //
-            let usage = Rc::new(RefCell::new(HashMap::<i32, i32>::new()));
-            let usage_ptr = Rc::clone(&usage);
-            let update_cnt = Rc::new(Cell::new(0));
-            let update_cnt_ptr = Rc::clone(&update_cnt);
+            let pinchange_cache = Rc::new(PinChangesCache::new());
+            let pinchange_cache_ptr = pinchange_cache.clone();
             let mut pinchanges_ptr = pinchanges_ptr.clone();
-            let dist_usage_ptr = usage_ptr.clone();
-            let dist_update_cnt_ptr = update_cnt_ptr.clone();
             //
             // final housekeeping before showing main window
             //
@@ -260,13 +255,12 @@ impl<'a> MainWindow<'a> {
                 // database
                 //
                 save_clicked: Slot::new(move || {
-                    let changes_usage_cache = dist_usage_ptr.clone();
+                    let pinchange_cache = pinchange_cache_ptr.clone();
                     save_versionpin_changes(
                         main_widget_ptr,
                         &mut pinchanges_ptr,
                         &mut query_button_ptr,
-                        update_cnt_ptr.clone(),
-                        changes_usage_cache,
+                        pinchange_cache,
                     );
                 }),
                 //
@@ -300,11 +294,9 @@ impl<'a> MainWindow<'a> {
                     choose_alternative_distribution(
                         current_row,
                         vpin_tablewidget_ptr,
-                        //dist_usage_ptr.clone(),
-                        usage_ptr.clone(),
                         main_widget_ptr,
                         pinchanges_ptr,
-                        dist_update_cnt_ptr.clone(),
+                        pinchange_cache.clone(),
                     );
                 }),
                 select_pin_changes: Slot::new(move || {

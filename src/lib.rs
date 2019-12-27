@@ -1,4 +1,5 @@
 pub mod api;
+pub mod cache;
 pub mod constants;
 pub mod slot_functions;
 pub mod utility;
