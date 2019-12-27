@@ -1,3 +1,4 @@
+use packybara::types::IdType;
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 
@@ -9,8 +10,8 @@ pub struct PinChangesCache {
     /// The number of rows in the changes ui widget
     row_count: Cell<i32>,
     /// a cache of distribution id => changes ui cache
-    pkgcoord_index: RefCell<HashMap<i32, i32>>,
-    with_updates: RefCell<HashMap<i32, Vec<String>>>,
+    pkgcoord_index: RefCell<HashMap<IdType, i32>>,
+    with_updates: RefCell<HashMap<IdType, Vec<String>>>,
 }
 
 impl PinChangesCache {
@@ -59,7 +60,7 @@ impl PinChangesCache {
     /// # Returns
     /// * A Some(index) if exant
     /// * Otherwise None
-    pub fn index(&self, pkgcoord_id: i32) -> Option<i32> {
+    pub fn index(&self, pkgcoord_id: IdType) -> Option<i32> {
         match self.pkgcoord_index.borrow().get(&pkgcoord_id) {
             None => None,
             Some(v) => Some(*v),
@@ -70,7 +71,7 @@ impl PinChangesCache {
     /// # Argument
     /// * `pkgcoord_id` - The distribution's package coordinate id
     /// * `dist_idx - THe distribution's index in the ui element
-    pub fn cache_dist(&self, pkgcoord_id: i32, dist_idx: i32) {
+    pub fn cache_dist(&self, pkgcoord_id: IdType, dist_idx: i32) {
         self.pkgcoord_index
             .borrow_mut()
             .insert(pkgcoord_id, dist_idx);
@@ -83,7 +84,7 @@ impl PinChangesCache {
     /// # Returns
     /// * true if pkgcoord_id in cache.
     /// * false if pkgcoord_id is not in cache
-    pub fn has_key(&self, pkgcoord_id: i32) -> bool {
+    pub fn has_key(&self, pkgcoord_id: IdType) -> bool {
         self.pkgcoord_index.borrow().contains_key(&pkgcoord_id)
     }
 
@@ -94,7 +95,7 @@ impl PinChangesCache {
     ///
     /// # Returns
     /// * bool - Indicating the presence or absence of withs for a given distribution
-    pub fn has_withs(&self, pkgcoord_id: i32) -> bool {
+    pub fn has_withs(&self, pkgcoord_id: IdType) -> bool {
         self.with_updates.borrow().contains_key(&pkgcoord_id)
     }
     /// Set the withs for
@@ -102,7 +103,7 @@ impl PinChangesCache {
     /// # Arguments
     /// * `pkgcoord_id` - The pkgcoord id for which we are recording withs
     /// * `withs` - a vector of with name strings
-    pub fn set_withs_for(&self, pkgcoord_id: i32, withs: Vec<String>) {
+    pub fn cache_withs(&self, pkgcoord_id: IdType, withs: Vec<String>) {
         self.with_updates.borrow_mut().insert(pkgcoord_id, withs);
     }
     /// Return the withs as either a Some wrapped vec of &str or None
@@ -113,7 +114,7 @@ impl PinChangesCache {
     /// # Returns
     /// * If pkgcoord_id is extant, a vector of package names wrapped in a Some
     /// * if non-extant, None
-    pub fn withs(&self, pkgcoord_id: i32) -> Option<Vec<String>> {
+    pub fn withs(&self, pkgcoord_id: IdType) -> Option<Vec<String>> {
         match self.with_updates.borrow().get(&pkgcoord_id) {
             None => None,
             Some(vals) => {
@@ -132,7 +133,7 @@ impl PinChangesCache {
     /// * If pkgcoord_id is non-extant, None
     //TODO: figure out if there is a way of returning a non-owned vec of
     // &strs so we dont have to allocate
-    pub fn withs_string(&self, pkgcoord_id: i32) -> Option<String> {
+    pub fn withs_string(&self, pkgcoord_id: IdType) -> Option<String> {
         match self.with_updates.borrow().get(&pkgcoord_id) {
             None => None,
             Some(vals) => Some(vals.join(",")),
