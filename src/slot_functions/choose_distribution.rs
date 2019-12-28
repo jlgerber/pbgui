@@ -1,12 +1,12 @@
-use crate::constants::*;
-
 use crate::cache::PinChangesCache;
 use crate::change_type::ChangeType;
+use crate::constants::*;
 pub use crate::ClientProxy;
 use log;
 use packybara::packrat::PackratDb;
 use qt_core::QVariant;
 use qt_gui::{QBrush, QColor};
+use qt_thread_conductor::traits::ToQString;
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr, Ref /*Ptr,*/},
     qt_core::QString,
@@ -184,13 +184,7 @@ fn set_pinchange(
 ) {
     unsafe {
         // CHANGETYPE
-        let mut pinchanges_item = QTableWidgetItem::new();
-        let dist_idx: i32 = changetype.into();
-        let variant = QVariant::from_int(dist_idx);
-        pinchanges_item.set_data(
-            2, // EditRole
-            variant.as_ref(),
-        );
+        let pinchanges_item = QTableWidgetItem::from_q_string(changetype.to_qstring().as_ref());
         pinchanges_table.set_item(row_cnt - 1, COL_PC_CHANGETYPE, pinchanges_item.into_ptr());
         // VPIN ID
         let mut pinchanges_item = QTableWidgetItem::new();
