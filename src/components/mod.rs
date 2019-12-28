@@ -1,6 +1,6 @@
 pub mod bottom_context_widget;
 pub mod bottom_stacked_widget;
-pub mod changes_table;
+pub mod revision_changes_table;
 pub mod top;
 pub use top::main_menu_bar;
 pub use top::package_lineedit;

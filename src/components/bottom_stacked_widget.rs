@@ -1,5 +1,5 @@
 use super::bottom_context_widget;
-use super::changes_table;
+use super::revision_changes_table;
 use super::revisions_table;
 use super::versionpin_changes_table;
 
@@ -115,10 +115,10 @@ pub fn create_bottom_stacked_widget(
 
         let mut revisions_table = revisions_table::create();
         let revisions_table_ptr = revisions_table.as_mut_ptr();
-        let mut changes_table = changes_table::create();
-        let changes_table_ptr = changes_table.as_mut_ptr();
+        let mut revision_changes_table = revision_changes_table::create();
+        let changes_table_ptr = revision_changes_table.as_mut_ptr();
         rsplitter_ptr.add_widget(revisions_table.into_ptr());
-        rsplitter_ptr.add_widget(changes_table.into_ptr());
+        rsplitter_ptr.add_widget(revision_changes_table.into_ptr());
 
         // add the bottom_context_widget which gives us the ablitity
         // to add controls per page

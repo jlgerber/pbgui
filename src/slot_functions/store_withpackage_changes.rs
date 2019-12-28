@@ -25,7 +25,7 @@ pub fn store_withpackage_changes(
         let selection_model = versionpin_table.selection_model();
         if selection_model.has_selection() {
             let row = selection_model.selected_rows_0a().first().row();
-            let _change_type = ChangeType::Withs;
+            let _change_type = ChangeType::ChangeWiths;
             let table_row =
                 VersionPinRow::<CppBox<QString>>::from_table_at_row(&versionpin_table, row);
             if table_row.is_none() {

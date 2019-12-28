@@ -16,18 +16,20 @@ use qt_widgets::cpp_core::{CppBox, Ref};
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, UnsafeFromPrimitive, IntoPrimitive)]
 #[repr(i32)]
 pub enum ChangeType {
-    Distribution,
-    Withs,
-    PkgCoord,
+    ChangeDistribution,
+    AddDistribution,
+    ChangeWiths,
+    ChangePkgCoord,
     Unknown,
 }
 
 impl ToQString for ChangeType {
     fn to_qstring(&self) -> CppBox<QString> {
         match self {
-            Self::Distribution => qs("Distribution"),
-            Self::Withs => qs("Withs"),
-            Self::PkgCoord => qs("PkgCoord"),
+            Self::ChangeDistribution => qs("ChangeDistribution"),
+            Self::AddDistribution => qs("AddDistribution"),
+            Self::ChangeWiths => qs("ChangeWiths"),
+            Self::ChangePkgCoord => qs("ChangePkgCoord"),
             Self::Unknown => qs("Unknown"),
         }
     }
@@ -35,10 +37,11 @@ impl ToQString for ChangeType {
 
 impl FromQString for ChangeType {
     fn from_qstring(qs: Ref<QString>) -> Self {
-        match qs.to_std_string().to_lowercase().as_str() {
-            "distribution" => ChangeType::Distribution,
-            "withs" => ChangeType::Withs,
-            "PkgCoord" => ChangeType::PkgCoord,
+        match qs.to_std_string().as_str() {
+            "ChangeDistribution" => ChangeType::ChangeDistribution,
+            "AddDistribution" => ChangeType::AddDistribution,
+            "ChangeWiths" => ChangeType::ChangeWiths,
+            "ChangePkgCoord" => ChangeType::ChangePkgCoord,
             _ => ChangeType::Unknown,
         }
     }

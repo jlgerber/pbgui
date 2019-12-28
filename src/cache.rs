@@ -9,7 +9,11 @@ use std::collections::HashMap;
 pub struct PinChangesCache {
     /// The number of rows in the changes ui widget
     row_count: Cell<i32>,
-    /// a cache of distribution id => changes ui cache
+    /// a cache of pkgcoord id => changes ui cache
+    // TODO: pkgcoord_index needs to get more sophisticated once I
+    // start storing different changes. Specifically, any addition
+    // of new distributions.. perhaps i need to change this out for
+    // an enum Update{ Change{pkgcoord_id}, NewDistribution{dist_id,pkgcoords}}
     pkgcoord_index: RefCell<HashMap<IdType, i32>>,
     with_updates: RefCell<HashMap<IdType, Vec<String>>>,
 }

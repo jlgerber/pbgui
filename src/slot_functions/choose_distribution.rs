@@ -155,7 +155,7 @@ pub fn choose_alternative_distribution(
                 set_pinchange(
                     &mut pinchanges_ptr,
                     row_cnt,
-                    ChangeType::Distribution,
+                    ChangeType::ChangeDistribution,
                     vpin_id,
                     *new_dist_id,
                     pkgcoord_id,
