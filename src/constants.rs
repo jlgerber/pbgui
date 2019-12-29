@@ -20,19 +20,19 @@ pub const HEADERS: &[(i32, &'static str, bool)] = &[
 ];
 
 pub const COL_PC_CHANGETYPE: i32 = 0;
-pub const COL_PC_VPINID: i32 = 1;
-pub const COL_PC_DISTID: i32 = 2;
-pub const COL_PC_PKGCOORDID: i32 = 3;
-pub const COL_PC_DISPLAY: i32 = 4;
+pub const COL_PC_CONTEXT: i32 = 1;
+pub const COL_PC_OLD_VALUE: i32 = 2;
+pub const COL_PC_BECOMES: i32 = 3;
+pub const COL_PC_NEW_VALUE: i32 = 4;
 
 pub const PC_HEADERS: &[(i32, &'static str, bool)] = &[
     (COL_PC_CHANGETYPE, "ChangeType", false),
-    (COL_PC_VPINID, "Vpinid", true),
-    (COL_PC_DISTID, "Distid", true),
-    (COL_PC_PKGCOORDID, "Pkgcoordid", true),
-    (COL_PC_DISPLAY, "Display", false),
+    (COL_PC_CONTEXT, "context", true),
+    (COL_PC_OLD_VALUE, "old_value", true),
+    // only to display -> arrow
+    (COL_PC_BECOMES, "becomes", true),
+    (COL_PC_NEW_VALUE, "new_value", true),
 ];
-
 //
 pub const COL_REV_TXID: i32 = 0;
 pub const COL_REV_AUTHOR: i32 = 1;

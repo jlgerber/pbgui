@@ -218,6 +218,20 @@ impl VersionPinRow<CppBox<QString>> {
             withs,
         }
     }
+
+    /// Return an owned pkgcoord string
+    pub fn pkgcoord(&self) -> CppBox<QString> {
+        unsafe {
+            let pieces = self.distribution.split_q_string(&qs("-"));
+            qs("(level: %1, role: %2, platform: %3, site: %4, package: %5)").arg_5_q_string(
+                self.level.as_ref(),
+                self.role.as_ref(),
+                self.platform.as_ref(),
+                self.site.as_ref(),
+                pieces.index(0),
+            )
+        }
+    }
 }
 impl RowTrait for VersionPinRow<CppBox<QString>> {
     type ReturnType = VersionPinRow<CppBox<QString>>;

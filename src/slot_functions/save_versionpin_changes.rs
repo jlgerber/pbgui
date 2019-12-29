@@ -1,5 +1,5 @@
 use crate::cache::PinChangesCache;
-use crate::constants::*;
+use crate::change_type::Change;
 use crate::utility::qs;
 use crate::ClientProxy;
 
@@ -49,14 +49,19 @@ pub fn save_versionpin_changes(
         let user = whoami::username();
         let mut update = pb.update_versionpins(comments.as_str(), user.as_str());
         let mut changes = Vec::new();
-        for row_idx in 0..pinchanges_ptr.row_count() {
-            let vpin_id = pinchanges_ptr.item(row_idx, COL_PC_VPINID).data(2);
-            let dist_id = pinchanges_ptr.item(row_idx, COL_PC_DISTID).data(2);
-            changes.push(VersionPinChange::new(
-                vpin_id.to_int_0a(),
-                Some(dist_id.to_int_0a()),
-                None,
-            ));
+        for idx in pinchange_cache.change_indexes() {
+            let change = pinchange_cache
+                .change_at(idx)
+                .expect("unable to unwrap change");
+            match change {
+                Change::ChangeDistribution {
+                    vpin_id,
+                    new_dist_id,
+                } => {
+                    changes.push(VersionPinChange::new(vpin_id, Some(new_dist_id), None));
+                }
+                _ => panic!("not implemented"),
+            }
         }
         let results = update.changes(&mut changes).update();
         if results.is_ok() {

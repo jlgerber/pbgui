@@ -2,19 +2,20 @@ use crate::cache::PinChangesCache;
 use crate::change_type::{Change, ChangeType};
 use crate::constants::*;
 use crate::traits::RowTrait;
+use crate::traits::*;
 pub use crate::utility::qs;
+use crate::versionpin_changes_row::VersionPinChangesRow;
 use crate::versionpin_row::VersionPinRow;
 pub use crate::ClientProxy;
 use log;
 use packybara::packrat::PackratDb;
 use packybara::types::IdType;
-use qt_core::{QString, QVariant};
+use qt_core::QString;
 use qt_gui::{QBrush, QColor};
-use qt_thread_conductor::traits::ToQString;
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr, Ref /*Ptr,*/},
     qt_core::QStringList,
-    QInputDialog, QTableWidget, QTableWidgetItem, QWidget,
+    QInputDialog, QTableWidget, QWidget,
 };
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -113,22 +114,7 @@ pub fn choose_alternative_distribution(
                 let original_version = pinchange_cache
                     .orig_version_for(vpin_row.id)
                     .expect("failed to retrieve original version from cache.");
-                // we should remove the update
-                // if new_version_string == original_version {
-                //     log::info!("new value and old value match. Skipping");
-                //     return;
-                // }
-                let change_qstr = distribution_version_change::build_changestr(
-                    qs(package).as_ref(),
-                    // original version
-                    qs(original_version).as_ref(),
-                    // new version
-                    new_version.as_ref(),
-                    vpin_row.level.as_ref(),
-                    vpin_row.role.as_ref(),
-                    vpin_row.platform.as_ref(),
-                    vpin_row.site.as_ref(),
-                );
+
                 let row = match pinchange_cache.index(vpin_row.pkgcoord_id) {
                     Some(r) => r,
                     None => {
@@ -146,42 +132,39 @@ pub fn choose_alternative_distribution(
                     return;
                 }
 
-                let mut item = pinchanges_ptr.item(row, COL_PC_DISPLAY);
+                let mut item = pinchanges_ptr.item(row, COL_PC_NEW_VALUE);
                 if item.is_null() {
                     log::error!("problem retreiving row from pinchanges_ptr using cached row number. item is null");
                     return;
                 }
-                item.set_text(&change_qstr);
+                item.set_text(&new_version);
                 let change = Change::ChangeDistribution {
                     vpin_id: vpin_row.id,
                     new_dist_id: *new_dist_id,
                 };
                 pinchange_cache.cache_change_at(change, row);
             } else {
-                let change_qstr = distribution_version_change::build_changestr(
-                    qs(package).as_ref(),
-                    // original version
-                    qs(version).as_ref(),
-                    // new version
-                    new_version.as_ref(),
-                    vpin_row.level.as_ref(),
-                    vpin_row.role.as_ref(),
-                    vpin_row.platform.as_ref(),
-                    vpin_row.site.as_ref(),
+                let vpc_row = VersionPinChangesRow::<CppBox<QString>>::new(
+                    ChangeType::ChangeDistribution,
+                    vpin_row.pkgcoord(),
+                    qs(version),
+                    new_version,
                 );
+
                 pinchange_cache.cache_original_version(vpin_row.id, version);
                 let row_cnt = pinchanges_ptr.row_count() + 1;
                 pinchanges_ptr.set_row_count(row_cnt);
 
-                set_pinchange(
-                    &mut pinchanges_ptr,
-                    row_cnt,
-                    ChangeType::ChangeDistribution,
-                    vpin_row.id,
-                    *new_dist_id,
-                    vpin_row.pkgcoord_id,
-                    change_qstr.as_ref(),
-                );
+                // set_pinchange(
+                //     &mut pinchanges_ptr,
+                //     row_cnt,
+                //     ChangeType::ChangeDistribution,
+                //     vpin_row.id,
+                //     *new_dist_id,
+                //     vpin_row.pkgcoord_id,
+                //     change_qstr.as_ref(),
+                // );
+                vpc_row.set_table_row(&mut pinchanges_ptr, row_cnt);
                 let update_color = qcolor_blue!();
                 distribution.set_foreground(&QBrush::from_q_color(update_color.as_ref()));
                 distribution.table_widget().clear_selection();
@@ -292,78 +275,3 @@ fn build_qstring_list_and_map(
         (versions_list, idx, dist_versions)
     }
 }
-// insert a row into teh pinchanges table
-fn set_pinchange(
-    pinchanges_table: &mut MutPtr<QTableWidget>,
-    row_cnt: i32,
-    changetype: ChangeType,
-    vpin_id: i32,
-    dist_id: i32,
-    pkgcoord_id: i32,
-    display: Ref<QString>,
-) {
-    unsafe {
-        // CHANGETYPE
-        let pinchanges_item = QTableWidgetItem::from_q_string(changetype.to_qstring().as_ref());
-        pinchanges_table.set_item(row_cnt - 1, COL_PC_CHANGETYPE, pinchanges_item.into_ptr());
-        // VPIN ID
-        let mut pinchanges_item = QTableWidgetItem::new();
-        let variant = QVariant::from_int(vpin_id);
-        pinchanges_item.set_data(
-            2, // EditRole
-            variant.as_ref(),
-        );
-        pinchanges_table.set_item(row_cnt - 1, COL_PC_VPINID, pinchanges_item.into_ptr());
-        // DIST ID
-        let mut pinchanges_item = QTableWidgetItem::new();
-        let variant = QVariant::from_int(dist_id);
-        pinchanges_item.set_data(
-            2, // EditRole
-            variant.as_ref(),
-        );
-        pinchanges_table.set_item(row_cnt - 1, COL_PC_DISTID, pinchanges_item.into_ptr());
-        // PKGCOORD ID
-        let mut pinchanges_item = QTableWidgetItem::new();
-        let variant = QVariant::from_int(pkgcoord_id);
-        pinchanges_item.set_data(
-            2, // EditRole
-            variant.as_ref(),
-        );
-        pinchanges_table.set_item(row_cnt - 1, COL_PC_PKGCOORDID, pinchanges_item.into_ptr());
-        // DISPLAY
-        let pinchanges_item = QTableWidgetItem::from_q_string(display);
-        pinchanges_table.set_item(row_cnt - 1, COL_PC_DISPLAY, pinchanges_item.into_ptr());
-    }
-}
-
-// unsafe fn get_coords_from_row(
-//     row_widget: &mut MutPtr<QTableWidget>,
-//     row: i32,
-// ) -> (
-//     CppBox<QString>,
-//     CppBox<QString>,
-//     CppBox<QString>,
-//     CppBox<QString>,
-//     i32,
-//     i32,
-//     i32,
-// ) {
-//     //level
-//     let level = row_widget.item(row, COL_LEVEL).text();
-//     let role = row_widget.item(row, COL_ROLE).text();
-//     let platform = row_widget.item(row, COL_PLATFORM).text();
-//     let site = row_widget.item(row, COL_SITE).text();
-//     let vpin_id = row_widget.item(row, COL_ID).data(2);
-//     let dist_id = row_widget.item(row, COL_DISTRIBUTION_ID).data(2);
-//     let pkgcoord_id = row_widget.item(row, COL_PKGCOORD_ID).data(2);
-
-//     (
-//         level,
-//         role,
-//         platform,
-//         site,
-//         vpin_id.to_int_0a(),
-//         dist_id.to_int_0a(),
-//         pkgcoord_id.to_int_0a(),
-//     )
-// }
