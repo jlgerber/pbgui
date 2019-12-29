@@ -8,9 +8,7 @@ use qt_widgets::{
     QTableWidget,
 };
 
-/// Create the Table tracking Changes per Revision. For each Revision, there
-/// are 1 to N Changes, desplayed within this table. The user selects a
-/// Revision from the revision table and this table is populated in response.
+/// Create the Table tracking staged versionpin changes
 ///
 /// # Arguments
 /// * None
