@@ -180,7 +180,7 @@ impl RowSetterTrait for VersionPinRow<String> {
 //
 impl fmt::Debug for VersionPinRow<CppBox<QString>> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("VersionPinRow<String>")
+        f.debug_struct("VersionPinRow<CppBox<QString>>")
             .field("id", &self.id)
             .field("dist_id", &self.dist_id)
             .field("pkgcoord_id", &self.pkgcoord_id) //&format_args!("{}", self.addr))
