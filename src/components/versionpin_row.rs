@@ -12,6 +12,7 @@ use std::fmt;
 /// Define a VersionPinRowTrait in terms of input: T and out put ReturnType.
 pub trait VersionPinRowTrait<T> {
     type ReturnType;
+    type TableType;
     /// New up a VersionPinRowTrait of type T
     ///
     /// # Arguments
@@ -48,7 +49,7 @@ pub trait VersionPinRowTrait<T> {
     /// * `Some(Self::ReturnType)` if successful
     /// * `None` if unsuccessful
     fn from_table_at_row(
-        versionpin_table: &MutPtr<QTableWidget>,
+        versionpin_table: &Self::TableType, //MutPtr<QTableWidget>,
         row: i32,
     ) -> Option<Self::ReturnType>;
 
@@ -57,7 +58,8 @@ pub trait VersionPinRowTrait<T> {
 
 /// Set a the table row
 pub trait VersionPinRowSetterTrait {
-    fn set_table_row(&self, versionpin_table: &mut MutPtr<QTableWidget>, row: i32);
+    type TargetTable; //MutPtr<QTableWidget>
+    fn set_table_row(&self, versionpin_table: &mut Self::TargetTable, row: i32);
 }
 /// A row of versionpin data
 #[derive(PartialEq, Eq, PartialOrd, Ord)]
@@ -96,6 +98,8 @@ impl fmt::Debug for VersionPinRow<String> {
 //
 impl VersionPinRowTrait<CppBox<QString>> for VersionPinRow<String> {
     type ReturnType = VersionPinRow<String>;
+    type TableType = MutPtr<QTableWidget>;
+
     fn new(
         id: IdType,
         dist_id: IdType,
@@ -164,7 +168,8 @@ impl VersionPinRowTrait<CppBox<QString>> for VersionPinRow<String> {
 }
 
 impl VersionPinRowSetterTrait for VersionPinRow<String> {
-    fn set_table_row(&self, versionpin_table: &mut MutPtr<QTableWidget>, row: i32) {
+    type TargetTable = MutPtr<QTableWidget>;
+    fn set_table_row(&self, versionpin_table: &mut Self::TargetTable, row: i32) {
         unsafe {
             let mut vpin_table_widget_item = QTableWidgetItem::new();
             let variant = QVariant::from_int(self.id);
@@ -244,6 +249,8 @@ impl fmt::Debug for VersionPinRow<CppBox<QString>> {
 
 impl VersionPinRowTrait<CppBox<QString>> for VersionPinRow<CppBox<QString>> {
     type ReturnType = VersionPinRow<CppBox<QString>>;
+    type TableType = MutPtr<QTableWidget>;
+
     fn new(
         id: IdType,
         dist_id: IdType,
@@ -311,7 +318,8 @@ impl VersionPinRowTrait<CppBox<QString>> for VersionPinRow<CppBox<QString>> {
     }
 }
 impl VersionPinRowSetterTrait for VersionPinRow<CppBox<QString>> {
-    fn set_table_row(&self, versionpin_table: &mut MutPtr<QTableWidget>, row: i32) {
+    type TargetTable = MutPtr<QTableWidget>;
+    fn set_table_row(&self, versionpin_table: &mut Self::TargetTable, row: i32) {
         unsafe {
             let mut vpin_table_widget_item = QTableWidgetItem::new();
             let variant = QVariant::from_int(self.id);
@@ -373,7 +381,9 @@ impl VersionPinRowSetterTrait for VersionPinRow<CppBox<QString>> {
 //
 //
 impl VersionPinRowSetterTrait for FindAllVersionPinsRow {
-    fn set_table_row(&self, versionpin_table: &mut MutPtr<QTableWidget>, row: i32) {
+    type TargetTable = MutPtr<QTableWidget>;
+
+    fn set_table_row(&self, versionpin_table: &mut Self::TargetTable, row: i32) {
         unsafe {
             let mut vpin_table_widget_item = QTableWidgetItem::new();
             let variant = QVariant::from_int(self.versionpin_id);
