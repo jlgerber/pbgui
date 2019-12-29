@@ -1,5 +1,5 @@
 use crate::change_type::ChangeType;
-//use crate::constants::*;
+use crate::constants::*;
 use crate::utility::qs;
 use crate::{RowSetterTrait, RowTrait};
 use qt_core::QString;
@@ -11,17 +11,17 @@ use qt_widgets::{
 };
 use std::fmt;
 
-pub const COL_PC_CHANGETYPE: i32 = 0;
-pub const COL_PC_CONTEXT: i32 = 1;
-pub const COL_PC_OLD_VALUE: i32 = 2;
-pub const COL_PC_NEW_VALUE: i32 = 3;
+// pub const COL_PC_CHANGETYPE: i32 = 0;
+// pub const COL_PC_CONTEXT: i32 = 1;
+// pub const COL_PC_OLD_VALUE: i32 = 2;
+// pub const COL_PC_NEW_VALUE: i32 = 3;
 
-pub const PC_HEADERS: &[(i32, &'static str, bool)] = &[
-    (COL_PC_CHANGETYPE, "ChangeType", false),
-    (COL_PC_CONTEXT, "context", true),
-    (COL_PC_OLD_VALUE, "old_value", true),
-    (COL_PC_NEW_VALUE, "new_value", true),
-];
+// pub const PC_HEADERS: &[(i32, &'static str, bool)] = &[
+//     (COL_PC_CHANGETYPE, "ChangeType", false),
+//     (COL_PC_CONTEXT, "context", true),
+//     (COL_PC_OLD_VALUE, "old_value", true),
+//     (COL_PC_NEW_VALUE, "new_value", true),
+// ];
 
 /// A row of versionpin data
 #[derive(PartialEq, Eq, PartialOrd, Ord)]
