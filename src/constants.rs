@@ -27,11 +27,11 @@ pub const COL_PC_NEW_VALUE: i32 = 4;
 
 pub const PC_HEADERS: &[(i32, &'static str, bool)] = &[
     (COL_PC_CHANGETYPE, "ChangeType", false),
-    (COL_PC_CONTEXT, "context", true),
-    (COL_PC_OLD_VALUE, "old_value", true),
+    (COL_PC_CONTEXT, "context", false),
+    (COL_PC_OLD_VALUE, "old_value", false),
     // only to display -> arrow
-    (COL_PC_BECOMES, "becomes", true),
-    (COL_PC_NEW_VALUE, "new_value", true),
+    (COL_PC_BECOMES, "becomes", false),
+    (COL_PC_NEW_VALUE, "new_value", false),
 ];
 //
 pub const COL_REV_TXID: i32 = 0;
