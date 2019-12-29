@@ -6,17 +6,13 @@ pub use qt_thread_conductor::traits::{FromQString, ToQString};
 use qt_widgets::cpp_core::{CppBox, Ref};
 use std::str::FromStr;
 use strum_macros::{AsRefStr, EnumDiscriminants, EnumString, IntoStaticStr};
-/// The ChangeType that the user has requested.
+/// The Change that the user has requested.
 ///
-/// This enum derives IntoPrimitive and UnsafeFromPrimitive, which afford
-/// the ability to convert from and to i32.
+/// ChangeType is derived from Change. ChangeType is a companion enum that
+/// provides the descriminant names without their values.
 ///
-/// # Example
-/// ```ignore
-/// let number: i32 = ChangeType::Distribution.into();
-/// unsafe{ let changetype = ChangeType::from_unchecked(1);}
-/// ```
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, EnumDiscriminants)]
+/// to_qstring and from_qstring are impl'ed for ChangeType
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, EnumDiscriminants, Clone)]
 #[strum_discriminants(name(ChangeType))]
 #[strum_discriminants(derive(EnumString, IntoStaticStr, AsRefStr, PartialOrd, Ord))]
 pub enum Change {
@@ -51,13 +47,6 @@ impl ToQString for ChangeType {
     fn to_qstring(&self) -> CppBox<QString> {
         let s: &'static str = self.into();
         qs(&s)
-        // match self {
-        //     Self::ChangeDistribution => qs("ChangeDistribution"),
-        //     Self::AddDistribution => qs("AddDistribution"),
-        //     Self::ChangeWiths => qs("ChangeWiths"),
-        //     Self::ChangePkgCoord => qs("ChangePkgCoord"),
-        //     Self::Unknown => qs("Unknown"),
-        // }
     }
 }
 
@@ -67,12 +56,5 @@ impl FromQString for ChangeType {
             Ok(t) => t,
             Err(_) => ChangeType::Unknown,
         }
-        // match qs.to_std_string().as_str() {
-        //     "ChangeDistribution" => ChangeType::ChangeDistribution,
-        //     "AddDistribution" => ChangeType::AddDistribution,
-        //     "ChangeWiths" => ChangeType::ChangeWiths,
-        //     "ChangePkgCoord" => ChangeType::ChangePkgCoord,
-        //     _ => ChangeType::Unknown,
-        // }
     }
 }
