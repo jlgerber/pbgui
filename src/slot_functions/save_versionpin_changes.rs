@@ -33,7 +33,7 @@ pub fn save_versionpin_changes(
         if ok_ptr.is_null() {
             log::error!("In save_versionpin_changes. QInputDialog returned null ok_ptr.");
             let mut mb = QMessageBox::new();
-            mb.set_text(&qs("QT Problem Detected"));
+            mb.set_text(&qs("QT Problem Detected - null ok_ptr"));
             mb.exec();
             return;
         } else if *ok_ptr == false {
@@ -42,8 +42,6 @@ pub fn save_versionpin_changes(
             mb.exec();
             return;
         }
-        // reset book keeping
-        pinchange_cache.reset();
         // update fields.
         let mut pb = PackratDb::new(client);
         let user = whoami::username();
@@ -63,6 +61,8 @@ pub fn save_versionpin_changes(
                 _ => panic!("not implemented"),
             }
         }
+        // reset book keeping
+        pinchange_cache.reset();
         let results = update.changes(&mut changes).update();
         if results.is_ok() {
             pinchanges_ptr.clear();

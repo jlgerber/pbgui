@@ -111,9 +111,9 @@ pub fn choose_alternative_distribution(
             // build up new string
             distribution.set_text(&new_value_qstr);
             if pinchange_cache.has_key(vpin_row.pkgcoord_id) {
-                let original_version = pinchange_cache
-                    .orig_version_for(vpin_row.id)
-                    .expect("failed to retrieve original version from cache.");
+                // let original_version = pinchange_cache
+                //     .orig_version_for(vpin_row.id)
+                //     .expect("failed to retrieve original version from cache.");
 
                 let row = match pinchange_cache.index(vpin_row.pkgcoord_id) {
                     Some(r) => r,
@@ -122,16 +122,6 @@ pub fn choose_alternative_distribution(
                         return;
                     }
                 };
-                log::info!(
-                    "pinchange cache has pkgcoord {} @ row {}",
-                    vpin_row.pkgcoord_id,
-                    row
-                );
-                if pinchanges_ptr.is_null() {
-                    log::error!("pinchanges_ptr is now null");
-                    return;
-                }
-
                 let mut item = pinchanges_ptr.item(row, COL_PC_NEW_VALUE);
                 if item.is_null() {
                     log::error!("problem retreiving row from pinchanges_ptr using cached row number. item is null");
@@ -150,37 +140,21 @@ pub fn choose_alternative_distribution(
                     qs(version),
                     new_version,
                 );
-
                 pinchange_cache.cache_original_version(vpin_row.id, version);
                 let row_cnt = pinchanges_ptr.row_count() + 1;
                 pinchanges_ptr.set_row_count(row_cnt);
 
-                // set_pinchange(
-                //     &mut pinchanges_ptr,
-                //     row_cnt,
-                //     ChangeType::ChangeDistribution,
-                //     vpin_row.id,
-                //     *new_dist_id,
-                //     vpin_row.pkgcoord_id,
-                //     change_qstr.as_ref(),
-                // );
-                vpc_row.set_table_row(&mut pinchanges_ptr, row_cnt);
+                vpc_row.set_table_row(&mut pinchanges_ptr, row_cnt - 1);
                 let update_color = qcolor_blue!();
                 distribution.set_foreground(&QBrush::from_q_color(update_color.as_ref()));
                 distribution.table_widget().clear_selection();
                 let idx = pinchange_cache.row_count();
-                log::info!(
-                    "caching pkgcoord_id {} at row {}",
-                    vpin_row.pkgcoord_id,
-                    idx
-                );
                 pinchange_cache.cache_dist(vpin_row.pkgcoord_id, idx);
                 let change = Change::ChangeDistribution {
                     vpin_id: vpin_row.id,
                     new_dist_id: *new_dist_id,
                 };
                 pinchange_cache.cache_change(change);
-                //pinchange_cache.increment_rowcount();
             }
         }
     }
