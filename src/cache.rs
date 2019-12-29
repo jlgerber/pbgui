@@ -1,21 +1,23 @@
+use crate::change_type::Change;
 use packybara::types::IdType;
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
-
 /// Caches versionpin changes that the user has selected
 /// in the versionpin popup menu, so that the Pin Changes
 /// table can stay in sync before the user  hits `save`
 #[derive(Debug)]
 pub struct PinChangesCache {
-    /// The number of rows in the changes ui widget
-    row_count: Cell<i32>,
     /// a cache of pkgcoord id => changes ui cache
     // TODO: pkgcoord_index needs to get more sophisticated once I
     // start storing different changes. Specifically, any addition
     // of new distributions.. perhaps i need to change this out for
     // an enum Update{ Change{pkgcoord_id}, NewDistribution{dist_id,pkgcoords}}
+    //pkgcoord_id => row #
     pkgcoord_index: RefCell<HashMap<IdType, i32>>,
-    with_updates: RefCell<HashMap<IdType, Vec<String>>>,
+    // versionpin_id => version (string)
+    original_version: RefCell<HashMap<IdType, String>>,
+    // row # => Change
+    changes: RefCell<HashMap<i32, Change>>,
 }
 
 impl PinChangesCache {
@@ -29,19 +31,17 @@ impl PinChangesCache {
     /// ```
     pub fn new() -> Self {
         Self {
-            row_count: Cell::new(0),
             pkgcoord_index: RefCell::new(HashMap::new()),
-            with_updates: RefCell::new(HashMap::new()),
+            original_version: RefCell::new(HashMap::new()),
+            changes: RefCell::new(HashMap::new()),
         }
     }
-    /// Reset the instance to its initial value, with the row_count at `0`
-    /// and the pkgcoord_index empty
+    /// Reset the instance to its initial value
     pub fn reset(&self) {
-        self.row_count.set(0);
         self.pkgcoord_index.borrow_mut().clear();
-        self.with_updates.borrow_mut().clear();
+        self.original_version.borrow_mut().clear();
+        self.changes.borrow_mut().clear();
     }
-
     /// Return the number of rows in the ui
     /// # Arguments
     /// * None
@@ -49,12 +49,7 @@ impl PinChangesCache {
     /// # Returns
     /// * The number of rows in the ui element
     pub fn row_count(&self) -> i32 {
-        self.row_count.get()
-    }
-    /// Increment the rowcount by 1
-    pub fn increment_rowcount(&self) {
-        let cnt = self.row_count.get();
-        self.row_count.set(cnt + 1);
+        self.changes.borrow().len() as i32
     }
     /// Retreive the index in the cache for the provided distribution id.
     ///
@@ -69,6 +64,104 @@ impl PinChangesCache {
             None => None,
             Some(v) => Some(*v),
         }
+    }
+    /// Cache the original version of a versionpin
+    ///
+    /// # Argument
+    /// * `vpin_id` - The verionpin id to use as a key
+    /// * `version` - The version to cache
+    pub fn cache_original_version<S>(&self, vpin_id: IdType, version: S)
+    where
+        S: Into<String>,
+    {
+        self.original_version
+            .borrow_mut()
+            .insert(vpin_id, version.into());
+    }
+    /// Get the original version for the given versionpin id
+    ///
+    /// # Arguments
+    /// * `vpin_id` - The versionpin id we want to use to look up the original version for.alloc
+    ///
+    /// # Returns
+    /// * Some of version string if vpin_id exists
+    /// * None otherwise
+    pub fn orig_version_for(&self, vpin_id: IdType) -> Option<String> {
+        match self.original_version.borrow().get(&vpin_id) {
+            Some(v) => Some(v.clone()),
+            None => None,
+        }
+    }
+    /// Retrieve the change for the index.
+    /// Note that this has to clone under the hood.
+    ///
+    /// # Arguments
+    /// * `idx` - the row index to retrieve the change at
+    ///
+    /// # Returns
+    /// * Some of Change if successful
+    /// * None otherwise
+    pub fn change_at(&self, idx: i32) -> Option<Change> {
+        match self.changes.borrow().get(&idx) {
+            Some(c) => Some(c.clone()),
+            None => None,
+        }
+    }
+    /// Retrieve the change for the distribution at a given index,
+    /// removing it in the process
+    ///
+    /// # Arguments
+    /// * `idx` - The row index to retrieve the Change at, removing it in the process
+    ///
+    /// # Returns
+    /// * Some wrapped Change if successful (removing it from self in the proxess)
+    /// * None otherwise
+    pub fn remove_change_at(&self, idx: i32) -> Option<Change> {
+        self.changes.borrow_mut().remove(&idx)
+    }
+    /// Return a vector of change indexes.
+    /// Storing the index of the change allows us to delete rows
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// * Vector of change indexes
+    pub fn change_indexes(&self) -> Vec<i32> {
+        let mut v: Vec<i32> = self.changes.borrow().keys().map(|x| x.clone()).collect();
+        v.sort();
+        v
+    }
+    /// Retrieve the last change index if it exsits
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// * Some wrapped index, if `self` stores any changes
+    /// * None otherwise
+    pub fn last_change_idx(&self) -> Option<i32> {
+        match self.change_indexes().last() {
+            Some(v) => Some(v.clone()),
+            None => None,
+        }
+    }
+    /// Insert a change into the cache, incrementing the
+    /// last index in the process.
+    ///
+    /// # Arguments
+    /// * `change` - A Change instance to cache
+    pub fn cache_change(&self, change: Change) {
+        let idx = self.last_change_idx().map_or(0, |x| x + 1);
+        self.cache_change_at(change, idx);
+    }
+    /// Inserts a change at a specific index. Raises an exception
+    ///
+    /// # Arguments
+    /// * `change` - The Change instance to cache.
+    /// * `idx - The index to cache the Change at.
+    pub fn cache_change_at(&self, change: Change, idx: i32) {
+        self.changes.borrow_mut().insert(idx, change);
     }
     /// Inserts a distribution's id and index into the cache
     ///
@@ -91,56 +184,80 @@ impl PinChangesCache {
     pub fn has_key(&self, pkgcoord_id: IdType) -> bool {
         self.pkgcoord_index.borrow().contains_key(&pkgcoord_id)
     }
+}
 
-    /// Check to see if the cache has withs for a particular distribution, given its id
-    ///
-    /// # Arguments
-    /// * `pkgcoord_id` The distribution's package coordinate id of interest
-    ///
-    /// # Returns
-    /// * bool - Indicating the presence or absence of withs for a given distribution
-    pub fn has_withs(&self, pkgcoord_id: IdType) -> bool {
-        self.with_updates.borrow().contains_key(&pkgcoord_id)
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn cache_change_adds_key() {
+        let change = Change::ChangeDistribution {
+            vpin_id: 1,
+            new_dist_id: 2,
+        };
+        let cache = PinChangesCache::new();
+        cache.cache_change(change);
+        let keys = cache
+            .changes
+            .borrow()
+            .keys()
+            .map(|x| x.clone())
+            .collect::<Vec<i32>>();
+        assert_eq!(keys, vec![0]);
+        // second change
+        let change2 = Change::ChangeDistribution {
+            vpin_id: 1,
+            new_dist_id: 2,
+        };
+        cache.cache_change(change2);
+        let keys = cache
+            .changes
+            .borrow()
+            .keys()
+            .map(|x| x.clone())
+            .collect::<Vec<i32>>();
+        assert_eq!(keys, vec![0, 1]);
     }
-    /// Set the withs for
-    ///
-    /// # Arguments
-    /// * `pkgcoord_id` - The pkgcoord id for which we are recording withs
-    /// * `withs` - a vector of with name strings
-    pub fn cache_withs(&self, pkgcoord_id: IdType, withs: Vec<String>) {
-        self.with_updates.borrow_mut().insert(pkgcoord_id, withs);
+    #[test]
+    fn change_indexes() {
+        let cache = PinChangesCache::new();
+        cache.cache_change(Change::ChangeDistribution {
+            vpin_id: 1,
+            new_dist_id: 2,
+        });
+        cache.cache_change(Change::ChangeDistribution {
+            vpin_id: 2,
+            new_dist_id: 3,
+        });
+        assert_eq!(cache.change_indexes(), vec![0, 1]);
     }
-    /// Return the withs as either a Some wrapped vec of &str or None
-    ///
-    /// # Arguments
-    /// * `pkgcoord_id` - The pkgcoord id we wish to lookup withs for
-    ///
-    /// # Returns
-    /// * If pkgcoord_id is extant, a vector of package names wrapped in a Some
-    /// * if non-extant, None
-    pub fn withs(&self, pkgcoord_id: IdType) -> Option<Vec<String>> {
-        match self.with_updates.borrow().get(&pkgcoord_id) {
-            None => None,
-            Some(vals) => {
-                let vals_ref = vals.iter().map(|x| x.clone()).collect::<Vec<String>>();
-                Some(vals_ref)
-            }
-        }
+    #[test]
+    fn row_count_works() {
+        let cache = PinChangesCache::new();
+        cache.cache_change(Change::ChangeDistribution {
+            vpin_id: 1,
+            new_dist_id: 2,
+        });
+        cache.cache_change(Change::ChangeDistribution {
+            vpin_id: 2,
+            new_dist_id: 3,
+        });
+        assert_eq!(cache.row_count(), 2);
     }
-    /// return a comma separated list of withs converted to a string
-    ///
-    /// # Arguments
-    /// * `pkgcoord_id`: The pkgcoord id whose withs we want
-    ///
-    /// # Returns
-    /// * If pkgcoord_id is extant, a Some wrapped string
-    /// * If pkgcoord_id is non-extant, None
-    //TODO: figure out if there is a way of returning a non-owned vec of
-    // &strs so we dont have to allocate
-    pub fn withs_string(&self, pkgcoord_id: IdType) -> Option<String> {
-        match self.with_updates.borrow().get(&pkgcoord_id) {
-            None => None,
-            Some(vals) => Some(vals.join(",")),
-        }
+    #[test]
+    fn when_adding_duplicate_change_row_count_works() {
+        let cache = PinChangesCache::new();
+        cache.cache_change(Change::ChangeDistribution {
+            vpin_id: 1,
+            new_dist_id: 2,
+        });
+        cache.cache_change_at(
+            Change::ChangeDistribution {
+                vpin_id: 1,
+                new_dist_id: 2,
+            },
+            0,
+        );
+        assert_eq!(cache.row_count(), 1);
     }
 }
