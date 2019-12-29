@@ -26,7 +26,7 @@ pub const COL_PC_PKGCOORDID: i32 = 3;
 pub const COL_PC_DISPLAY: i32 = 4;
 
 pub const PC_HEADERS: &[(i32, &'static str, bool)] = &[
-    (COL_PC_CHANGETYPE, "ChangeType", true),
+    (COL_PC_CHANGETYPE, "ChangeType", false),
     (COL_PC_VPINID, "Vpinid", true),
     (COL_PC_DISTID, "Distid", true),
     (COL_PC_PKGCOORDID, "Pkgcoordid", true),
