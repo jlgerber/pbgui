@@ -13,31 +13,31 @@ use std::fmt;
 pub trait VersionPinRowTrait<T> {
     type ReturnType;
     type TableType;
-    /// New up a VersionPinRowTrait of type T
-    ///
-    /// # Arguments
-    /// * `id` the Versionpin Id that the row is describing
-    /// * `dist_id` The distribution's id
-    /// * `pkgcoord_id` - The package coordinate's id.
-    /// * `level` - The level. Generally a show name or facility
-    /// * `role` - The role
-    /// * `platform` - The platform (os)
-    /// * `site` - The site that the versionpin reps
-    /// * `withs` - The number of with packages that the versionpin has associated with it
-    ///
-    /// # Returns
-    /// * A VersionPinRowTrait<T>
-    fn new(
-        id: IdType,
-        dist_id: IdType,
-        pkgcoord_id: IdType,
-        distribution: T,
-        level: T,
-        role: T,
-        platform: T,
-        site: T,
-        withs: i32,
-    ) -> Self;
+    // /// New up a VersionPinRowTrait of type T
+    // ///
+    // /// # Arguments
+    // /// * `id` the Versionpin Id that the row is describing
+    // /// * `dist_id` The distribution's id
+    // /// * `pkgcoord_id` - The package coordinate's id.
+    // /// * `level` - The level. Generally a show name or facility
+    // /// * `role` - The role
+    // /// * `platform` - The platform (os)
+    // /// * `site` - The site that the versionpin reps
+    // /// * `withs` - The number of with packages that the versionpin has associated with it
+    // ///
+    // /// # Returns
+    // /// * A VersionPinRowTrait<T>
+    // fn new(
+    //     id: IdType,
+    //     dist_id: IdType,
+    //     pkgcoord_id: IdType,
+    //     distribution: T,
+    //     level: T,
+    //     role: T,
+    //     platform: T,
+    //     site: T,
+    //     withs: i32,
+    // ) -> Self;
     /// generate a VersionPinRowTrait<T> from a reference to a versionpin table and a row number.
     /// The function is fallible, returning an Option.
     ///
@@ -96,11 +96,9 @@ impl fmt::Debug for VersionPinRow<String> {
 //
 //
 //
-impl VersionPinRowTrait<CppBox<QString>> for VersionPinRow<String> {
-    type ReturnType = VersionPinRow<String>;
-    type TableType = MutPtr<QTableWidget>;
 
-    fn new(
+impl VersionPinRow<String> {
+    pub fn new(
         id: IdType,
         dist_id: IdType,
         pkgcoord_id: IdType,
@@ -123,6 +121,12 @@ impl VersionPinRowTrait<CppBox<QString>> for VersionPinRow<String> {
             withs,
         }
     }
+}
+
+impl VersionPinRowTrait<CppBox<QString>> for VersionPinRow<String> {
+    type ReturnType = VersionPinRow<String>;
+    type TableType = MutPtr<QTableWidget>;
+
     /// Given a reference to the versionpin table, and a row number. return the row
     fn from_table_at_row(
         versionpin_table: &MutPtr<QTableWidget>,
@@ -152,7 +156,7 @@ impl VersionPinRowTrait<CppBox<QString>> for VersionPinRow<String> {
             let platform = versionpin_table.item(row, COL_PLATFORM).text();
             let site = versionpin_table.item(row, COL_SITE).text();
             let withs = versionpin_table.item(row, COL_WITHS).data(2).to_int_0a();
-            Some(VersionPinRow::new(
+            Some(VersionPinRow::<String>::new(
                 vpin_id,
                 dist_id,
                 pkgcoord_id,
@@ -247,11 +251,8 @@ impl fmt::Debug for VersionPinRow<CppBox<QString>> {
     }
 }
 
-impl VersionPinRowTrait<CppBox<QString>> for VersionPinRow<CppBox<QString>> {
-    type ReturnType = VersionPinRow<CppBox<QString>>;
-    type TableType = MutPtr<QTableWidget>;
-
-    fn new(
+impl VersionPinRow<CppBox<QString>> {
+    pub fn new(
         id: IdType,
         dist_id: IdType,
         pkgcoord_id: IdType,
@@ -274,6 +275,11 @@ impl VersionPinRowTrait<CppBox<QString>> for VersionPinRow<CppBox<QString>> {
             withs,
         }
     }
+}
+impl VersionPinRowTrait<CppBox<QString>> for VersionPinRow<CppBox<QString>> {
+    type ReturnType = VersionPinRow<CppBox<QString>>;
+    type TableType = MutPtr<QTableWidget>;
+
     /// Given a reference to the versionpin table, and a row number. return the row
     fn from_table_at_row(
         versionpin_table: &MutPtr<QTableWidget>,
@@ -303,7 +309,7 @@ impl VersionPinRowTrait<CppBox<QString>> for VersionPinRow<CppBox<QString>> {
             let platform = versionpin_table.item(row, COL_PLATFORM).text();
             let site = versionpin_table.item(row, COL_SITE).text();
             let withs = versionpin_table.item(row, COL_WITHS).data(2).to_int_0a();
-            Some(VersionPinRow::new(
+            Some(VersionPinRow::<CppBox<QString>>::new(
                 vpin_id,
                 dist_id,
                 pkgcoord_id,
