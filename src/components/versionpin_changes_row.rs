@@ -10,36 +10,28 @@ use qt_widgets::{
 };
 use std::fmt;
 
-/// Define a VersionPinRowTrait in terms of input: T and out put ReturnType.
-pub trait VersionPinRowTrait<T> {
+/// Define a VersionPinChangesRowTrait in terms of input: T and out put ReturnType.
+pub trait VersionPinChangesRowTrait<T> {
     type ReturnType;
-    /// New up a VersionPinRowTrait of type T
+    /// New up a VersionPinChangesRowTrait of type T
     ///
     /// # Arguments
     /// * `id` the Versionpin Id that the row is describing
     /// * `dist_id` The distribution's id
     /// * `pkgcoord_id` - The package coordinate's id.
     /// * `level` - The level. Generally a show name or facility
-    /// * `role` - The role
-    /// * `platform` - The platform (os)
-    /// * `site` - The site that the versionpin reps
-    /// * `withs` - The number of with packages that the versionpin has associated with it
+    /// * `display` - The change as displayed to the user
     ///
     /// # Returns
-    /// * A VersionPinRowTrait<T>
+    /// * A VersionPinChangesRowTrait<T>
     fn new(
         change_type: ChangeType,
         vpin_id: IdType,
         dist_id: IdType,
         pkgcoord_id: IdType,
-        distribution: T,
-        level: T,
-        role: T,
-        platform: T,
-        site: T,
-        withs: i32,
+        display: T,
     ) -> Self;
-    /// generate a VersionPinRowTrait<T> from a reference to a versionpin table and a row number.
+    /// generate a VersionPinChangesRowTrait<T> from a reference to a versionpin table and a row number.
     /// The function is fallible, returning an Option.
     ///
     /// # Arguments
@@ -58,19 +50,14 @@ pub trait VersionPinRowTrait<T> {
 }
 
 /// Set a the table row
-pub trait VersionPinRowSetterTrait {
-    fn set_table_row(&self, versionpin_table: &mut MutPtr<QTableWidget>, row: i32);
+pub trait VersionPinChangesRowSetterTrait {
+    fn set_table_row(&self, versionpin_changes_table: &mut MutPtr<QTableWidget>, row: i32);
 }
 /// A row of versionpin data
 #[derive(PartialEq, Eq, PartialOrd, Ord)]
-pub struct VersionPinRow<T> {
-    pub id: IdType,
+pub struct VersionPinChangesRow<T> {
+    pub vpin_id: IdType,
     pub dist_id: IdType,
     pub pkgcoord_id: IdType,
-    pub distribution: T,
-    pub level: T,
-    pub role: T,
-    pub platform: T,
-    pub site: T,
-    pub withs: i32,
+    pub display: T,
 }
