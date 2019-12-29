@@ -1,4 +1,4 @@
-use crate::versionpin_row::VersionPinRowSetterTrait;
+use crate::traits::RowSetterTrait;
 use crate::ClientProxy;
 use packybara::packrat::PackratDb;
 use packybara::LtreeSearchMode;

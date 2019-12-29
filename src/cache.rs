@@ -1,6 +1,6 @@
 use crate::change_type::Change;
 use packybara::types::IdType;
-use std::cell::{Cell, RefCell};
+use std::cell::RefCell;
 use std::collections::HashMap;
 /// Caches versionpin changes that the user has selected
 /// in the versionpin popup menu, so that the Pin Changes

@@ -1,8 +1,9 @@
 use crate::cache::PinChangesCache;
 use crate::change_type::{Change, ChangeType};
 use crate::constants::*;
+use crate::traits::RowTrait;
 pub use crate::utility::qs;
-use crate::versionpin_row::{VersionPinRow, VersionPinRowTrait};
+use crate::versionpin_row::VersionPinRow;
 pub use crate::ClientProxy;
 use log;
 use packybara::packrat::PackratDb;
@@ -17,7 +18,6 @@ use qt_widgets::{
 };
 use std::collections::HashMap;
 use std::rc::Rc;
-
 macro_rules! qcolor_blue {
     () => {
         QColor::from_rgb_3a(100, 150, 255)
@@ -336,34 +336,34 @@ fn set_pinchange(
     }
 }
 
-unsafe fn get_coords_from_row(
-    row_widget: &mut MutPtr<QTableWidget>,
-    row: i32,
-) -> (
-    CppBox<QString>,
-    CppBox<QString>,
-    CppBox<QString>,
-    CppBox<QString>,
-    i32,
-    i32,
-    i32,
-) {
-    //level
-    let level = row_widget.item(row, COL_LEVEL).text();
-    let role = row_widget.item(row, COL_ROLE).text();
-    let platform = row_widget.item(row, COL_PLATFORM).text();
-    let site = row_widget.item(row, COL_SITE).text();
-    let vpin_id = row_widget.item(row, COL_ID).data(2);
-    let dist_id = row_widget.item(row, COL_DISTRIBUTION_ID).data(2);
-    let pkgcoord_id = row_widget.item(row, COL_PKGCOORD_ID).data(2);
+// unsafe fn get_coords_from_row(
+//     row_widget: &mut MutPtr<QTableWidget>,
+//     row: i32,
+// ) -> (
+//     CppBox<QString>,
+//     CppBox<QString>,
+//     CppBox<QString>,
+//     CppBox<QString>,
+//     i32,
+//     i32,
+//     i32,
+// ) {
+//     //level
+//     let level = row_widget.item(row, COL_LEVEL).text();
+//     let role = row_widget.item(row, COL_ROLE).text();
+//     let platform = row_widget.item(row, COL_PLATFORM).text();
+//     let site = row_widget.item(row, COL_SITE).text();
+//     let vpin_id = row_widget.item(row, COL_ID).data(2);
+//     let dist_id = row_widget.item(row, COL_DISTRIBUTION_ID).data(2);
+//     let pkgcoord_id = row_widget.item(row, COL_PKGCOORD_ID).data(2);
 
-    (
-        level,
-        role,
-        platform,
-        site,
-        vpin_id.to_int_0a(),
-        dist_id.to_int_0a(),
-        pkgcoord_id.to_int_0a(),
-    )
-}
+//     (
+//         level,
+//         role,
+//         platform,
+//         site,
+//         vpin_id.to_int_0a(),
+//         dist_id.to_int_0a(),
+//         pkgcoord_id.to_int_0a(),
+//     )
+// }

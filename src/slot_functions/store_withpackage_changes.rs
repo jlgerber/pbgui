@@ -1,6 +1,7 @@
 use crate::cache::PinChangesCache;
 use crate::change_type::{Change, ChangeType};
-use crate::versionpin_row::{VersionPinRow, VersionPinRowTrait};
+use crate::traits::RowTrait;
+use crate::versionpin_row::VersionPinRow;
 use qt_core::QString;
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr},
