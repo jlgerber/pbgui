@@ -116,7 +116,7 @@ pub fn choose_alternative_distribution(
                 //     log::info!("new value and old value match. Skipping");
                 //     return;
                 // }
-                let change_qstr = version_change::build_changestr(
+                let change_qstr = distribution_version_change::build_changestr(
                     qs(package).as_ref(),
                     // original version
                     qs(original_version).as_ref(),
@@ -152,7 +152,7 @@ pub fn choose_alternative_distribution(
                 };
                 pinchange_cache.cache_change_at(change, row);
             } else {
-                let change_qstr = version_change::build_changestr(
+                let change_qstr = distribution_version_change::build_changestr(
                     qs(package).as_ref(),
                     // original version
                     qs(version).as_ref(),
@@ -193,23 +193,23 @@ pub fn choose_alternative_distribution(
     }
 }
 
+#[allow(dead_code)]
 // Given
 fn package_and_version_from_dist<'a, T>(dist: T) -> (String, String)
 where
     T: Into<Ref<QString>>,
 {
-    unsafe {
-        let qstr = dist.into();
-        let orig_vpin_table_distribution = qstr.to_std_string();
-        if let &[package, version] = &*orig_vpin_table_distribution.split("-").collect::<Vec<_>>() {
-            (package.to_string(), version.to_string())
-        } else {
-            panic!("unable to extract package and version from row");
-        }
+    let qstr = dist.into();
+    let orig_vpin_table_distribution = qstr.to_std_string();
+    if let &[package, version] = &*orig_vpin_table_distribution.split("-").collect::<Vec<_>>() {
+        (package.to_string(), version.to_string())
+    } else {
+        panic!("unable to extract package and version from row");
     }
 }
+
 //
-mod version_change {
+mod distribution_version_change {
     use super::*;
 
     #[allow(dead_code)]
@@ -240,7 +240,7 @@ mod version_change {
     }
 }
 
-// perform validation
+// perform validation on the pointer inputs
 fn validate_ptrs(
     vpin_tablewidget_ptr: &MutPtr<QTableWidget>,
     root_widget_ptr: &MutPtr<QWidget>,
