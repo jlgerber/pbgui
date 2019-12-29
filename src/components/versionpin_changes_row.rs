@@ -13,24 +13,18 @@ use std::fmt;
 /// Define a VersionPinChangesRowTrait in terms of input: T and out put ReturnType.
 pub trait VersionPinChangesRowTrait<T> {
     type ReturnType;
+    type TableType;
     /// New up a VersionPinChangesRowTrait of type T
     ///
     /// # Arguments
     /// * `id` the Versionpin Id that the row is describing
-    /// * `dist_id` The distribution's id
-    /// * `pkgcoord_id` - The package coordinate's id.
-    /// * `level` - The level. Generally a show name or facility
-    /// * `display` - The change as displayed to the user
+    /// * `context` identify the versionpin by some means
+    /// * `old_value` - the older value .
+    /// * `new_value` - The value we wish to change to
     ///
     /// # Returns
-    /// * A VersionPinChangesRowTrait<T>
-    fn new(
-        change_type: ChangeType,
-        vpin_id: IdType,
-        dist_id: IdType,
-        pkgcoord_id: IdType,
-        display: T,
-    ) -> Self;
+    /// * A VersionPinChangesRow<T>
+    fn new(change_type: ChangeType, context: T, old_value: T, new_value: T) -> Self;
     /// generate a VersionPinChangesRowTrait<T> from a reference to a versionpin table and a row number.
     /// The function is fallible, returning an Option.
     ///
@@ -42,11 +36,9 @@ pub trait VersionPinChangesRowTrait<T> {
     /// * `Some(Self::ReturnType)` if successful
     /// * `None` if unsuccessful
     fn from_table_at_row(
-        versionpin_table: &MutPtr<QTableWidget>,
+        versionpin_table: &Self::TabelType, //MutPtr<QTableWidget>
         row: i32,
     ) -> Option<Self::ReturnType>;
-
-    //fn set_table_row(&self, versionpin_table: &mut MutPtr<QTableWidget>, row: i32);
 }
 
 /// Set a the table row

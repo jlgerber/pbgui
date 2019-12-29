@@ -38,5 +38,11 @@ enum ChangeCandidate {
     ChangeWiths{vpin_id: IdType, withs: Vec<String>}
 }
 
-and store changes like so;
-C
+what would a table look like for this?
+
+| change_type        | context                                                                    | old value                                                         | new value                                                           |
+| ------------------ | -------------------------------------------------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------- |
+| ChangeDistribution | (level: facility, role: any, platform:any, site: any, package: maya)       | 2018.2.3                                                          | 2018.2.4                                                            |
+| NewDistribution    | (level: dev01, role: any, platform:any, site: any, package: maya)          |                                                                   | 2019.0.0                                                            |
+| ChangeWiths        | (level: dev01, role: any, platform:any, site: any, package: maya) 2018.2.3 |                                                                   | [gcc,xerces,modelpublish]                                           |
+| ChangePkgCoord     | dist_id: 12345                                                             | (level: dev01, role: any, platform:any, site: any, package: maya) | (level: dev01, role: model, platform:any, site: any, package: maya) |
