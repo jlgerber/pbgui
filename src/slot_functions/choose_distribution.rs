@@ -85,8 +85,8 @@ pub fn choose_alternative_distribution(
         if *ok_or_cancel_ptr == false {
             log::info!("cancelled");
         } else {
-            let value = new_version.to_std_string();
-            let new_dist_id = match dist_versions.get(value.as_str()) {
+            let new_version_string = new_version.to_std_string();
+            let new_dist_id = match dist_versions.get(new_version_string.as_str()) {
                 Some(id) => id,
                 // TODO: handle this more appropriately
                 None => {
@@ -94,8 +94,8 @@ pub fn choose_alternative_distribution(
                     return;
                 }
             };
-            let new_value = format!("{}-{}", package, value);
-            if orig_vpin_table_distribution == new_value {
+            let new_distribution = format!("{}-{}", package, new_version_string);
+            if orig_vpin_table_distribution == new_distribution {
                 log::info!("new value and old value match. Skipping");
                 return;
             }
@@ -104,25 +104,18 @@ pub fn choose_alternative_distribution(
                 get_coords_from_row(&mut vpin_tablewidget_ptr, r);
             // cache the change. we will use this later to update the db. The rest of
             // the code is for updating the ui
-            let new_value_qstr = QString::from_std_str(new_value);
+            let new_value_qstr = QString::from_std_str(new_distribution);
             // build up new string
             distribution.set_text(&new_value_qstr);
-            // let change_qstr = version_change::build_changestr(
-            //     qs(package).as_ref(),
-            //     // original version
-            //     qs(version).as_ref(),
-            //     // new version
-            //     new_version.as_ref(),
-            //     level.as_ref(),
-            //     role.as_ref(),
-            //     platform.as_ref(),
-            //     site.as_ref(),
-            // );
-
             if pinchange_cache.has_key(pkgcoord_id) {
                 let original_version = pinchange_cache
                     .orig_version_for(vpin_id)
                     .expect("failed to retrieve original version from cache.");
+                // we should remove the update
+                // if new_version_string == original_version {
+                //     log::info!("new value and old value match. Skipping");
+                //     return;
+                // }
                 let change_qstr = version_change::build_changestr(
                     qs(package).as_ref(),
                     // original version
