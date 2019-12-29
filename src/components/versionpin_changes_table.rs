@@ -40,7 +40,10 @@ pub fn create() -> CppBox<QTableWidget> {
             .set_section_resize_mode_1a(ResizeMode::ResizeToContents);
         pinchanges
             .horizontal_header()
-            .set_section_resize_mode_2a(COL_ID, ResizeMode::ResizeToContents);
+            .set_section_resize_mode_1a(ResizeMode::ResizeToContents);
+        // pinchanges
+        //     .horizontal_header()
+        //     .set_section_resize_mode_2a(COL_ID, ResizeMode::ResizeToContents);
         pinchanges
     }
 }
