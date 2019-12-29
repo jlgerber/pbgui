@@ -2,6 +2,7 @@ use crate::cache::PinChangesCache;
 use crate::change_type::{Change, ChangeType};
 use crate::constants::*;
 pub use crate::utility::qs;
+use crate::versionpin_row::{VersionPinRow, VersionPinRowTrait};
 pub use crate::ClientProxy;
 use log;
 use packybara::packrat::PackratDb;
@@ -24,15 +25,15 @@ macro_rules! qcolor_blue {
 }
 use packybara::db::find_all::distributions::FindAllDistributionsRow;
 
-//------------------------------------//
-// choose_alternative_distribution    //
-//------------------------------------//
-// button double click Slot delegates //
-// the work to this function          //
-//------------------------------------//
+//
+// choose_alternative_distribution
+//
+// button double click Slot delegates
+// the work to this function
+//
 pub fn choose_alternative_distribution(
     r: i32,
-    mut vpin_tablewidget_ptr: MutPtr<QTableWidget>,
+    vpin_tablewidget_ptr: MutPtr<QTableWidget>,
     root_widget_ptr: MutPtr<QWidget>,
     mut pinchanges_ptr: MutPtr<QTableWidget>,
     pinchange_cache: Rc<PinChangesCache>,
@@ -99,17 +100,18 @@ pub fn choose_alternative_distribution(
                 log::info!("new value and old value match. Skipping");
                 return;
             }
-            // replace with full get_row
-            let (level, role, platform, site, vpin_id, _dist_id, pkgcoord_id) =
-                get_coords_from_row(&mut vpin_tablewidget_ptr, r);
+            // retrieve the value of the versionpin row
+            let vpin_row =
+                VersionPinRow::<CppBox<QString>>::from_table_at_row(&vpin_tablewidget_ptr, r)
+                    .unwrap();
             // cache the change. we will use this later to update the db. The rest of
             // the code is for updating the ui
             let new_value_qstr = QString::from_std_str(new_distribution);
             // build up new string
             distribution.set_text(&new_value_qstr);
-            if pinchange_cache.has_key(pkgcoord_id) {
+            if pinchange_cache.has_key(vpin_row.pkgcoord_id) {
                 let original_version = pinchange_cache
-                    .orig_version_for(vpin_id)
+                    .orig_version_for(vpin_row.id)
                     .expect("failed to retrieve original version from cache.");
                 // we should remove the update
                 // if new_version_string == original_version {
@@ -122,19 +124,23 @@ pub fn choose_alternative_distribution(
                     qs(original_version).as_ref(),
                     // new version
                     new_version.as_ref(),
-                    level.as_ref(),
-                    role.as_ref(),
-                    platform.as_ref(),
-                    site.as_ref(),
+                    vpin_row.level.as_ref(),
+                    vpin_row.role.as_ref(),
+                    vpin_row.platform.as_ref(),
+                    vpin_row.site.as_ref(),
                 );
-                let row = match pinchange_cache.index(pkgcoord_id) {
+                let row = match pinchange_cache.index(vpin_row.pkgcoord_id) {
                     Some(r) => r,
                     None => {
                         log::error!("ERROR: Problem retrieving row from QT");
                         return;
                     }
                 };
-                log::info!("pinchange cache has pkgcoord {} @ row {}", pkgcoord_id, row);
+                log::info!(
+                    "pinchange cache has pkgcoord {} @ row {}",
+                    vpin_row.pkgcoord_id,
+                    row
+                );
                 if pinchanges_ptr.is_null() {
                     log::error!("pinchanges_ptr is now null");
                     return;
@@ -147,7 +153,7 @@ pub fn choose_alternative_distribution(
                 }
                 item.set_text(&change_qstr);
                 let change = Change::ChangeDistribution {
-                    vpin_id,
+                    vpin_id: vpin_row.id,
                     new_dist_id: *new_dist_id,
                 };
                 pinchange_cache.cache_change_at(change, row);
@@ -158,12 +164,12 @@ pub fn choose_alternative_distribution(
                     qs(version).as_ref(),
                     // new version
                     new_version.as_ref(),
-                    level.as_ref(),
-                    role.as_ref(),
-                    platform.as_ref(),
-                    site.as_ref(),
+                    vpin_row.level.as_ref(),
+                    vpin_row.role.as_ref(),
+                    vpin_row.platform.as_ref(),
+                    vpin_row.site.as_ref(),
                 );
-                pinchange_cache.cache_original_version(vpin_id, version);
+                pinchange_cache.cache_original_version(vpin_row.id, version);
                 let row_cnt = pinchanges_ptr.row_count() + 1;
                 pinchanges_ptr.set_row_count(row_cnt);
 
@@ -171,19 +177,23 @@ pub fn choose_alternative_distribution(
                     &mut pinchanges_ptr,
                     row_cnt,
                     ChangeType::ChangeDistribution,
-                    vpin_id,
+                    vpin_row.id,
                     *new_dist_id,
-                    pkgcoord_id,
+                    vpin_row.pkgcoord_id,
                     change_qstr.as_ref(),
                 );
                 let update_color = qcolor_blue!();
                 distribution.set_foreground(&QBrush::from_q_color(update_color.as_ref()));
                 distribution.table_widget().clear_selection();
                 let idx = pinchange_cache.row_count();
-                log::info!("caching pkgcoord_id {} at row {}", pkgcoord_id, idx);
-                pinchange_cache.cache_dist(pkgcoord_id, idx);
+                log::info!(
+                    "caching pkgcoord_id {} at row {}",
+                    vpin_row.pkgcoord_id,
+                    idx
+                );
+                pinchange_cache.cache_dist(vpin_row.pkgcoord_id, idx);
                 let change = Change::ChangeDistribution {
-                    vpin_id,
+                    vpin_id: vpin_row.id,
                     new_dist_id: *new_dist_id,
                 };
                 pinchange_cache.cache_change(change);
