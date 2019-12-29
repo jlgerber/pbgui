@@ -69,7 +69,7 @@ impl VersionPinRow<String> {
     }
 }
 
-impl RowTrait<CppBox<QString>> for VersionPinRow<String> {
+impl RowTrait for VersionPinRow<String> {
     type ReturnType = VersionPinRow<String>;
     type SourceTableType = MutPtr<QTableWidget>;
 
@@ -219,7 +219,7 @@ impl VersionPinRow<CppBox<QString>> {
         }
     }
 }
-impl RowTrait<CppBox<QString>> for VersionPinRow<CppBox<QString>> {
+impl RowTrait for VersionPinRow<CppBox<QString>> {
     type ReturnType = VersionPinRow<CppBox<QString>>;
     type SourceTableType = MutPtr<QTableWidget>;
 
