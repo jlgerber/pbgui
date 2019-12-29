@@ -1,5 +1,5 @@
 /// Define a VersionPinRowTrait in terms of input: T and out put ReturnType.
-pub trait RowTrait<T> {
+pub trait RowTrait {
     type ReturnType;
     type SourceTableType;
     /// generate a VersionPinRowTrait<T> from a reference to a versionpin table and a row number.
