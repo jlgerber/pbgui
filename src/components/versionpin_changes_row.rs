@@ -2,6 +2,7 @@ use crate::change_type::ChangeType;
 use crate::constants::*;
 use crate::utility::qs;
 use crate::{RowSetterTrait, RowTrait};
+use log;
 use qt_core::QString;
 use qt_thread_conductor::traits::FromQString;
 use qt_thread_conductor::traits::ToQString;
@@ -10,18 +11,6 @@ use qt_widgets::{
     QTableWidget, QTableWidgetItem,
 };
 use std::fmt;
-
-// pub const COL_PC_CHANGETYPE: i32 = 0;
-// pub const COL_PC_CONTEXT: i32 = 1;
-// pub const COL_PC_OLD_VALUE: i32 = 2;
-// pub const COL_PC_NEW_VALUE: i32 = 3;
-
-// pub const PC_HEADERS: &[(i32, &'static str, bool)] = &[
-//     (COL_PC_CHANGETYPE, "ChangeType", false),
-//     (COL_PC_CONTEXT, "context", true),
-//     (COL_PC_OLD_VALUE, "old_value", true),
-//     (COL_PC_NEW_VALUE, "new_value", true),
-// ];
 
 /// A row of versionpin data
 #[derive(PartialEq, Eq, PartialOrd, Ord)]
@@ -99,7 +88,7 @@ impl RowSetterTrait for VersionPinChangesRow<String> {
     type TargetTable = MutPtr<QTableWidget>;
     fn set_table_row(&self, target_table: &mut Self::TargetTable, row: i32) {
         unsafe {
-            // DISTRIBUTION
+            // CHANGETYPE
             let mut table_widget_item = QTableWidgetItem::new();
             table_widget_item.set_text(&qs(&self.change_type));
             target_table.set_item(row, COL_PC_CHANGETYPE, table_widget_item.into_ptr());
@@ -200,6 +189,10 @@ impl RowSetterTrait for VersionPinChangesRow<CppBox<QString>> {
             let mut table_widget_item = QTableWidgetItem::new();
             table_widget_item.set_text(&self.old_value);
             target_table.set_item(row, COL_PC_OLD_VALUE, table_widget_item.into_ptr());
+
+            let mut table_widget_item = QTableWidgetItem::new();
+            table_widget_item.set_text(&qs("->"));
+            target_table.set_item(row, COL_PC_BECOMES, table_widget_item.into_ptr());
 
             // new_VALUE
             let mut table_widget_item = QTableWidgetItem::new();
