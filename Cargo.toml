@@ -1,11 +1,11 @@
 [package]
 name = "pbgui"
-version = "0.18.0"
+version = "0.19.0"
 authors = ["jgerber <jlgerber@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-packybara = {git= "https://github.com/jlgerber/packybara", tag="v0.25.0"}
+packybara = {git= "https://github.com/jlgerber/packybara", tag="v0.26.0"}
 qt_thread_conductor = {git= "https://github.com/jlgerber/rust-qt-conductor", tag="v0.3.0"}
 
 qt_core = "0.4.1"

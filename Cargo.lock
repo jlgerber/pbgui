@@ -705,8 +705,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "packybara"
-version = "0.25.0"
-source = "git+https://github.com/jlgerber/packybara?tag=v0.25.0#c9d59aae41c4ed6fa4662d0ec2abafd4c096bc5d"
+version = "0.26.0"
+source = "git+https://github.com/jlgerber/packybara?tag=v0.26.0#45e96e59658b06daf08897fab05c1825a0820c69"
 dependencies = [
  "chrono 0.4.10 (registry+https://github.com/rust-lang/crates.io-index)",
  "env_logger 0.7.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -754,12 +754,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "pbgui"
-version = "0.18.0"
+version = "0.19.0"
 dependencies = [
  "env_logger 0.7.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.4.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "num_enum 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "packybara 0.25.0 (git+https://github.com/jlgerber/packybara?tag=v0.25.0)",
+ "packybara 0.26.0 (git+https://github.com/jlgerber/packybara?tag=v0.26.0)",
  "qt_core 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "qt_gui 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "qt_thread_conductor 0.3.0 (git+https://github.com/jlgerber/rust-qt-conductor?tag=v0.3.0)",
@@ -1843,7 +1843,7 @@ dependencies = [
 "checksum num_enum 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)" = "be601e38e20a6f3d01049d85801cb9b7a34a8da7a0da70df507bbde7735058c8"
 "checksum num_enum_derive 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)" = "b59f30f6a043f2606adbd0addbf1eef6f2e28e8c4968918b63b7ff97ac0db2a7"
 "checksum opaque-debug 0.2.3 (registry+https://github.com/rust-lang/crates.io-index)" = "2839e79665f131bdb5782e51f2c6c9599c133c6098982a54c794358bf432529c"
-"checksum packybara 0.25.0 (git+https://github.com/jlgerber/packybara?tag=v0.25.0)" = "<none>"
+"checksum packybara 0.26.0 (git+https://github.com/jlgerber/packybara?tag=v0.26.0)" = "<none>"
 "checksum parking_lot 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)" = "92e98c49ab0b7ce5b222f2cc9193fc4efe11c6d0bd4f648e374684a6857b1cfc"
 "checksum parking_lot_core 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)" = "7582838484df45743c8434fbff785e8edf260c28748353d44bc0da32e0ceabf1"
 "checksum pathdiff 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "a3bf70094d203e07844da868b634207e71bfab254fe713171fae9a6e751ccf31"
