@@ -1,7 +1,11 @@
 use crate::cache::PinChangesCache;
 use crate::change_type::{Change, ChangeType};
 use crate::traits::RowTrait;
-use crate::versionpin_row::VersionPinRow;
+use crate::utility::qs;
+use crate::{
+    versionpin_changes_row::{RowSetterTrait, VersionPinChangesRow},
+    versionpin_row::VersionPinRow,
+};
 use qt_core::QString;
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr},
@@ -12,7 +16,7 @@ use std::rc::Rc;
 pub fn store_withpackage_changes(
     withpackage_list: MutPtr<QListWidget>,
     versionpin_table: MutPtr<QTableWidget>,
-    _changes_table: &mut MutPtr<QTableWidget>,
+    changes_table: &mut MutPtr<QTableWidget>,
     cache: Rc<PinChangesCache>,
 ) {
     unsafe {
@@ -36,6 +40,7 @@ pub fn store_withpackage_changes(
             let table_row = table_row.unwrap();
             println!("table row: {:#?}", table_row);
             println!("New Withs:\n{:#?}", &items);
+            let new_withs = items.join(",");
             let change = Change::ChangeWiths {
                 vpin_id: table_row.id,
                 withs: items,
@@ -43,6 +48,14 @@ pub fn store_withpackage_changes(
             cache.cache_change(change);
             //cache.cache_withs(table_row.id, items);
             // store change
+            let change_row = VersionPinChangesRow::<CppBox<QString>>::new(
+                ChangeType::ChangeWiths,
+                table_row.pkgcoord(),
+                qs(""),
+                qs(new_withs),
+            );
+            println!("storing {:?}", change_row);
+            change_row.set_table_row(changes_table, changes_table.row_count());
         }
     }
 }

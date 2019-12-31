@@ -335,6 +335,10 @@ impl RowSetterTrait for VersionPinRow<CppBox<QString>> {
             );
             target_table.set_item(row, COL_PKGCOORD_ID, vpin_table_widget_item.into_ptr());
             target_table.set_column_hidden(COL_PKGCOORD_ID, true);
+
+            if target_table.row_count() + 1 == row {
+                target_table.set_row_count(row);
+            }
         }
     }
 }
@@ -409,6 +413,10 @@ impl RowSetterTrait for FindAllVersionPinsRow {
             );
             target_table.set_item(row, COL_PKGCOORD_ID, vpin_table_widget_item.into_ptr());
             target_table.set_column_hidden(COL_PKGCOORD_ID, true);
+
+            if target_table.row_count() + 1 == row {
+                target_table.set_row_count(row);
+            }
         }
     }
 }

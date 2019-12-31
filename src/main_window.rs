@@ -236,6 +236,7 @@ impl<'a> MainWindow<'a> {
                 // ),
                 save_withpackages: Slot::new(
                     enclose_all! { (pinchange_cache) (mut pinchanges_ptr) move || {
+
                         store_withpackage_changes::store_withpackage_changes(
                             withpackage_list,
                             versionpin_table,

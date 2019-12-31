@@ -1,7 +1,7 @@
 use crate::change_type::ChangeType;
 use crate::constants::*;
 use crate::utility::qs;
-use crate::{RowSetterTrait, RowTrait};
+pub use crate::{RowSetterTrait, RowTrait};
 use log;
 use qt_core::QString;
 use qt_thread_conductor::traits::FromQString;
@@ -88,6 +88,9 @@ impl RowSetterTrait for VersionPinChangesRow<String> {
     type TargetTable = MutPtr<QTableWidget>;
     fn set_table_row(&self, target_table: &mut Self::TargetTable, row: i32) {
         unsafe {
+            if target_table.row_count() == row {
+                target_table.set_row_count(row + 1);
+            }
             // CHANGETYPE
             let mut table_widget_item = QTableWidgetItem::new();
             table_widget_item.set_text(&qs(&self.change_type));
@@ -176,6 +179,9 @@ impl RowSetterTrait for VersionPinChangesRow<CppBox<QString>> {
     type TargetTable = MutPtr<QTableWidget>;
     fn set_table_row(&self, target_table: &mut Self::TargetTable, row: i32) {
         unsafe {
+            if target_table.row_count() == row {
+                target_table.set_row_count(row + 1);
+            }
             // DISTRIBUTION
             let mut table_widget_item = QTableWidgetItem::new();
             table_widget_item.set_text(&self.change_type.to_qstring());
