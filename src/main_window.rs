@@ -212,6 +212,7 @@ impl<'a> MainWindow<'a> {
             // persist data
             //
             let pinchange_cache = Rc::new(PinChangesCache::new());
+            let cache = pinchange_cache.clone();
             //
             // final housekeeping before showing main window
             //
@@ -252,16 +253,13 @@ impl<'a> MainWindow<'a> {
                 distribution_changed: SlotOfQItemSelectionQItemSelection::new(
                     move |selected: Ref<QItemSelection>, _deselected: Ref<QItemSelection>| {
                         let ind = selected.indexes();
-                        // dont need this anymore. However, this is how you go about
-                        // casting...
-                        //let mut withpackage: MutPtr<QListWidget> =
-                        //    withpackage_ptr.list.widget().dynamic_cast_mut();
                         if ind.count_0a() > 0 {
                             let txid = ind.at(COL_REV_TXID);
                             update_withpackages(
                                 txid.row(),
                                 &mut vpin_tablewidget_ptr,
                                 &mut withpackage_ptr.list,
+                                cache.clone(),
                             );
                         } else {
                             withpackage_ptr.list.clear();
