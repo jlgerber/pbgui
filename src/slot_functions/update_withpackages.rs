@@ -34,7 +34,13 @@ pub fn update_withpackages(
                     withpackage_list.add_item_q_string(&qs(item));
                 }
             } else {
-                panic!("should not be here");
+                log::error!(
+                    "Missing cached change::ChangeWiths for row {} an vpin {}",
+                    row,
+                    vpin_id
+                );
+                return;
+                //panic!("should not be here");
             }
         } else {
             let mut withs_finder = packratdb.find_all_versionpin_withs(vpin_id);
