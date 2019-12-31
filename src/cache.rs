@@ -1,23 +1,22 @@
-use crate::change_type::Change;
+use crate::change_type::{Change, ChangeType};
 use packybara::types::IdType;
 use std::cell::RefCell;
 use std::collections::HashMap;
+type ChangeIdx = usize;
 /// Caches versionpin changes that the user has selected
 /// in the versionpin popup menu, so that the Pin Changes
 /// table can stay in sync before the user  hits `save`
 #[derive(Debug)]
 pub struct PinChangesCache {
     /// a cache of pkgcoord id => changes ui cache
-    // TODO: pkgcoord_index needs to get more sophisticated once I
-    // start storing different changes. Specifically, any addition
-    // of new distributions.. perhaps i need to change this out for
-    // an enum Update{ Change{pkgcoord_id}, NewDistribution{dist_id,pkgcoords}}
     //pkgcoord_id => row #
     pkgcoord_index: RefCell<HashMap<IdType, i32>>,
     // versionpin_id => version (string)
     original_version: RefCell<HashMap<IdType, String>>,
+    change_vec: RefCell<Vec<Change>>,
     // row # => Change
-    changes: RefCell<HashMap<i32, Change>>,
+    changes: RefCell<HashMap<i32, ChangeIdx>>,
+    changes_row: RefCell<HashMap<ChangeIdx, i32>>,
 }
 
 impl PinChangesCache {
@@ -33,14 +32,18 @@ impl PinChangesCache {
         Self {
             pkgcoord_index: RefCell::new(HashMap::new()),
             original_version: RefCell::new(HashMap::new()),
+            change_vec: RefCell::new(Vec::new()),
             changes: RefCell::new(HashMap::new()),
+            changes_row: RefCell::new(HashMap::new()),
         }
     }
     /// Reset the instance to its initial value
     pub fn reset(&self) {
         self.pkgcoord_index.borrow_mut().clear();
         self.original_version.borrow_mut().clear();
+        self.change_vec.borrow_mut().clear();
         self.changes.borrow_mut().clear();
+        self.changes_row.borrow_mut().clear();
     }
     /// Return the number of rows in the ui
     /// # Arguments
@@ -103,22 +106,22 @@ impl PinChangesCache {
     /// * None otherwise
     pub fn change_at(&self, idx: i32) -> Option<Change> {
         match self.changes.borrow().get(&idx) {
-            Some(c) => Some(c.clone()),
+            Some(c) => Some(self.change_vec.borrow()[*c].clone()),
             None => None,
         }
     }
-    /// Retrieve the change for the distribution at a given index,
-    /// removing it in the process
-    ///
-    /// # Arguments
-    /// * `idx` - The row index to retrieve the Change at, removing it in the process
-    ///
-    /// # Returns
-    /// * Some wrapped Change if successful (removing it from self in the proxess)
-    /// * None otherwise
-    pub fn remove_change_at(&self, idx: i32) -> Option<Change> {
-        self.changes.borrow_mut().remove(&idx)
-    }
+    // /// Retrieve the change for the distribution at a given index,
+    // /// removing it in the process
+    // ///
+    // /// # Arguments
+    // /// * `idx` - The row index to retrieve the Change at, removing it in the process
+    // ///
+    // /// # Returns
+    // /// * Some wrapped Change if successful (removing it from self in the proxess)
+    // /// * None otherwise
+    // pub fn remove_change_at(&self, idx: i32) -> Option<Change> {
+    //     self.changes.borrow_mut().remove(&idx)
+    // }
     /// Return a vector of change indexes.
     /// Storing the index of the change allows us to delete rows
     ///
@@ -146,6 +149,38 @@ impl PinChangesCache {
             None => None,
         }
     }
+    /// Retrieve the row that a change is in, if it is in fact in a row
+    ///
+    /// # Arguments
+    /// * `change` - A reference to a Change instance
+    ///
+    /// # Returns
+    /// * An Option wrapped index of the row that
+    pub fn change_row(&self, change: &Change) -> Option<i32> {
+        for (idx, value) in self.change_vec.borrow().iter().enumerate() {
+            if value == change {
+                return match self.changes_row.borrow().get(&idx) {
+                    Some(v) => Some(*v),
+                    _ => None,
+                };
+            }
+        }
+        None
+    }
+    /// use the retrieve the row of the change using its id().
+    pub fn change_row_from_id(&self, id: u64, ctype: &ChangeType) -> Option<i32> {
+        for (idx, value) in self.change_vec.borrow().iter().enumerate() {
+            if value.is_a(&ctype) {
+                if value.id() == id {
+                    return match self.changes_row.borrow().get(&idx) {
+                        Some(v) => Some(*v),
+                        _ => None,
+                    };
+                }
+            }
+        }
+        None
+    }
     /// Insert a change into the cache, incrementing the
     /// last index in the process.
     ///
@@ -161,7 +196,10 @@ impl PinChangesCache {
     /// * `change` - The Change instance to cache.
     /// * `idx - The index to cache the Change at.
     pub fn cache_change_at(&self, change: Change, idx: i32) {
-        self.changes.borrow_mut().insert(idx, change);
+        self.change_vec.borrow_mut().push(change);
+        let change_idx = self.change_vec.borrow().len() - 1;
+        self.changes.borrow_mut().insert(idx, change_idx);
+        self.changes_row.borrow_mut().insert(change_idx, idx);
     }
     /// Inserts a distribution's id and index into the cache
     ///
