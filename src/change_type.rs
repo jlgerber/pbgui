@@ -4,6 +4,8 @@ use packybara::types::IdType;
 use qt_core::QString;
 pub use qt_thread_conductor::traits::{FromQString, ToQString};
 use qt_widgets::cpp_core::{CppBox, Ref};
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
 use std::str::FromStr;
 use strum_macros::{AsRefStr, EnumDiscriminants, EnumString, IntoStaticStr};
 /// The Change that the user has requested.
@@ -41,6 +43,48 @@ pub enum Change {
         withs: Vec<String>,
     },
     Unknown,
+}
+
+fn calculate_hash<T: Hash>(t: &T) -> u64 {
+    let mut s = DefaultHasher::new();
+    t.hash(&mut s);
+    s.finish()
+}
+
+impl Change {
+    /// Retrieve an identifing id.
+    pub fn id(&self) -> u64 {
+        match self {
+            Change::ChangeDistribution { vpin_id, .. } => *vpin_id as u64,
+            Change::AddDistribution {
+                package,
+                version,
+                level,
+                role,
+                platform,
+                site,
+            } => {
+                let val = format!(
+                    "{}-{}-{}-{}-{}-{}",
+                    package, version, level, role, platform, site
+                );
+                calculate_hash(&val)
+            }
+            Change::ChangePkgCoord { vpin_id, .. } => *vpin_id as u64,
+            Change::ChangeWiths { vpin_id, .. } => *vpin_id as u64,
+            Change::Unknown => panic!("unable to retrieve id for unknown type"),
+        }
+    }
+    /// Determine whether a change is of a particular change type
+    pub fn is_a(&self, ctype: &ChangeType) -> bool {
+        match self {
+            Change::ChangeDistribution { .. } => ctype == &ChangeType::ChangeDistribution,
+            Change::AddDistribution { .. } => ctype == &ChangeType::AddDistribution,
+            Change::ChangePkgCoord { .. } => ctype == &ChangeType::ChangePkgCoord,
+            Change::ChangeWiths { .. } => ctype == &ChangeType::ChangeWiths,
+            Change::Unknown => ctype == &ChangeType::Unknown,
+        }
+    }
 }
 
 impl ToQString for ChangeType {
