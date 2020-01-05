@@ -22,6 +22,7 @@ impl WithToolbar {
 ///
 /// # Returns
 /// * A pointer to the Withs List Widget
+/*
 pub fn create(splitter: &mut MutPtr<QSplitter>) -> WithToolbar {
     unsafe {
         // create the inner withpackage
@@ -65,4 +66,70 @@ pub fn create(splitter: &mut MutPtr<QSplitter>) -> WithToolbar {
         frame_ptr.set_layout(layout.into_ptr());
         WithToolbar::new(withpackage_listwidget_ptr, edit_action, save_action)
     }
+}
+*/
+pub fn create(splitter: &mut MutPtr<QSplitter>) -> WithToolbar {
+    unsafe {
+        let (mut toolbar, withpackage_listwidget_ptr) = create_withwidget(splitter);
+
+        // add actions
+        let edit_action = toolbar.add_action_1a(&qs("Edit"));
+        let save_action = toolbar.add_action_1a(&qs("Save"));
+
+        setup_buttons(toolbar, edit_action, save_action);
+
+        WithToolbar::new(withpackage_listwidget_ptr, edit_action, save_action)
+    }
+}
+
+unsafe fn setup_buttons(
+    toolbar: MutPtr<QToolBar>,
+    edit_action: MutPtr<QAction>,
+    save_action: MutPtr<QAction>
+) {
+    // configure buttons
+    let mut edit_button: MutPtr<QToolButton> =
+        toolbar.widget_for_action(edit_action).dynamic_cast_mut();
+    edit_button.set_object_name(&qs("WithpackagesToolbarButton"));
+
+    let mut save_button: MutPtr<QToolButton> =
+        toolbar.widget_for_action(save_action).dynamic_cast_mut();
+    save_button.set_object_name(&qs("WithpackagesToolbarButton"));
+}
+
+unsafe fn create_withwidget(
+    splitter: &mut MutPtr<QSplitter>
+    //edit_action: MutPtr<QAction>,
+    //save_action: MutPtr<QAction>
+) -> (MutPtr<QToolBar>, MutPtr<QListWidget>) {
+    // create the top frame
+    let mut frame = QFrame::new_0a();
+    let mut layout = create_vlayout();
+
+    // create the toolbar
+    let mut toolbar = QToolBar::from_q_string(&qs("WithPackage Toolbar"));
+    let  toolbar_ptr = toolbar.as_mut_ptr();
+    toolbar.set_floatable(false);
+    toolbar.set_movable(false);
+    // add spacer widget
+    let mut spacer = QWidget::new_0a();
+    let sp = QSizePolicy::new_2a(Policy::Expanding, Policy::Fixed);
+    spacer.set_size_policy_1a(sp.as_ref());
+    toolbar.add_widget(spacer.into_ptr());
+
+    // create the list widget
+    let mut withpackage_listwidget = QListWidget::new_0a();
+    withpackage_listwidget.set_object_name(&qs("WithsListWidget"));
+    withpackage_listwidget.set_drag_enabled(true);
+    withpackage_listwidget.set_drag_drop_mode(DragDropMode::InternalMove);
+    // create a pointer to it
+    let withpackage_listwidget_ptr = withpackage_listwidget.as_mut_ptr();
+
+    layout.add_widget(toolbar.into_ptr());
+    layout.add_widget(withpackage_listwidget.into_ptr());
+
+    frame.set_layout(layout.into_ptr());
+    splitter.add_widget(frame.into_ptr());
+
+    (toolbar_ptr, withpackage_listwidget_ptr)
 }
