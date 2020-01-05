@@ -19,29 +19,12 @@ use crate::{
 use log;
 use packybara::packrat::PackratDb;
 use qt_core::{
-    QItemSelection,
-    //QListOfQModelIndex,
-    QPoint,
-    QString,
-    Slot,
-    SlotOfBool,
-    //SlotOfInt,
-    SlotOfQItemSelectionQItemSelection,
+    QItemSelection, QPoint, QString, Slot, SlotOfBool, SlotOfQItemSelectionQItemSelection,
 };
 use qt_widgets::{
-    cpp_core::{CppBox, MutPtr, Ref},
-    QAction,
-    QLineEdit,
-    //QListWidgetItem,
-    QMainWindow,
-    QMenu,
-    QMenuBar,
-    QPushButton,
-    QTableWidget,
-    QVBoxLayout,
-    QWidget,
-    //SlotOfQListOfQModelIndex,
-    SlotOfQPoint,
+    cpp_core::{CppBox, MutPtr, Ref as QRef},
+    QAction, QLineEdit, QMainWindow, QMenu, QMenuBar, QPushButton, QTableWidget, QVBoxLayout,
+    QWidget, SlotOfQPoint,
 };
 use std::rc::Rc;
 
@@ -109,7 +92,6 @@ pub struct MainWindow<'a> {
     _toggle_vpin_changes: SlotOfBool<'a>,
     revision_changed: SlotOfQItemSelectionQItemSelection<'a>,
     distribution_changed: SlotOfQItemSelectionQItemSelection<'a>,
-    //withpackage_moved: SlotOfQListOfQModelIndex<'a>,
     edit_withpackages: Slot<'a>,
     save_withpackages: Slot<'a>,
 }
@@ -129,7 +111,7 @@ impl<'a> MainWindow<'a> {
     /// slot implementation to crate::slot_functions.
     /// Even so, the main structure is a bit nested.
     ///
-    /// ```
+    /// ```ignore
     /// main_window (QMainApplication)
     /// - main_window_bar (QMenuBar)
     /// - main_widget (QWidget)
@@ -219,7 +201,7 @@ impl<'a> MainWindow<'a> {
             versionpin_table_splitter::set_sizes(&mut vpin_table_splitter);
             withs_splitter::set_sizes(&mut with_splitter_ptr);
             resize_window_to_screen(&mut main_window_ptr, 0.8);
-            load_stylesheet(main_window_ptr);
+            load_stylesheet("/Users/jgerber/bin/pbgui.qss", main_window_ptr);
             main_window_ptr.show();
             let withpackage_save = withpackage_ptr.save.clone();
             let withpackage_edit = withpackage_ptr.edit.clone();
@@ -231,7 +213,7 @@ impl<'a> MainWindow<'a> {
             let form = MainWindow {
                 // problem with signal signature in library being incompatible with slot. wait for a fix.
                 // withpackage_moved: SlotOfQListOfQModelIndex::new(
-                //     |item: Ref<QListOfQModelIndex>| {
+                //     |item: QRef<QListOfQModelIndex>| {
                 //         println!("item moved");
                 //     },
                 // ),
@@ -251,7 +233,7 @@ impl<'a> MainWindow<'a> {
                     println!("edit");
                 }),
                 distribution_changed: SlotOfQItemSelectionQItemSelection::new(
-                    move |selected: Ref<QItemSelection>, _deselected: Ref<QItemSelection>| {
+                    move |selected: QRef<QItemSelection>, _deselected: QRef<QItemSelection>| {
                         let ind = selected.indexes();
                         if ind.count_0a() > 0 {
                             let txid = ind.at(COL_REV_TXID);
@@ -267,7 +249,7 @@ impl<'a> MainWindow<'a> {
                     },
                 ),
                 revision_changed: SlotOfQItemSelectionQItemSelection::new(
-                    move |selected: Ref<QItemSelection>, _deselected: Ref<QItemSelection>| {
+                    move |selected: QRef<QItemSelection>, _deselected: QRef<QItemSelection>| {
                         let ind = selected.indexes();
                         if ind.count_0a() > 0 {
                             let txid = ind.at(COL_REV_TXID);
@@ -281,11 +263,11 @@ impl<'a> MainWindow<'a> {
                 clear_package: Slot::new(move || {
                     line_edit_ptr.clear();
                 }),
-                show_line_edit_menu: SlotOfQPoint::new(move |pos: Ref<QPoint>| {
+                show_line_edit_menu: SlotOfQPoint::new(move |pos: QRef<QPoint>| {
                     let _action = line_edit_popup_menu_ptr
                         .exec_1a_mut(line_edit_ptr.map_to_global(pos).as_ref());
                 }),
-                show_dist_menu: SlotOfQPoint::new(move |pos: Ref<QPoint>| {
+                show_dist_menu: SlotOfQPoint::new(move |pos: QRef<QPoint>| {
                     if vpin_tablewidget_ptr.is_null() {
                         log::error!("vpin_tablewidget_ptr is null");
                         return;

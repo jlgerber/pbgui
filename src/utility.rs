@@ -8,8 +8,8 @@ use qt_widgets::{
 pub fn qs<S: AsRef<str>>(input: S) -> CppBox<QString> {
     QString::from_std_str(input.as_ref())
 }
-
-pub fn load_stylesheet(mut parent_widget: MutPtr<QMainWindow>) {
+//"/Users/jgerber/bin/pbgui.qss"
+pub fn load_stylesheet(sheet: &str, mut widget: MutPtr<QMainWindow>) {
     unsafe {
         // Does not work
         //QResource::add_search_path(&QString::from_std_str("/Users/jgerber/bin/"));
@@ -19,12 +19,12 @@ pub fn load_stylesheet(mut parent_widget: MutPtr<QMainWindow>) {
         //    "/Users/jgerber/bin/pbgui.rcc",
         //));
 
-        let mut file = QFile::from_q_string(&QString::from_std_str("/Users/jgerber/bin/pbgui.qss"));
+        let mut file = QFile::from_q_string(&QString::from_std_str(sheet));
         if file.open_1a(QFlags::from(OpenModeFlag::ReadOnly)) {
             let mut text_stream = QTextStream::new();
             text_stream.set_device(file.as_mut_ptr());
             let stylesheet = text_stream.read_all();
-            parent_widget.set_style_sheet(stylesheet.as_ref());
+            widget.set_style_sheet(stylesheet.as_ref());
         } else {
             log::warn!("stylesheet not found");
         }

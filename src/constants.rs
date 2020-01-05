@@ -1,3 +1,7 @@
+//! This module deals with column ids, names, and initial visibility.
+//!
+
+/// COL is for the versionpin table
 pub const COL_ID: i32 = 0;
 pub const COL_DISTRIBUTION: i32 = 1;
 pub const COL_LEVEL: i32 = 2;
@@ -19,6 +23,7 @@ pub const HEADERS: &[(i32, &'static str, bool)] = &[
     (COL_PKGCOORD_ID, "PkdCoord Id", true),
 ];
 
+/// COL_PC -> Pin COnfiguraiton Table
 pub const COL_PC_CHANGETYPE: i32 = 0;
 pub const COL_PC_CONTEXT: i32 = 1;
 pub const COL_PC_OLD_VALUE: i32 = 2;
@@ -33,7 +38,7 @@ pub const PC_HEADERS: &[(i32, &'static str, bool)] = &[
     (COL_PC_BECOMES, "becomes", false),
     (COL_PC_NEW_VALUE, "new_value", false),
 ];
-//
+// COL_REV Revision Table
 pub const COL_REV_TXID: i32 = 0;
 pub const COL_REV_AUTHOR: i32 = 1;
 pub const COL_REV_DATETIME: i32 = 2;
@@ -46,6 +51,7 @@ pub const REV_HEADERS: &[(i32, &'static str, bool)] = &[
     (COL_REV_COMMENT, "Comment", false),
 ];
 
+/// COL_CHNG Revision Change table
 pub const COL_CHNG_ID: i32 = 0;
 pub const COL_CHNG_TXID: i32 = 1;
 pub const COL_CHNG_ACTION: i32 = 2;
