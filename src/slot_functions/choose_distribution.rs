@@ -13,7 +13,7 @@ use packybara::types::IdType;
 use qt_core::QString;
 use qt_gui::{QBrush, QColor};
 use qt_widgets::{
-    cpp_core::{CppBox, MutPtr, Ref /*Ptr,*/},
+    cpp_core::{CppBox, MutPtr, Ref as QRef},
     qt_core::QStringList,
     QInputDialog, QTableWidget, QWidget,
 };
@@ -111,9 +111,6 @@ pub fn choose_alternative_distribution(
             // build up new string
             distribution.set_text(&new_value_qstr);
             if pinchange_cache.has_key(vpin_row.pkgcoord_id) {
-                // let original_version = pinchange_cache
-                //     .orig_version_for(vpin_row.id)
-                //     .expect("failed to retrieve original version from cache.");
 
                 let row = match pinchange_cache.index(vpin_row.pkgcoord_id) {
                     Some(r) => r,
@@ -164,7 +161,7 @@ pub fn choose_alternative_distribution(
 // Given
 fn package_and_version_from_dist<'a, T>(dist: T) -> (String, String)
 where
-    T: Into<Ref<QString>>,
+    T: Into<QRef<QString>>,
 {
     let qstr = dist.into();
     let orig_vpin_table_distribution = qstr.to_std_string();
@@ -181,13 +178,13 @@ mod distribution_version_change {
 
     #[allow(dead_code)]
     pub(super) fn build_changestr(
-        package: Ref<QString>,
-        original_version: Ref<QString>,
-        new_version: Ref<QString>,
-        level: Ref<QString>,
-        role: Ref<QString>,
-        platform: Ref<QString>,
-        site: Ref<QString>,
+        package: QRef<QString>,
+        original_version: QRef<QString>,
+        new_version: QRef<QString>,
+        level: QRef<QString>,
+        role: QRef<QString>,
+        platform: QRef<QString>,
+        site: QRef<QString>,
     ) -> CppBox<QString> {
         unsafe {
             let changestr = qs(

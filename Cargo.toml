@@ -7,7 +7,7 @@ edition = "2018"
 [dependencies]
 packybara = {git= "https://github.com/jlgerber/packybara", tag="v0.29.2"}
 qt_thread_conductor = {git= "https://github.com/jlgerber/rust-qt-conductor", tag="v0.3.0"}
-listitem = {git= "https://github.com/jlgerber/listview", tag="v0.9.1"}
+listitem = {git= "https://github.com/jlgerber/listview", tag="v0.11.0"}
 qt_core = "0.4.1"
 qt_gui = "0.4.1"
 qt_widgets = "0.4.1"

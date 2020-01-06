@@ -9,24 +9,23 @@ use crate::{
 use qt_core::QString;
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr},
-    QListView, QTableWidget,
+     QTableWidget,
 };
 use std::rc::Rc;
 use std::cell::RefCell;
  use listitem::ItemList;
-use crate::components::withpackage_widget::WithToolbar;
 
 /// add the withpackage change to the listx`
 pub fn store_withpackage_changes(
-    withpackage_list: Rc<RefCell<WithToolbar>>,
+    item_list: Rc<RefCell<ItemList>>,
     versionpin_table: MutPtr<QTableWidget>,
     changes_table: &mut MutPtr<QTableWidget>,
     cache: Rc<PinChangesCache>,
 ) {
     unsafe {
 
-        let mut items = withpackage_list.borrow().itemlist.borrow().items();
-        println!("after items");
+        let  items = item_list.borrow().items();
+
         // get current versionpin distribution_id
         let selection_model = versionpin_table.selection_model();
         if selection_model.has_selection() {
@@ -39,8 +38,6 @@ pub fn store_withpackage_changes(
                 return;
             }
             let table_row = table_row.unwrap();
-            println!("table row: {:#?}", table_row);
-            println!("New Withs:\n{:#?}", &items);
 
             let new_withs = items.join(",");
             let change = Change::ChangeWiths {
