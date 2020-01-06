@@ -189,8 +189,10 @@ impl<'a> MainWindow<'a> {
             //
             // create the WithPackage
             //
-            let mut withpackage_ptr = withpackage_widget::create(&mut with_splitter_ptr);
-            //
+            let  withpackage_ptr = withpackage_widget::create(with_splitter_ptr);
+            let  with_package_ptr2 = withpackage_ptr.clone();
+            let  with_package_ptr3 = withpackage_ptr.clone();
+
             // persist data
             //
             let pinchange_cache = Rc::new(PinChangesCache::new());
@@ -203,11 +205,11 @@ impl<'a> MainWindow<'a> {
             resize_window_to_screen(&mut main_window_ptr, 0.8);
             load_stylesheet("/Users/jgerber/bin/pbgui.qss", main_window_ptr);
             main_window_ptr.show();
-            let withpackage_save = withpackage_ptr.save.clone();
-            let withpackage_edit = withpackage_ptr.edit.clone();
-            let withpackage_list = withpackage_ptr.list.clone();
+            let withpackage_save = withpackage_ptr.borrow_mut().save.clone();
+            let withpackage_edit = withpackage_ptr.borrow_mut().edit.clone();
+            let withpackage_list = withpackage_ptr.borrow_mut().itemlist.borrow_mut().view;
             let versionpin_table = vpin_tablewidget_ptr.clone();
-            //
+            let itemlist_ptr =  withpackage_ptr.borrow_mut().itemlist.clone();
             // Create the MainWindow instance, set up signals and slots, and return
             // the newly minted instance. We are done.
             let form = MainWindow {
@@ -219,9 +221,8 @@ impl<'a> MainWindow<'a> {
                 // ),
                 save_withpackages: Slot::new(
                     enclose_all! { (pinchange_cache) (mut pinchanges_ptr) move || {
-
                         store_withpackage_changes::store_withpackage_changes(
-                            withpackage_list,
+                            with_package_ptr2.clone(),
                             versionpin_table,
                             &mut pinchanges_ptr,//revision_changes_table,
                             pinchange_cache.clone(),
@@ -232,7 +233,7 @@ impl<'a> MainWindow<'a> {
                 edit_withpackages: Slot::new(move || {
                     println!("edit");
                 }),
-                distribution_changed: SlotOfQItemSelectionQItemSelection::new(
+                distribution_changed: SlotOfQItemSelectionQItemSelection::new( enclose! { (itemlist_ptr)
                     move |selected: QRef<QItemSelection>, _deselected: QRef<QItemSelection>| {
                         let ind = selected.indexes();
                         if ind.count_0a() > 0 {
@@ -240,13 +241,13 @@ impl<'a> MainWindow<'a> {
                             update_withpackages(
                                 txid.row(),
                                 &mut vpin_tablewidget_ptr,
-                                &mut withpackage_ptr.list,
+                                with_package_ptr3.clone(),
                                 cache.clone(),
                             );
                         } else {
-                            withpackage_ptr.list.clear();
+                            itemlist_ptr.borrow_mut().clear();
                         }
-                    },
+                    }}
                 ),
                 revision_changed: SlotOfQItemSelectionQItemSelection::new(
                     move |selected: QRef<QItemSelection>, _deselected: QRef<QItemSelection>| {

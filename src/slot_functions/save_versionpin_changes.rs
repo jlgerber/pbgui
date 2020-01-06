@@ -10,7 +10,6 @@ use packybara::packrat::PackratDb;
 use qt_widgets::{cpp_core::MutPtr, QInputDialog, QMessageBox, QPushButton, QTableWidget, QWidget};
 use std::rc::Rc;
 use whoami;
-// TODO: clear usage_ptr
 pub fn save_versionpin_changes(
     root_widget_ptr: MutPtr<QWidget>,
     pinchanges_ptr: &mut MutPtr<QTableWidget>,

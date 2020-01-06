@@ -24,5 +24,7 @@
     <file>images/pin_us.png</file>
     <file>images/pin.png</file>
     <file>images/sailboat.png</file>
+    <file>images/radio_btn_sel.svg</file>
+    <file>images/radio_btn.svg</file>
 </qresource>
 </RCC>

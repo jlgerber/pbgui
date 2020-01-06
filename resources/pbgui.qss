@@ -258,3 +258,80 @@ QScrollBar::sub-line:vertical {
     subcontrol-position: left;
     subcontrol-origin: margin;
 } */
+
+
+QToolBar#WithsToolBar {
+    border: none;
+}
+QListView#WithsListView {
+    background-color: rgb(80,80,80);
+    padding:5px;
+}
+
+QListView#WithsListView::item {
+    border: 2px solid rgb(160,220,250);
+    margin: 2px;
+    background-color: rgb(80,160,200);
+    border-radius: 2px;
+}
+
+QListView#WithsListView::item:selected { /*:active */
+    background-color: rgb(110,190,250);
+}
+
+
+#ItemComboWidget {
+    padding-top: 6px;
+    padding-bottom: 10px;
+}
+
+
+#WithsToolbarModeButton {
+    margin: 0px;
+    padding: 0px;
+    border: none;
+}
+#WithsToolbarModeButton:checked {
+    border:none;
+    background: transparent;
+}
+
+QLabel#WithsCBLabel {
+    padding-right: 10px;
+}
+
+QComboBox#WithsComboBox {
+    border: none;
+    border-radius: 3px;
+    padding: 1px 18px 1px 3px;
+    min-width: 6em;
+    border-top-left-radius: 6px;
+    border-bottom-left-radius: 6px;
+}
+
+QComboBox#WithsComboBox:on { /* shift the text when the popup opens */
+    padding-top: 3px;
+    padding-left: 4px;
+}
+
+QComboBox#WithsComboBox:disabled {
+    background:rgb(40,40,40);
+}
+
+QComboBox#WithsComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 20px;
+    background: rgb(60,60,60);
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+    border:none;
+}
+
+QComboBox#WithsComboBox::down-arrow {
+    color: white;
+    image: url(:/images/dropdown.png);
+    width: 10px;
+    height: 10px;
+}
+
