@@ -14,7 +14,7 @@ use crate::{
     update_withpackages::update_withpackages,
     utility::{create_hlayout, create_vlayout, load_stylesheet, qs, resize_window_to_screen},
     versionpin_table, versionpin_table_splitter, withpackage_widget, withs_splitter,
-    LeftToolBarActions,
+    LeftToolBarActions
 };
 
 use log;
@@ -26,7 +26,7 @@ use qt_gui::QKeySequence;
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr, Ref as QRef},
     QAction, QLineEdit, QMainWindow, QMenu, QMenuBar, QPushButton, QTableWidget, QVBoxLayout,
-    QWidget, SlotOfQPoint, QShortcut
+    QWidget, SlotOfQPoint, QShortcut, QHBoxLayout
 };
 use std::rc::Rc;
 
@@ -137,18 +137,27 @@ impl<'a> MainWindow<'a> {
             let mut top_toolbar_hlayout = create_hlayout();
             let mut top_toolbar_hlayout_ptr = top_toolbar_hlayout.as_mut_ptr();
 
+
+            // create query button
+            let mut query_button_ptr = query_button::create(&mut top_toolbar_hlayout_ptr);
+            query_button_ptr.set_object_name(&qs("QueryButton"));
+
+            // testing hiding them
+            //let mut tmplayout = QHBoxLayout::new_0a();
             // create the comboboxes
-            let mut combobox_ctrls =
-                search_comboboxes::create(&mut db, &mut top_toolbar_hlayout_ptr);
+           let mut combobox_ctrls =
+               search_comboboxes::create(&mut db,
+                                         //&mut tmplayout.into_ptr());
+                                        &mut top_toolbar_hlayout_ptr);
 
             // create the package line edit
             let (mut line_edit_ptr, mut line_edit_popup_menu, choose_line_edit_clear_action) =
                 package_lineedit::create(&mut top_toolbar_hlayout_ptr);
             let mut line_edit_popup_menu_ptr = line_edit_popup_menu.as_mut_ptr();
-
-            // create query button
-            let mut query_button_ptr = query_button::create(&mut top_toolbar_hlayout_ptr);
-            query_button_ptr.set_object_name(&qs("QueryButton"));
+//
+//            // create query button
+//            let mut query_button_ptr = query_button::create(&mut top_toolbar_hlayout_ptr);
+//            query_button_ptr.set_object_name(&qs("QueryButton"));
 
             // create the toolbar, passing in its layout with previously registered
             // widgets. The QToolBar will assume ownership

@@ -120,9 +120,9 @@ unsafe fn setup_levels_cb<'b>(
     //let pixmap = icon.pixmap_q_size(&QSize::new_2a(50, 50));
     let mut pxlabel = QPushButton::from_q_string(&QString::from_std_str(""));
     pxlabel.set_object_name(&qs("LevelIcon"));
-    pxlabel.set_minimum_width(24); //70
-    pxlabel.set_maximum_width(24); //70
-    pxlabel.set_minimum_height(24);
+    //pxlabel.set_minimum_width(24); //70
+    //pxlabel.set_maximum_width(24); //70
+    //pxlabel.set_minimum_height(24);
     let label = QLabel::from_q_string(&qs("Level"));
     let mut hlayout = create_hlayout();
     hlayout.add_widget(pxlabel.into_ptr());
@@ -159,9 +159,9 @@ unsafe fn setup_roles_cb<'b>(
     grpbox.set_object_name(&qs("ComboWidget"));
     let mut pxlabel = QPushButton::from_q_string(&QString::from_std_str(""));
     pxlabel.set_object_name(&qs("RoleIcon"));
-    pxlabel.set_minimum_width(24); //70
-    pxlabel.set_maximum_width(24); //70
-    pxlabel.set_minimum_height(24);
+    //pxlabel.set_minimum_width(24); //70
+    //pxlabel.set_maximum_width(24); //70
+    //pxlabel.set_minimum_height(24);
     let label = QLabel::from_q_string(&qs("Role"));
     let mut hlayout = create_hlayout();
     hlayout.add_widget(pxlabel.into_ptr());
@@ -194,9 +194,9 @@ unsafe fn setup_platforms_cb<'b>(
     grpbox.set_object_name(&qs("ComboWidget"));
     let mut pxlabel = QPushButton::from_q_string(&QString::from_std_str(""));
     pxlabel.set_object_name(&qs("PlatformIcon"));
-    pxlabel.set_minimum_width(24);
-    pxlabel.set_maximum_width(24);
-    pxlabel.set_minimum_height(24);
+    //pxlabel.set_minimum_width(24);
+    //pxlabel.set_maximum_width(24);
+    //pxlabel.set_minimum_height(24);
     let label = QLabel::from_q_string(&qs("Platform"));
     let mut hlayout = create_hlayout();
     hlayout.add_widget(pxlabel.into_ptr());
@@ -229,9 +229,9 @@ unsafe fn setup_sites_cb<'b>(
     grpbox.set_object_name(&qs("ComboWidget"));
     let mut pxlabel = QPushButton::from_q_string(&QString::from_std_str(""));
     pxlabel.set_object_name(&qs("SiteIcon"));
-    pxlabel.set_minimum_width(24);
-    pxlabel.set_maximum_width(24);
-    pxlabel.set_minimum_height(24);
+    //pxlabel.set_minimum_width(24);
+    //pxlabel.set_maximum_width(24);
+    //pxlabel.set_minimum_height(24);
     let label = QLabel::from_q_string(&qs("Site"));
     let mut hlayout = create_hlayout();
     hlayout.add_widget(pxlabel.into_ptr());
