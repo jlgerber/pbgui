@@ -1,6 +1,7 @@
 use crate::constants::*;
 use crate::ClientProxy;
 use packybara::packrat::PackratDb;
+use packybara::traits::*;
 use packybara::OrderDirection;
 use packybara::OrderRevisionBy;
 use qt_core::{QString, QVariant};

@@ -1,4 +1,5 @@
 use crate::utility::{create_hlayout, qs};
+use packybara::db::traits::PBFind;
 use packybara::packrat::PackratDb;
 use qt_widgets::{
     cpp_core::MutPtr, qt_core::QString, QComboBox, QFrame, QHBoxLayout, QLabel, QPushButton,

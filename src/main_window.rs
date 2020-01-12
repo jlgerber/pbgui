@@ -15,6 +15,7 @@ use crate::{
     versionpin_table, versionpin_table_splitter, withpackage_widget, withs_splitter, ClientProxy,
     LeftToolBarActions,
 };
+use packybara::traits::*;
 
 use log;
 use packybara::packrat::PackratDb;

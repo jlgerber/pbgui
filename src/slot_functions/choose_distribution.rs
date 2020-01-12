@@ -9,6 +9,7 @@ use crate::versionpin_row::VersionPinRow;
 pub use crate::ClientProxy;
 use log;
 use packybara::packrat::PackratDb;
+use packybara::traits::*;
 use packybara::types::IdType;
 use qt_core::QString;
 use qt_gui::{QBrush, QColor};
@@ -17,8 +18,10 @@ use qt_widgets::{
     qt_core::QStringList,
     QInputDialog, QTableWidget, QWidget,
 };
+
 use std::collections::HashMap;
 use std::rc::Rc;
+
 macro_rules! qcolor_blue {
     () => {
         QColor::from_rgb_3a(100, 150, 255)
@@ -111,7 +114,6 @@ pub fn choose_alternative_distribution(
             // build up new string
             distribution.set_text(&new_value_qstr);
             if pinchange_cache.has_key(vpin_row.pkgcoord_id) {
-
                 let row = match pinchange_cache.index(vpin_row.pkgcoord_id) {
                     Some(r) => r,
                     None => {

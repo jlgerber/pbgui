@@ -1,6 +1,7 @@
 use crate::traits::RowSetterTrait;
 use crate::ClientProxy;
 use packybara::packrat::PackratDb;
+use packybara::traits::*;
 use packybara::LtreeSearchMode;
 use pbgui_toolbar::toolbar;
 use qt_widgets::{cpp_core::MutPtr, QAction, QTableWidget};

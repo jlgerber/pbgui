@@ -1,14 +1,12 @@
-use crate::utility::{create_vlayout};
+use crate::utility::create_vlayout;
 //use qt_widgets::q_abstract_item_view::DragDropMode;
-use qt_widgets::{
-    cpp_core::{MutPtr}, QFrame,
-    QWidget,QSplitter
-};
-use std::rc::Rc;
-use std::cell::RefCell;
-use listitem::ItemList;
 use crate::ClientProxy;
+use listitem::ItemList;
 use packybara::packrat::PackratDb;
+use packybara::traits::*;
+use qt_widgets::{cpp_core::MutPtr, QFrame, QSplitter, QWidget};
+use std::cell::RefCell;
+use std::rc::Rc;
 
 /// create and return the ItemList struct, which provides the withs list widget,
 /// given the parent splitter.
@@ -19,26 +17,25 @@ use packybara::packrat::PackratDb;
 /// # Returns
 /// * A pointer to the ItemList
 pub fn create<'c>(splitter: MutPtr<QSplitter>) -> Rc<RefCell<ItemList<'c>>> {
-
-        unsafe {
-        let  itemlist = create_withwidget(splitter);
+    unsafe {
+        let itemlist = create_withwidget(splitter);
 
         let client = ClientProxy::connect().expect("Unable to connect via ClientProxy");
         let mut packratdb = PackratDb::new(client);
 
-        let packages = packratdb.find_all_packages().query().expect("unable to find packages");
+        let packages = packratdb
+            .find_all_packages()
+            .query()
+            .expect("unable to find packages");
         let packages = packages.into_iter().map(|x| x.name).collect::<Vec<_>>();
 
         itemlist.borrow_mut().set_cb_items(packages);
 
-       itemlist
-
+        itemlist
     }
 }
 
-unsafe fn create_withwidget<'z>(
-    mut splitter: MutPtr<QSplitter>
-) ->Rc<RefCell<ItemList<'z>>> {
+unsafe fn create_withwidget<'z>(mut splitter: MutPtr<QSplitter>) -> Rc<RefCell<ItemList<'z>>> {
     // create the top frame
     let mut frame = QFrame::new_0a();
     let frame_ptr = frame.as_mut_ptr();

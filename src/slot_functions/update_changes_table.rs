@@ -3,6 +3,7 @@ use crate::utility::{update_row, RowType};
 use crate::ClientProxy;
 use log;
 use packybara::packrat::PackratDb;
+use packybara::traits::*;
 use qt_widgets::{cpp_core::MutPtr, QTableWidget};
 
 /// Update the changes table with new data
