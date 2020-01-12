@@ -3,7 +3,6 @@ use env_logger;
 use env_logger::Env;
 //use log;
 use packybara::packrat::PackratDb;
-use packybara::traits::*;
 use pbgui::utility::qs;
 use pbgui::{main_window, ClientProxy};
 use qt_core::QResource;

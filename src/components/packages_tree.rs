@@ -4,7 +4,7 @@ use pbgui_tree::tree;
 use crate::ClientProxy;
 use packybara::packrat::PackratDb;
 use packybara::traits::*;
-use qt_widgets::{cpp_core::MutPtr, QFrame, QSplitter, QWidget};
+use qt_widgets::{cpp_core::MutPtr, QFrame, QSplitter};
 use std::cell::RefCell;
 use std::rc::Rc;
 
