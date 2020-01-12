@@ -35,6 +35,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut vpin_finder = PackratDb::new(client);
     QApplication::init(|_app| unsafe {
         let _result = QResource::register_resource_q_string(&qs("/Users/jgerber/bin/pbgui.rcc"));
+        let _result =
+            QResource::register_resource_q_string(&qs("/Users/jgerber/bin/pbgui_tree.rcc"));
         let mut _form = main_window::MainWindow::new(&mut vpin_finder);
         //let available_size = app.desktop().available_geometry().size();
         QApplication::exec()

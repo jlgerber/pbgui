@@ -4,7 +4,7 @@ use crate::{
     center_widget,
     choose_distribution::choose_alternative_distribution,
     constants::COL_REV_TXID,
-    left_toolbar,
+    left_toolbar, packages_tree,
     save_versionpin_changes::save_versionpin_changes,
     select_history::select_history,
     store_withpackage_changes,
@@ -20,6 +20,7 @@ use packybara::traits::*;
 use log;
 use packybara::packrat::PackratDb;
 use pbgui_toolbar::toolbar;
+use pbgui_tree::tree;
 use qt_core::{
     QItemSelection, QPoint, QString, Slot, SlotOfBool, SlotOfQItemSelectionQItemSelection,
 };
@@ -75,6 +76,7 @@ pub struct MainWindow<'a> {
     _db: &'a mut PackratDb,
     _main: CppBox<QMainWindow>,
     _main_toolbar: Rc<RefCell<toolbar::MainToolbar>>,
+    _packages_tree: Rc<RefCell<tree::DistributionTreeView<'a>>>,
     _vpin_table: MutPtr<QTableWidget>,
     _pinchanges_list: MutPtr<QTableWidget>,
     _save_button: MutPtr<QPushButton>,
@@ -93,6 +95,7 @@ pub struct MainWindow<'a> {
     // show_line_edit_menu: SlotOfQPoint<'a>,
     select_pin_changes: Slot<'a>,
     select_history: Slot<'a>,
+    toggle_packages_tree: SlotOfBool<'a>,
     toggle_withs: SlotOfBool<'a>,
     toggle_vpin_changes: SlotOfBool<'a>,
     revision_changed: SlotOfQItemSelectionQItemSelection<'a>,
@@ -134,6 +137,7 @@ impl<'a> MainWindow<'a> {
             let main_toolbar_ptr = main_toolbar.clone();
             // create left toolbar
             let left_toolbar_actions = left_toolbar::create(&mut main_window_ptr);
+            let view_packages = left_toolbar_actions.view_packages;
             let view_withs = left_toolbar_actions.view_withs;
             let view_pin_changes = left_toolbar_actions.view_vpin_changes;
             let search_shows = left_toolbar_actions.search_shows;
@@ -141,6 +145,8 @@ impl<'a> MainWindow<'a> {
             // create the splitter between the center widget and the withs
             let mut with_splitter_ptr = withs_splitter::create(&mut main_layout_ptr);
 
+            // create packages treeview on left side
+            let packages_ptr = packages_tree::create(with_splitter_ptr);
             // create the center widget
             let mut center_layout_ptr = center_widget::create(&mut with_splitter_ptr);
 
@@ -171,7 +177,7 @@ impl<'a> MainWindow<'a> {
 
             let mut dist_popup_menu_ptr = dist_popup_menu.as_mut_ptr();
 
-            // create the with package list on the right hand side
+            // create the with with package list on the right hand side
             let item_list_ptr = withpackage_widget::create(with_splitter_ptr);
             item_list_ptr.borrow_mut().set_add_mode();
             item_list_ptr.borrow_mut().set_cb_max_visible_items(30);
@@ -203,6 +209,7 @@ impl<'a> MainWindow<'a> {
                 _db: db,
                 _main: main_window,
                 _main_toolbar: main_toolbar,
+                _packages_tree: packages_ptr,
                 _vpin_table: vpin_tablewidget_ptr,
                 _save_button: save_button,
                 _pinchanges_list: pinchanges_ptr,
@@ -321,9 +328,12 @@ impl<'a> MainWindow<'a> {
                     select_history(&mut revisions_ptr, &mut stacked_ptr);
                     controls_ptr.set_current_index(1);
                 }),
-
+                toggle_packages_tree: SlotOfBool::new(move |state: bool| {
+                    let mut frame = with_splitter_ptr.widget(0);
+                    frame.set_visible(state);
+                }),
                 toggle_withs: SlotOfBool::new(move |state: bool| {
-                    let mut frame = with_splitter_ptr.widget(1);
+                    let mut frame = with_splitter_ptr.widget(2);
                     frame.set_visible(state);
                 }),
 
@@ -379,6 +389,10 @@ impl<'a> MainWindow<'a> {
                 .selection_model()
                 .selection_changed()
                 .connect(&main_window_inst.distribution_changed);
+
+            view_packages
+                .toggled()
+                .connect(&main_window_inst.toggle_packages_tree);
 
             view_withs.toggled().connect(&main_window_inst.toggle_withs);
 
