@@ -756,13 +756,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "pbgui"
-version = "0.23.0"
+version = "0.24.0"
 dependencies = [
  "env_logger 0.7.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "listitem 0.11.0 (git+https://github.com/jlgerber/listview?tag=v0.11.0)",
  "log 0.4.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "num_enum 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "packybara 0.29.2 (git+https://github.com/jlgerber/packybara?tag=v0.29.2)",
+ "pbgui-toolbar 0.3.1 (git+https://github.com/jlgerber/pbgui-toolbar?tag=v0.3.1)",
  "qt_core 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "qt_gui 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "qt_thread_conductor 0.3.0 (git+https://github.com/jlgerber/rust-qt-conductor?tag=v0.3.0)",
@@ -771,6 +772,21 @@ dependencies = [
  "structopt 0.3.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "strum 0.17.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "strum_macros 0.17.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "whoami 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "pbgui-toolbar"
+version = "0.3.1"
+source = "git+https://github.com/jlgerber/pbgui-toolbar?tag=v0.3.1#56ea5125813bc012ca7e479828f2086a3108f1cf"
+dependencies = [
+ "log 0.4.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "packybara 0.29.2 (git+https://github.com/jlgerber/packybara?tag=v0.29.2)",
+ "qt_core 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "qt_gui 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "qt_ui_tools 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "qt_widgets 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rustqt-utils 0.2.0 (git+https://github.com/jlgerber/rustqt-utils?tag=v0.2.0)",
  "whoami 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -1181,6 +1197,18 @@ dependencies = [
 name = "rustc-demangle"
 version = "0.1.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "rustqt-utils"
+version = "0.2.0"
+source = "git+https://github.com/jlgerber/rustqt-utils?tag=v0.2.0#7309fb743b5db772e296ec5ce8b5a0aa5d06df7c"
+dependencies = [
+ "log 0.4.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "qt_core 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "qt_gui 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "qt_ui_tools 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "qt_widgets 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
+]
 
 [[package]]
 name = "rustversion"
@@ -1716,6 +1744,7 @@ dependencies = [
 "checksum parking_lot 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)" = "92e98c49ab0b7ce5b222f2cc9193fc4efe11c6d0bd4f648e374684a6857b1cfc"
 "checksum parking_lot_core 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)" = "7582838484df45743c8434fbff785e8edf260c28748353d44bc0da32e0ceabf1"
 "checksum pathdiff 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "a3bf70094d203e07844da868b634207e71bfab254fe713171fae9a6e751ccf31"
+"checksum pbgui-toolbar 0.3.1 (git+https://github.com/jlgerber/pbgui-toolbar?tag=v0.3.1)" = "<none>"
 "checksum percent-encoding 2.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "d4fd5641d01c8f18a23da7b6fe29298ff4b55afcccdf78973b24cf3175fee32e"
 "checksum phf 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)" = "3dfb61232e34fcb633f43d12c58f83c1df82962dcdfa565a4e866ffc17dafe12"
 "checksum phf_shared 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)" = "c00cf8b9eafe68dde5e9eaa2cef8ee84a9336a47d566ec55ca16589633b65af7"
@@ -1760,6 +1789,7 @@ dependencies = [
 "checksum ritual_common 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)" = "28d30de34c9683bedc6f0b1f5a3ef0bb613df7ff7e1833c767eeed45f1a9d2af"
 "checksum rust-argon2 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)" = "4ca4eaef519b494d1f2848fc602d18816fed808a981aedf4f1f00ceb7c9d32cf"
 "checksum rustc-demangle 0.1.16 (registry+https://github.com/rust-lang/crates.io-index)" = "4c691c0e608126e00913e33f0ccf3727d5fc84573623b8d65b2df340b5201783"
+"checksum rustqt-utils 0.2.0 (git+https://github.com/jlgerber/rustqt-utils?tag=v0.2.0)" = "<none>"
 "checksum rustversion 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)" = "3a0538bd897e17257b0128d2fd95c2ed6df939374073a36166051a79e2eb7986"
 "checksum ryu 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)" = "bfa8506c1de11c9c4e4c38863ccbe02a305c8188e85a05a784c9e11e1c3910c8"
 "checksum scopeguard 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "b42e15e59b18a828bbf5c58ea01debb36b9b096346de35d941dcb89009f24a0d"

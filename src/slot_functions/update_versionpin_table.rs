@@ -2,7 +2,10 @@ use crate::traits::RowSetterTrait;
 use crate::ClientProxy;
 use packybara::packrat::PackratDb;
 use packybara::LtreeSearchMode;
-use qt_widgets::{cpp_core::MutPtr, QAction, QComboBox, QLineEdit, QTableWidget};
+use pbgui_toolbar::toolbar;
+use qt_widgets::{cpp_core::MutPtr, QAction, QTableWidget};
+use std::cell::RefCell;
+use std::rc::Rc;
 use std::str::FromStr;
 
 /// update the main versionpin table by gathering the user's requested query parameters from    
@@ -12,13 +15,7 @@ use std::str::FromStr;
 ///                         
 pub fn update_vpin_table(
     // direction
-    dir_ptr: MutPtr<QComboBox>,
-    // package
-    line_edit_ptr: MutPtr<QLineEdit>,
-    level_ptr: MutPtr<QComboBox>,
-    role_ptr: MutPtr<QComboBox>,
-    platform_ptr: MutPtr<QComboBox>,
-    site_ptr: MutPtr<QComboBox>,
+    toolbar: Rc<RefCell<toolbar::MainToolbar>>,
     search_shows: &MutPtr<QAction>,
     mut vpin_tablewidget_ptr: MutPtr<QTableWidget>,
 ) {
@@ -28,12 +25,12 @@ pub fn update_vpin_table(
     let mut vpin_finder = packratdb.find_all_versionpins();
 
     unsafe {
-        let dirtxt = dir_ptr.current_text().to_std_string();
-        let line_edit_txt = line_edit_ptr.text().to_std_string();
-        let showtxt = level_ptr.current_text().to_std_string();
-        let roletxt = role_ptr.current_text().to_std_string();
-        let platformtxt = platform_ptr.current_text().to_std_string();
-        let sitetxt = site_ptr.current_text().to_std_string();
+        let dirtxt = toolbar.borrow().dir.current_text().to_std_string();
+        let line_edit_txt = toolbar.borrow().line_edit.text().to_std_string();
+        let showtxt = toolbar.borrow().level.current_text().to_std_string();
+        let roletxt = toolbar.borrow().role.current_text().to_std_string();
+        let platformtxt = toolbar.borrow().platform.current_text().to_std_string();
+        let sitetxt = toolbar.borrow().site.current_text().to_std_string();
 
         vpin_finder
             .level(showtxt.as_str())

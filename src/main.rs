@@ -20,8 +20,7 @@ pub struct PbGui {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-
-        let opt = PbGui::from_args();
+    let opt = PbGui::from_args();
     if let PbGui {
         loglevel: Some(ref level),
         ..
@@ -39,5 +38,4 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         //let available_size = app.desktop().available_geometry().size();
         QApplication::exec()
     });
-    Ok(())
 }

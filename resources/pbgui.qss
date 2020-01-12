@@ -28,9 +28,6 @@ QDockWidget:title {
     margin: 4px;
     margin-right: 6px;
 }
-#QueryButton {
-    padding: 6px;
-}
 
 QWidget#HistoryWidget {
     padding: 0px;
@@ -108,17 +105,7 @@ QHeaderView::section#RevisionsHeader, QHeaderView::section#ChangesHeader {
 QFrame > QLabel {
     margin-right: 10px;
 }
-#ComboWidget {
-    border: 1px solid rgb(80,80,80);
-    border-left: none;
-     padding: 10px;
-     background: rgb(60,60,60);
-}
-#FirstComboWidget {
-    border: 1px solid rgb(80,80,80);
-    padding: 10px;
-    background: rgb(60,60,60);
-}
+/*  
  QComboBox {
     border: 1px solid gray;
     border-radius: 3px;
@@ -126,14 +113,8 @@ QFrame > QLabel {
     min-width: 6em;
     background: rgb(80,80,80);
 } 
-QComboBox#TopCB {
-    border: none;
-    padding: 1px 18px 1px 3px;
-    min-width: 6em;
-    background: rgb(60,60,60);
-}
 
-QComboBox:on { /* shift the text when the popup opens */
+QComboBox:on { 
     padding-top: 3px;
     padding-left: 4px;
 }
@@ -145,8 +126,8 @@ QComboBox::drop-down {
 
     border-left-width: 1px;
     border-left-color: darkgray;
-    border-left-style: solid; /* just a single line */
-    border-top-right-radius: 3px; /* same radius as the QComboBox */
+    border-left-style: solid; 
+    border-top-right-radius: 3px; 
     border-bottom-right-radius: 3px;
 }
 
@@ -156,10 +137,8 @@ QComboBox::down-arrow {
     width: 10px;
     height: 10px;
    
-}
-QComboBox#TopCB::down-arrow {
- left: 4px;
-}
+} */
+
 QToolBar#LeftToolBar {
     border: none; 
     spacing: 20px;
@@ -186,87 +165,11 @@ QFrame#ButtonFrame  {
 
 }
 
-QPushButton#QueryButton {
-    border: 1px solid rgb(101,101,101);
-    border-radius: 25px;
-    background: rgb(80,80,80);
-    width: 30px;
-    height: 30px;
-    image: url(:/images/magnify_us_med.png);
-}
-
-QPushButton#QueryButton::hover {
-    background: rgb(90,90,90);
-    image: url(:/images/magnify.png);
-}
-
-QPushButton#QueryButton:pressed {
-    image: url(:/images/magnify.png);
-    border: 1px solid rgb(131,131,131);
-    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
-    stop: 0 #006DCC, stop: .6 #006DCC,stop: 1.0 #0033BF);
-}
-
-QPushButton#LevelIcon {
-    background: transparent;
-    image: url(:images/volume.png);
-    margin-bottom:6px;
-    margin-top:4px;
-    margin-right:5px;
-}
-QPushButton#RoleIcon {
-    background: transparent;
-    image: url(:images/facehappy.png);
-    /* margin: 5px; */
-    margin-bottom:6px;
-    margin-top:4px;
-    margin-right:5px;
-}
-QPushButton#PlatformIcon {
-    background: transparent;
-    image: url(:images/computer2.png);
-    /* margin: 5px; */
-    margin-bottom:6px;
-    margin-top:4px;
-    margin-right:5px;
-}
-QPushButton#SiteIcon {
-    background: transparent;
-    image: url(:images/earth.png);
-    /* margin: 5px; */
-    margin-bottom:6px;
-    margin-top:4px;
-    margin-right:5px;
-}
-
-/* 
-QScrollBar:vertical {
-    border: 2px solid grey;
-    background: #32CC99;
-    height: 15px;
-    margin: 0px 20px 0 20px;
-} */
 
 QScrollBar::handle:vertical {
     background: rgb(80,80,80);
     min-width: 20px;
 }
-/* 
-QScrollBar::add-line:vertical {
-    border: 2px solid grey;
-    background: #32CC99;
-    width: 20px;
-    subcontrol-position: right;
-    subcontrol-origin: margin;
-}
-
-QScrollBar::sub-line:vertical {
-    border: 2px solid grey;
-    background: #32CC99;
-    width: 20px;
-    subcontrol-position: left;
-    subcontrol-origin: margin;
-} */
 
 
 QToolBar#WithsToolBar {
@@ -286,12 +189,6 @@ QListView#WithsListView::item {
 
 QListView#WithsListView::item:selected { /*:active */
     background-color: rgb(110,190,250);
-}
-
-
-#ItemComboWidget {
-    padding-top: 6px;
-    padding-bottom: 10px;
 }
 
 

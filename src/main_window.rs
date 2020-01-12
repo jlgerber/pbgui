@@ -4,30 +4,31 @@ use crate::{
     center_widget,
     choose_distribution::choose_alternative_distribution,
     constants::COL_REV_TXID,
-    left_toolbar, package_lineedit, query_button,
+    left_toolbar,
     save_versionpin_changes::save_versionpin_changes,
-    search_comboboxes,
     select_history::select_history,
-    store_withpackage_changes, top_toolbar,
+    store_withpackage_changes,
     update_changes_table::update_changes_table,
     update_versionpin_table::update_vpin_table,
     update_withpackages::update_withpackages,
-    utility::{create_hlayout, create_vlayout, load_stylesheet, qs, resize_window_to_screen},
-    versionpin_table, versionpin_table_splitter, withpackage_widget, withs_splitter,
-    LeftToolBarActions
+    utility::{create_vlayout, load_stylesheet, qs, resize_window_to_screen},
+    versionpin_table, versionpin_table_splitter, withpackage_widget, withs_splitter, ClientProxy,
+    LeftToolBarActions,
 };
 
 use log;
 use packybara::packrat::PackratDb;
+use pbgui_toolbar::toolbar;
 use qt_core::{
     QItemSelection, QPoint, QString, Slot, SlotOfBool, SlotOfQItemSelectionQItemSelection,
 };
 use qt_gui::QKeySequence;
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr, Ref as QRef},
-    QAction, QLineEdit, QMainWindow, QMenu, QMenuBar, QPushButton, QTableWidget, QVBoxLayout,
-    QWidget, SlotOfQPoint, QShortcut, QHBoxLayout
+    QAction, QMainWindow, QMenu, QMenuBar, QPushButton, QShortcut, QTableWidget, QVBoxLayout,
+    QWidget, SlotOfQPoint,
 };
+use std::cell::RefCell;
 use std::rc::Rc;
 
 // makes it simpler to deal with the need to clone. Saw this here:
@@ -72,15 +73,13 @@ macro_rules! enclose_all {
 pub struct MainWindow<'a> {
     _db: &'a mut PackratDb,
     _main: CppBox<QMainWindow>,
-    _query_button: MutPtr<QPushButton>,
-    _pkg_line_edit: MutPtr<QLineEdit>,
+    _main_toolbar: Rc<RefCell<toolbar::MainToolbar>>,
     _vpin_table: MutPtr<QTableWidget>,
     _pinchanges_list: MutPtr<QTableWidget>,
     _save_button: MutPtr<QPushButton>,
     _pin_changes_button: MutPtr<QPushButton>,
     _history_button: MutPtr<QPushButton>,
     _dist_popup_menu: CppBox<QMenu>,
-    _package_popup_menu: CppBox<QMenu>,
     _dist_popup_action: MutPtr<QAction>,
     _left_toolbar_actions: LeftToolBarActions,
     search_shortcut: MutPtr<QShortcut>,
@@ -89,8 +88,8 @@ pub struct MainWindow<'a> {
     save_clicked: Slot<'a>,
     choose_distribution_triggered: Slot<'a>,
     show_dist_menu: SlotOfQPoint<'a>,
-    clear_package: Slot<'a>,
-    show_line_edit_menu: SlotOfQPoint<'a>,
+    //clear_package: Slot<'a>,
+    // show_line_edit_menu: SlotOfQPoint<'a>,
     select_pin_changes: Slot<'a>,
     select_history: Slot<'a>,
     toggle_withs: SlotOfBool<'a>,
@@ -125,44 +124,13 @@ impl<'a> MainWindow<'a> {
     /// ----- center_layout (QVBoxLayourt)
     /// ---- item_list_ptr (MutPtr<QListWidget>)
     /// ```
-    pub fn new(mut db: &'a mut PackratDb) -> MainWindow<'a> {
+    pub fn new(db: &'a mut PackratDb) -> MainWindow<'a> {
         unsafe {
             // create the main window, menus, central widget and layout
             let (mut main_window, main_widget_ptr, mut main_layout_ptr) = create_main_window();
             let mut main_window_ptr = main_window.as_mut_ptr();
-            //
-            // Create the top toolbar which contains the search controls
-            //
-            // create the horizontal layout
-            let mut top_toolbar_hlayout = create_hlayout();
-            let mut top_toolbar_hlayout_ptr = top_toolbar_hlayout.as_mut_ptr();
-
-
-            // create query button
-            let mut query_button_ptr = query_button::create(&mut top_toolbar_hlayout_ptr);
-            query_button_ptr.set_object_name(&qs("QueryButton"));
-
-            // testing hiding them
-            //let mut tmplayout = QHBoxLayout::new_0a();
-            // create the comboboxes
-           let mut combobox_ctrls =
-               search_comboboxes::create(&mut db,
-                                         //&mut tmplayout.into_ptr());
-                                        &mut top_toolbar_hlayout_ptr);
-
-            // create the package line edit
-            let (mut line_edit_ptr, mut line_edit_popup_menu, choose_line_edit_clear_action) =
-                package_lineedit::create(&mut top_toolbar_hlayout_ptr);
-            let mut line_edit_popup_menu_ptr = line_edit_popup_menu.as_mut_ptr();
-//
-//            // create query button
-//            let mut query_button_ptr = query_button::create(&mut top_toolbar_hlayout_ptr);
-//            query_button_ptr.set_object_name(&qs("QueryButton"));
-
-            // create the toolbar, passing in its layout with previously registered
-            // widgets. The QToolBar will assume ownership
-            top_toolbar::create(&mut main_window_ptr, top_toolbar_hlayout);
-
+            let main_toolbar = Rc::new(RefCell::new(create_top_toolbar(main_window_ptr.clone())));
+            let main_toolbar_ptr = main_toolbar.clone();
             // create left toolbar
             let left_toolbar_actions = left_toolbar::create(&mut main_window_ptr);
             let view_withs = left_toolbar_actions.view_withs;
@@ -209,7 +177,8 @@ impl<'a> MainWindow<'a> {
 
             // shortcuts
             let key_seq = QKeySequence::from_q_string(&qs("Ctrl+Return"));
-            let search_shortcut = QShortcut::new_2a(key_seq.as_ref(), item_list_ptr.borrow_mut().main);
+            let search_shortcut =
+                QShortcut::new_2a(key_seq.as_ref(), item_list_ptr.borrow_mut().main);
 
             // persist data
             let pinchange_cache = Rc::new(PinChangesCache::new());
@@ -232,14 +201,13 @@ impl<'a> MainWindow<'a> {
             let main_window_inst = MainWindow {
                 _db: db,
                 _main: main_window,
+                _main_toolbar: main_toolbar,
                 _vpin_table: vpin_tablewidget_ptr,
-                _query_button: query_button_ptr,
                 _save_button: save_button,
-                _pkg_line_edit: line_edit_ptr,
                 _pinchanges_list: pinchanges_ptr,
                 _dist_popup_menu: dist_popup_menu,
                 _dist_popup_action: choose_dist_action,
-                _package_popup_menu: line_edit_popup_menu,
+                // _package_popup_menu: line_edit_popup_menu,
                 _pin_changes_button: pinchanges_button_ptr,
                 _history_button: history_button_ptr,
                 _left_toolbar_actions: left_toolbar_actions,
@@ -256,7 +224,8 @@ impl<'a> MainWindow<'a> {
                     }},
                 ),
 
-                distribution_changed: SlotOfQItemSelectionQItemSelection::new( enclose! { (item_list_ptr)
+                distribution_changed: SlotOfQItemSelectionQItemSelection::new(
+                    enclose! { (item_list_ptr)
                     move |selected: QRef<QItemSelection>, _deselected: QRef<QItemSelection>| {
                         let ind = selected.indexes();
                         if ind.count_0a() > 0 {
@@ -270,7 +239,7 @@ impl<'a> MainWindow<'a> {
                         } else {
                             item_list_ptr.borrow_mut().clear();
                         }
-                    }}
+                    }},
                 ),
 
                 revision_changed: SlotOfQItemSelectionQItemSelection::new(
@@ -286,15 +255,14 @@ impl<'a> MainWindow<'a> {
                     },
                 ),
 
-                clear_package: Slot::new(move || {
-                    line_edit_ptr.clear();
-                }),
+                // clear_package: Slot::new(move || {
+                //     line_edit_ptr.clear();
+                // }),
 
-                show_line_edit_menu: SlotOfQPoint::new(move |pos: QRef<QPoint>| {
-                    let _action = line_edit_popup_menu_ptr
-                        .exec_1a_mut(line_edit_ptr.map_to_global(pos).as_ref());
-                }),
-
+                // show_line_edit_menu: SlotOfQPoint::new(move |pos: QRef<QPoint>| {
+                //     let _action = line_edit_popup_menu_ptr
+                //         .exec_1a_mut(line_edit_ptr.map_to_global(pos).as_ref());
+                // }),
                 show_dist_menu: SlotOfQPoint::new(move |pos: QRef<QPoint>| {
                     if vpin_tablewidget_ptr.is_null() {
                         log::error!("vpin_tablewidget_ptr is null");
@@ -308,27 +276,22 @@ impl<'a> MainWindow<'a> {
                         .exec_1a_mut(vpin_tablewidget_ptr.map_to_global(pos).as_ref());
                 }),
 
-                save_clicked: Slot::new(enclose! { (pinchange_cache) move || {
+                save_clicked: Slot::new(enclose! { (pinchange_cache, main_toolbar_ptr) move || {
                     save_versionpin_changes(
                         main_widget_ptr,
                         &mut pinchanges_ptr,
-                        &mut query_button_ptr,
+                        main_toolbar_ptr.clone(),
                         pinchange_cache.clone(),
                     );
                 } }),
 
-                query_button_clicked: Slot::new(move || {
+                query_button_clicked: Slot::new(enclose! {(main_toolbar_ptr) move || {
                     update_vpin_table(
-                        *combobox_ctrls.dir(),
-                        line_edit_ptr,
-                        *combobox_ctrls.level(),
-                        *combobox_ctrls.role(),
-                        *combobox_ctrls.platform(),
-                        *combobox_ctrls.site(),
+                        main_toolbar_ptr.clone(),
                         &search_shows,
                         vpin_tablewidget_ptr,
                     );
-                }),
+                }}),
 
                 choose_distribution_triggered: Slot::new(enclose! { (pinchange_cache) move || {
                     if vpin_tablewidget_ptr.is_null() {
@@ -367,7 +330,6 @@ impl<'a> MainWindow<'a> {
                     let mut frame = vpin_table_splitter.widget(1);
                     frame.set_visible(state);
                 }),
-
             };
 
             //
@@ -377,13 +339,19 @@ impl<'a> MainWindow<'a> {
                 .clicked()
                 .connect(&main_window_inst.select_pin_changes);
 
-            history_button_ptr.clicked().connect(&main_window_inst.select_history);
+            history_button_ptr
+                .clicked()
+                .connect(&main_window_inst.select_history);
 
-            query_button_ptr
+            main_toolbar_ptr
+                .borrow()
+                .query_btn
                 .clicked()
                 .connect(&main_window_inst.query_button_clicked);
 
-            save_button.clicked().connect(&main_window_inst.save_clicked);
+            save_button
+                .clicked()
+                .connect(&main_window_inst.save_clicked);
 
             vpin_tablewidget_ptr
                 .custom_context_menu_requested()
@@ -393,13 +361,13 @@ impl<'a> MainWindow<'a> {
                 .triggered()
                 .connect(&main_window_inst.choose_distribution_triggered);
 
-            line_edit_ptr
-                .custom_context_menu_requested()
-                .connect(&main_window_inst.show_line_edit_menu);
+            // main_toolbar.borrow().line_edit
+            //     .custom_context_menu_requested()
+            //     .connect(&main_window_inst.show_line_edit_menu);
 
-            choose_line_edit_clear_action
-                .triggered()
-                .connect(&main_window_inst.clear_package);
+            // choose_line_edit_clear_action
+            //     .triggered()
+            //     .connect(&main_window_inst.clear_package);
 
             revisions_ptr
                 .selection_model()
@@ -455,4 +423,40 @@ fn create_main_window() -> (CppBox<QMainWindow>, MutPtr<QWidget>, MutPtr<QVBoxLa
 
         (main_window, main_widget_ptr, main_layout_ptr)
     }
+}
+
+fn create_top_toolbar(mut parent: MutPtr<QMainWindow>) -> toolbar::MainToolbar {
+    let mut tb = toolbar::create(&mut parent);
+    tb.set_default_stylesheet();
+    let client = ClientProxy::connect().expect("Unable to connect via ClientProxy");
+    let mut db = PackratDb::new(client);
+
+    let results = db
+        .find_all_levels()
+        .query()
+        .expect("unable to find_all_levels");
+    let results = results.iter().map(|s| s.level.as_str()).collect::<Vec<_>>();
+    tb.set_level_items(results);
+
+    let results = db
+        .find_all_roles()
+        .query()
+        .expect("unable to find_all_roless");
+    let results = results.iter().map(|s| s.role.as_str()).collect::<Vec<_>>();
+    tb.set_role_items(results);
+
+    let results = db
+        .find_all_platforms()
+        .query()
+        .expect("unable to find_all_platforms");
+    let results = results.iter().map(|s| s.name.as_str()).collect::<Vec<_>>();
+    tb.set_platform_items(results);
+
+    let results = db
+        .find_all_sites()
+        .query()
+        .expect("unable to find_all_platforms");
+    let results = results.iter().map(|s| s.name.as_str()).collect::<Vec<_>>();
+    tb.set_site_items(results);
+    tb
 }

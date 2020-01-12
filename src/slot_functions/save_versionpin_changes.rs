@@ -3,17 +3,20 @@ use crate::change_type::Change;
 use crate::utility::qs;
 use crate::ClientProxy;
 use packybara::traits::*;
+use pbgui_toolbar::toolbar;
 
 use log;
 use packybara::db::update::versionpins::VersionPinChange;
 use packybara::packrat::PackratDb;
-use qt_widgets::{cpp_core::MutPtr, QInputDialog, QMessageBox, QPushButton, QTableWidget, QWidget};
+use qt_widgets::{cpp_core::MutPtr, QInputDialog, QMessageBox, QTableWidget, QWidget};
+use std::cell::RefCell;
 use std::rc::Rc;
 use whoami;
+
 pub fn save_versionpin_changes(
     root_widget_ptr: MutPtr<QWidget>,
     pinchanges_ptr: &mut MutPtr<QTableWidget>,
-    query_button_ptr: &mut MutPtr<QPushButton>,
+    toolbar: Rc<RefCell<toolbar::MainToolbar>>,
     pinchange_cache: Rc<PinChangesCache>,
 ) {
     let client = ClientProxy::connect().expect("unable to connect via ClientProxy");
@@ -63,12 +66,17 @@ pub fn save_versionpin_changes(
         // reset book keeping
         pinchange_cache.reset();
         let results = PackratDb::commit(tx, user.as_str(), comments.as_str(), tx_cnt);
+        // avoid runtime borrow issues. Since we can upgrade with impunity in qt
+        // we simply borrow and upgrade instead of perform a borrow_mut(), which
+        // causes a panic
+        let qb = toolbar.borrow().query_btn;
+        let mut query_btn = qb.as_mut_ref().expect("unable to convert to mut");
         if results.is_ok() {
             pinchanges_ptr.clear();
             pinchanges_ptr.set_row_count(0);
             let mut mb = QMessageBox::new();
             // re-execute query
-            query_button_ptr.click();
+            query_btn.click();
             mb.set_text(&qs("Success"));
             mb.exec();
 
