@@ -68,6 +68,20 @@ impl LeftToolBarActions {
             }
         }
     }
+
+    /// Check/uncheck the withs button via its action
+    pub fn view_withs(&mut self, checked: bool) {
+        unsafe {
+            self.view_withs.set_checked(checked);
+        }
+    }
+
+    /// Check/uncheck the packages button via its action
+    pub fn view_packages(&mut self, checked: bool) {
+        unsafe {
+            self.view_packages.set_checked(checked);
+        }
+    }
 }
 
 /// Create the left toolbar and return the resulting actions
@@ -141,8 +155,9 @@ pub fn create(main_window: &mut MutPtr<QMainWindow>) -> LeftToolBarActions {
             //mode_action_group_ptr,
         );
 
-        view_packages_action.set_tool_tip(&qs("Display / Hide Withs List"));
+        view_packages_action.set_tool_tip(&qs("Display / Hide Packages tree"));
         view_packages_action.set_checkable(true);
+        view_packages_action.set_checked(true);
         left_toolbar.add_action(view_packages_action.as_mut_ptr());
 
         //withs

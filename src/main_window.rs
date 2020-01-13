@@ -138,7 +138,7 @@ impl<'a> MainWindow<'a> {
             // create left toolbar
             let left_toolbar_actions = left_toolbar::create(&mut main_window_ptr);
             let view_packages = left_toolbar_actions.view_packages;
-            let view_withs = left_toolbar_actions.view_withs;
+            let mut view_withs = left_toolbar_actions.view_withs;
             let view_pin_changes = left_toolbar_actions.view_vpin_changes;
             let search_shows = left_toolbar_actions.search_shows;
 
@@ -407,6 +407,9 @@ impl<'a> MainWindow<'a> {
                 .search_shortcut
                 .activated()
                 .connect(&main_window_inst.query_button_clicked);
+
+            // configuration
+            view_withs.set_checked(false);
 
             main_window_inst
         }

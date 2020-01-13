@@ -1,6 +1,6 @@
 [package]
 name = "pbgui"
-version = "0.25.0"
+version = "0.26.0"
 authors = ["jgerber <jlgerber@gmail.com>"]
 edition = "2018"
 
@@ -20,4 +20,4 @@ num_enum = "~0.4.2"
 strum = "~0.17.1"
 strum_macros = "~0.17.1"
 pbgui-toolbar = {git="https://github.com/jlgerber/pbgui-toolbar", tag="v0.3.3"}
-pbgui-tree = {git="https://github.com/jlgerber/pbgui-tree", tag="v0.6.1"}
+pbgui-tree = {git="https://github.com/jlgerber/pbgui-tree", tag="v0.7.2"}

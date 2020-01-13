@@ -1,6 +1,33 @@
 
 # Design Notes
 
+## Todos - p1
+- [ ] add selected distro/platform to current level
+- [ ] modify current pin's platform / role / etc
+- [ ] add packages.xml generation / installation
+- [ ] add install table to db
+- [ ] add install distro to packybara to populate table 
+- [ ] modify packages tree to use install as source of data
+- [ ] add support for linked shows
+- [ ] update client to use thread for queries
+- [ ] update history view to present with updates, pin installs, etc 
+- [ ] add support for change sets
+- [ ] add support for servistry configuration
+- [ ] copy withs between pins
+- [ ] show update locking for duration of change / install
+- [ ] change notification
+- [ ] grpc python api 
+
+## Todos - p2
+- [ ] add persistent configuration
+- [ ] add theming 
+- [ ] roll back changes
+- [ ] diff changes
+- [ ] add support for multiple server sites via server/service
+- [ ] add support for multi selection in with package dropdown
+- [ ] add reload in with package dropdown
+- [ ] add caching (server and/or client side)
+
 ## change table
 currently, we have the following rows:
 
