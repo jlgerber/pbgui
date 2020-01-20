@@ -5,7 +5,7 @@ use packybara::traits::*;
 use packybara::LtreeSearchMode;
 use pbgui_toolbar::toolbar;
 use qt_widgets::{cpp_core::MutPtr, QAction, QTableWidget};
-use std::cell::RefCell;
+//use std::cell::RefCell;
 use std::rc::Rc;
 use std::str::FromStr;
 
@@ -16,7 +16,7 @@ use std::str::FromStr;
 ///                         
 pub fn update_vpin_table(
     // direction
-    toolbar: Rc<RefCell<toolbar::MainToolbar>>,
+    toolbar: Rc<toolbar::MainToolbar>,
     search_shows: &MutPtr<QAction>,
     mut vpin_tablewidget_ptr: MutPtr<QTableWidget>,
 ) {
@@ -26,12 +26,12 @@ pub fn update_vpin_table(
     let mut vpin_finder = packratdb.find_all_versionpins();
 
     unsafe {
-        let dirtxt = toolbar.borrow().dir().current_text().to_std_string();
-        let line_edit_txt = toolbar.borrow().line_edit().text().to_std_string();
-        let showtxt = toolbar.borrow().level().current_text().to_std_string();
-        let roletxt = toolbar.borrow().role().current_text().to_std_string();
-        let platformtxt = toolbar.borrow().platform().current_text().to_std_string();
-        let sitetxt = toolbar.borrow().site().current_text().to_std_string();
+        let dirtxt = toolbar.dir().current_text().to_std_string();
+        let line_edit_txt = toolbar.line_edit().text().to_std_string();
+        let showtxt = toolbar.level().current_text().to_std_string();
+        let roletxt = toolbar.role().current_text().to_std_string();
+        let platformtxt = toolbar.platform().current_text().to_std_string();
+        let sitetxt = toolbar.site().current_text().to_std_string();
 
         vpin_finder
             .level(showtxt.as_str())

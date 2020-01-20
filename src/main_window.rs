@@ -39,7 +39,7 @@ use std::rc::Rc;
 pub struct MainWindow<'a> {
     _db: &'a mut PackratDb,
     _main: CppBox<QMainWindow>,
-    _main_toolbar: Rc<RefCell<toolbar::MainToolbar>>,
+    _main_toolbar: Rc<toolbar::MainToolbar>,
     _packages_tree: Rc<RefCell<tree::DistributionTreeView<'a>>>,
     _vpin_table: MutPtr<QTableWidget>,
     _pinchanges_list: MutPtr<QTableWidget>,
@@ -97,7 +97,7 @@ impl<'a> MainWindow<'a> {
             // create the main window, menus, central widget and layout
             let (mut main_window, main_widget_ptr, mut main_layout_ptr) = create_main_window();
             let mut main_window_ptr = main_window.as_mut_ptr();
-            let main_toolbar = Rc::new(RefCell::new(create_top_toolbar(main_window_ptr.clone())));
+            let main_toolbar = Rc::new(create_top_toolbar(main_window_ptr.clone()));
             let main_toolbar_ptr = main_toolbar.clone();
             // create left toolbar
             let left_toolbar_actions = left_toolbar::create(&mut main_window_ptr);
@@ -319,7 +319,7 @@ impl<'a> MainWindow<'a> {
                 .connect(&main_window_inst.select_history);
 
             main_toolbar_ptr
-                .borrow()
+                //.borrow()
                 .query_btn()
                 .clicked()
                 .connect(&main_window_inst.query_button_clicked);
@@ -335,14 +335,6 @@ impl<'a> MainWindow<'a> {
             choose_dist_action
                 .triggered()
                 .connect(&main_window_inst.choose_distribution_triggered);
-
-            // main_toolbar.borrow().line_edit
-            //     .custom_context_menu_requested()
-            //     .connect(&main_window_inst.show_line_edit_menu);
-
-            // choose_line_edit_clear_action
-            //     .triggered()
-            //     .connect(&main_window_inst.clear_package);
 
             revisions_ptr
                 .selection_model()
