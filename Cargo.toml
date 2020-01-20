@@ -20,5 +20,5 @@ strum = "~0.17.1"
 strum_macros = "~0.17.1"
 pbgui-withs = {git= "https://github.com/jlgerber/listview", tag="v0.17.0"}
 pbgui-toolbar = {git="https://github.com/jlgerber/pbgui-toolbar", tag="v0.7.0"}
-pbgui-tree = {git="https://github.com/jlgerber/pbgui-tree", tag="v0.8.1"}
+pbgui-tree = {git="https://github.com/jlgerber/pbgui-tree", tag="v0.9.2"}
 rustqt-utils = {git = "https://github.com/jlgerber/rustqt-utils", tag="v0.6.0"}
