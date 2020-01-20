@@ -5,7 +5,6 @@ use packybara::traits::*;
 use packybara::LtreeSearchMode;
 use pbgui_toolbar::toolbar;
 use qt_widgets::{cpp_core::MutPtr, QAction, QTableWidget};
-//use std::cell::RefCell;
 use std::rc::Rc;
 use std::str::FromStr;
 

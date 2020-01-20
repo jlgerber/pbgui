@@ -31,7 +31,7 @@ use qt_widgets::{
     QWidget, SlotOfQPoint,
 };
 use rustqt_utils::{enclose, enclose_all};
-use std::cell::RefCell;
+//use std::cell::RefCell;
 use std::rc::Rc;
 
 /// Just as it sounds, MainWindow is the MainWindow struct, holding on
@@ -40,7 +40,7 @@ pub struct MainWindow<'a> {
     _db: &'a mut PackratDb,
     _main: CppBox<QMainWindow>,
     _main_toolbar: Rc<toolbar::MainToolbar>,
-    _packages_tree: Rc<RefCell<tree::DistributionTreeView<'a>>>,
+    _packages_tree: Rc<tree::DistributionTreeView<'a>>,
     _vpin_table: MutPtr<QTableWidget>,
     _pinchanges_list: MutPtr<QTableWidget>,
     _save_button: MutPtr<QPushButton>,

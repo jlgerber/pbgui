@@ -5,17 +5,16 @@ use crate::ClientProxy;
 use packybara::packrat::PackratDb;
 use packybara::traits::*;
 use qt_widgets::{cpp_core::MutPtr, QFrame, QSplitter};
-use std::cell::RefCell;
+//use std::cell::RefCell;
 use std::rc::Rc;
 
-pub fn create<'c>(mut splitter: MutPtr<QSplitter>) -> Rc<RefCell<tree::DistributionTreeView<'c>>> {
+pub fn create<'c>(mut splitter: MutPtr<QSplitter>) -> Rc<tree::DistributionTreeView<'c>> {
     unsafe {
         let mut frame = QFrame::new_0a();
         let layout = create_vlayout();
         frame.set_layout(layout.into_ptr());
         let dtv = tree::DistributionTreeView::create(frame.as_mut_ptr());
         splitter.add_widget(frame.into_ptr());
-        println!("here we fgo");
         let client = ClientProxy::connect().expect("Unable to connect via ClientProxy");
         let mut db = PackratDb::new(client);
         let results = get_all_packages(&mut db);
@@ -26,7 +25,7 @@ pub fn create<'c>(mut splitter: MutPtr<QSplitter>) -> Rc<RefCell<tree::Distribut
         dtv.set_sites(sites, "portland");
         dtv.set_default_stylesheet();
 
-        Rc::new(RefCell::new(dtv))
+        Rc::new(dtv)
     }
 }
 
