@@ -13,7 +13,7 @@ pub fn create<'c>(mut splitter: MutPtr<QSplitter>) -> Rc<RefCell<tree::Distribut
         let mut frame = QFrame::new_0a();
         let layout = create_vlayout();
         frame.set_layout(layout.into_ptr());
-        let mut dtv = tree::DistributionTreeView::create(frame.as_mut_ptr());
+        let dtv = tree::DistributionTreeView::create(frame.as_mut_ptr());
         splitter.add_widget(frame.into_ptr());
         println!("here we fgo");
         let client = ClientProxy::connect().expect("Unable to connect via ClientProxy");

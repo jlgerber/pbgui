@@ -69,7 +69,7 @@ pub fn save_versionpin_changes(
         // avoid runtime borrow issues. Since we can upgrade with impunity in qt
         // we simply borrow and upgrade instead of perform a borrow_mut(), which
         // causes a panic
-        let qb = toolbar.borrow().query_btn;
+        let qb = toolbar.borrow().query_btn();
         let mut query_btn = qb.as_mut_ref().expect("unable to convert to mut");
         if results.is_ok() {
             pinchanges_ptr.clear();

@@ -26,12 +26,12 @@ pub fn update_vpin_table(
     let mut vpin_finder = packratdb.find_all_versionpins();
 
     unsafe {
-        let dirtxt = toolbar.borrow().dir.current_text().to_std_string();
-        let line_edit_txt = toolbar.borrow().line_edit.text().to_std_string();
-        let showtxt = toolbar.borrow().level.current_text().to_std_string();
-        let roletxt = toolbar.borrow().role.current_text().to_std_string();
-        let platformtxt = toolbar.borrow().platform.current_text().to_std_string();
-        let sitetxt = toolbar.borrow().site.current_text().to_std_string();
+        let dirtxt = toolbar.borrow().dir().current_text().to_std_string();
+        let line_edit_txt = toolbar.borrow().line_edit().text().to_std_string();
+        let showtxt = toolbar.borrow().level().current_text().to_std_string();
+        let roletxt = toolbar.borrow().role().current_text().to_std_string();
+        let platformtxt = toolbar.borrow().platform().current_text().to_std_string();
+        let sitetxt = toolbar.borrow().site().current_text().to_std_string();
 
         vpin_finder
             .level(showtxt.as_str())

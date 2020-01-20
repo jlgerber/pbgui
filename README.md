@@ -17,7 +17,7 @@
 - [ ] show update locking for duration of change / install
 - [ ] change notification
 - [ ] grpc python api 
-
+- [ ] add banner for when other user makes change during current session 
 ## Todos - p2
 - [ ] add persistent configuration
 - [ ] add theming 
@@ -27,6 +27,12 @@
 - [ ] add support for multi selection in with package dropdown
 - [ ] add reload in with package dropdown
 - [ ] add caching (server and/or client side)
+
+## add versionpin dialog
+
+select roles
+select sequence / shots
+select locations
 
 ## change table
 currently, we have the following rows:

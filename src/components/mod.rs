@@ -17,7 +17,6 @@ pub use top::query_button;
 pub use top::search_comboboxes;
 pub use top::toolbar as top_toolbar;
 pub mod center_widget;
-pub mod distribution_dialog;
 pub mod left_toolbar;
 pub mod packages_tree;
 pub mod revisions_table;

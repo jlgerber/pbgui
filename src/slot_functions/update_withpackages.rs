@@ -4,9 +4,9 @@ use crate::traits::RowTrait;
 //use crate::utility::qs;
 use crate::versionpin_row::VersionPinRow;
 use crate::ClientProxy;
-use listitem::ItemList;
 use packybara::packrat::PackratDb;
 use packybara::traits::*;
+use pbgui_withs::WithsList;
 use qt_core::QString;
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr},
@@ -19,7 +19,7 @@ use std::rc::Rc;
 pub fn update_withpackages(
     row: i32,
     vpin_tablewidget_ptr: &mut MutPtr<QTableWidget>,
-    item_list: Rc<RefCell<ItemList>>,
+    item_list: Rc<RefCell<WithsList>>,
     cache: Rc<PinChangesCache>,
 ) {
     let client = ClientProxy::connect().expect("Unable to connect via ClientProxy");

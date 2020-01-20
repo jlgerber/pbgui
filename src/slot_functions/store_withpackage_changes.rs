@@ -6,25 +6,24 @@ use crate::{
     versionpin_changes_row::{RowSetterTrait, VersionPinChangesRow},
     versionpin_row::VersionPinRow,
 };
+use pbgui_withs::WithsList;
 use qt_core::QString;
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr},
-     QTableWidget,
+    QTableWidget,
 };
-use std::rc::Rc;
 use std::cell::RefCell;
- use listitem::ItemList;
+use std::rc::Rc;
 
 /// add the withpackage change to the listx`
 pub fn store_withpackage_changes(
-    item_list: Rc<RefCell<ItemList>>,
+    item_list: Rc<RefCell<WithsList>>,
     versionpin_table: MutPtr<QTableWidget>,
     changes_table: &mut MutPtr<QTableWidget>,
     cache: Rc<PinChangesCache>,
 ) {
     unsafe {
-
-        let  items = item_list.borrow().items();
+        let items = item_list.borrow().items();
 
         // get current versionpin distribution_id
         let selection_model = versionpin_table.selection_model();

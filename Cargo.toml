@@ -1,13 +1,12 @@
 [package]
 name = "pbgui"
-version = "0.27.0"
+version = "0.28.0"
 authors = ["jgerber <jlgerber@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-packybara = {git= "https://github.com/jlgerber/packybara", tag="v0.31.1"}
+packybara = {git= "https://github.com/jlgerber/packybara", tag="v0.32.0"}
 qt_thread_conductor = {git= "https://github.com/jlgerber/rust-qt-conductor", tag="v0.3.0"}
-listitem = {git= "https://github.com/jlgerber/listview", tag="v0.11.0"}
 qt_core = "~0.4.1"
 qt_gui = "~0.4.1"
 qt_widgets = "~0.4.1"
@@ -19,5 +18,7 @@ structopt = "~0.3.7"
 num_enum = "~0.4.2"
 strum = "~0.17.1"
 strum_macros = "~0.17.1"
-pbgui-toolbar = {git="https://github.com/jlgerber/pbgui-toolbar", tag="v0.3.3"}
-pbgui-tree = {git="https://github.com/jlgerber/pbgui-tree", tag="v0.7.2"}
+pbgui-withs = {git= "https://github.com/jlgerber/listview", tag="v0.17.0"}
+pbgui-toolbar = {git="https://github.com/jlgerber/pbgui-toolbar", tag="v0.7.0"}
+pbgui-tree = {git="https://github.com/jlgerber/pbgui-tree", tag="v0.8.1"}
+rustqt-utils = {git = "https://github.com/jlgerber/rustqt-utils", tag="v0.6.0"}

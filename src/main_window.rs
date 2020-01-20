@@ -30,45 +30,9 @@ use qt_widgets::{
     QAction, QMainWindow, QMenu, QMenuBar, QPushButton, QShortcut, QTableWidget, QVBoxLayout,
     QWidget, SlotOfQPoint,
 };
+use rustqt_utils::{enclose, enclose_all};
 use std::cell::RefCell;
 use std::rc::Rc;
-
-// makes it simpler to deal with the need to clone. Saw this here:
-// https://github.com/rust-webplatform/rust-todomvc/blob/master/src/main.rs#L142
-macro_rules! enclose {
-    ( ($(  $x:ident ),*) $y:expr ) => {
-        {
-            $(let $x = $x.clone();)*
-            $y
-        }
-    };
-}
-
-#[allow(unused_macros)]
-macro_rules! enclose_mut {
-    ( ($( mut $x:ident ),*) $y:expr ) => {
-        {
-            $(let mut $x = $x.clone();)*
-            $y
-        }
-    };
-}
-
-/// clone both immutable and mutable vars. Useful for
-/// qt, which has a lot more mutable
-/// use like so:
-/// ```ignore
-/// Slot::,new(enclose_all!{ (foo, bar) (mut bla) move || {}}),
-/// ```
-macro_rules! enclose_all {
-    ( ($(  $x:ident ),*) ($( mut $mx:ident ),*) $y:expr ) => {
-        {
-            $(let $x = $x.clone();)*
-            $(let mut $mx = $mx.clone();)*
-            $y
-        }
-    };
-}
 
 /// Just as it sounds, MainWindow is the MainWindow struct, holding on
 /// to various pointers that need to persist as well as top level slots
@@ -185,7 +149,7 @@ impl<'a> MainWindow<'a> {
             // shortcuts
             let key_seq = QKeySequence::from_q_string(&qs("Ctrl+Return"));
             let search_shortcut =
-                QShortcut::new_2a(key_seq.as_ref(), item_list_ptr.borrow_mut().main);
+                QShortcut::new_2a(key_seq.as_ref(), item_list_ptr.borrow().main());
 
             // persist data
             let pinchange_cache = Rc::new(PinChangesCache::new());
@@ -199,7 +163,7 @@ impl<'a> MainWindow<'a> {
             resize_window_to_screen(&mut main_window_ptr, 0.8);
             load_stylesheet("/Users/jgerber/bin/pbgui.qss", main_window_ptr);
 
-            let withpackage_save = item_list_ptr.borrow_mut().save_button.clone();
+            let withpackage_save = item_list_ptr.borrow().save_button().clone();
             let versionpin_table = vpin_tablewidget_ptr.clone();
 
             main_window_ptr.show();
@@ -356,7 +320,7 @@ impl<'a> MainWindow<'a> {
 
             main_toolbar_ptr
                 .borrow()
-                .query_btn
+                .query_btn()
                 .clicked()
                 .connect(&main_window_inst.query_button_clicked);
 
@@ -443,8 +407,8 @@ fn create_main_window() -> (CppBox<QMainWindow>, MutPtr<QWidget>, MutPtr<QVBoxLa
     }
 }
 
-fn create_top_toolbar(mut parent: MutPtr<QMainWindow>) -> toolbar::MainToolbar {
-    let mut tb = toolbar::create(&mut parent);
+fn create_top_toolbar(parent: MutPtr<QMainWindow>) -> toolbar::MainToolbar {
+    let tb = toolbar::create(parent);
     tb.set_default_stylesheet();
     let client = ClientProxy::connect().expect("Unable to connect via ClientProxy");
     let mut db = PackratDb::new(client);
