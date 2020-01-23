@@ -1,7 +1,9 @@
 use log;
-use qt_core::{q_io_device::OpenModeFlag, QFile, QFlags, QSize, QString, QTextStream, QVariant};
+use qt_core::{
+    q_io_device::OpenModeFlag, QFile, QFlags, QModelIndex, QSize, QString, QTextStream, QVariant,
+};
 use qt_widgets::{
-    cpp_core::{CppBox, MutPtr},
+    cpp_core::{CppBox, MutPtr, Ref},
     QDesktopWidget, QHBoxLayout, QMainWindow, QTableWidget, QTableWidgetItem, QVBoxLayout,
 };
 /// Given an input of &str or String, return a boxed QString
@@ -114,4 +116,45 @@ pub fn create_hlayout() -> CppBox<QHBoxLayout> {
         pc_hlayout.set_spacing(0);
         pc_hlayout
     }
+}
+
+/// Given a QModelIndex retrieved from the tree, retrieve the distribution name
+pub unsafe fn distribution_from_idx(idx: Ref<QModelIndex>) -> Option<String> {
+    if !idx.is_valid() {
+        log::warn!("distribution_from_idx supplied QModelIndex not valid.");
+        return None;
+    }
+    let parent = idx.parent();
+    if !parent.is_valid() {
+        //we clicked on the distribution. Our parent is the root
+        return None;
+    }
+    let gp = parent.parent();
+    if gp.is_valid() {
+        // we are too deep. Our grandparent should have been None
+        return None;
+    }
+    // get package name
+    let package = if parent.column() == 0 {
+        parent.data_0a().to_string().to_std_string()
+    } else {
+        parent
+            .sibling_at_column(0)
+            .data_0a()
+            .to_string()
+            .to_std_string()
+    };
+
+    let version = if idx.column() == 0 {
+        idx.data_0a().to_string().to_std_string()
+    } else {
+        idx.sibling_at_column(0)
+            .data_0a()
+            .to_string()
+            .to_std_string()
+    };
+    let dist = format!("{}-{}", package, version);
+    println!("found dist: {}", dist);
+    // only the distribution is allowed to have a dash in its name
+    Some(dist)
 }
