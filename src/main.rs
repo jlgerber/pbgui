@@ -3,9 +3,8 @@ use env_logger;
 use env_logger::Env;
 //use log;
 use crossbeam_channel::{unbounded as channel, Receiver, Sender};
-use packybara::packrat::PackratDb;
+use pbgui::main_window;
 use pbgui::utility::{distribution_from_idx, qs};
-use pbgui::{main_window, ClientProxy};
 use pbgui_messaging::init;
 use pbgui_messaging::{
     client_proxy::ConnectParams, event::Event, new_event_handler, thread as pbthread, IMsg, OMsg,
@@ -49,16 +48,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // sender to handle quitting
     let to_thread_sender_quit = to_thread_sender.clone();
 
-    let client = ClientProxy::connect()?;
-    let mut vpin_finder = PackratDb::new(client);
+    //let client = ClientProxy::connect()?;
+    //let mut vpin_finder = PackratDb::new(client);
     QApplication::init(|app| unsafe {
         let _result = QResource::register_resource_q_string(&qs("/Users/jgerber/bin/pbgui.rcc"));
         let _result =
             QResource::register_resource_q_string(&qs("/Users/jgerber/bin/pbgui_tree.rcc"));
 
-        let mut pbgui_root = main_window::MainWindow::new(&mut vpin_finder);
+        let mut pbgui_root = main_window::MainWindow::new();
         init::packages_tree::init(to_thread_sender.clone());
         init::package_withs::init(to_thread_sender.clone());
+        init::main_toolbar::init(to_thread_sender.clone());
+
         let dialog = Rc::new(create_dialog("unset", "unset", pbgui_root.main()));
         init::vpin_dialog::init(to_thread_sender.clone(), "facility");
 
@@ -112,6 +113,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             dialog.clone(),
             pbgui_root.tree(),
             pbgui_root.package_withs_list(),
+            pbgui_root.main_toolbar(),
             receiver,
         );
 

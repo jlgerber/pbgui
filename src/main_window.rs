@@ -12,11 +12,9 @@ use crate::{
     update_versionpin_table::update_vpin_table,
     update_withpackages::update_withpackages,
     utility::{create_vlayout, load_stylesheet, qs, resize_window_to_screen},
-    versionpin_table, versionpin_table_splitter, withs_splitter, ClientProxy, LeftToolBarActions,
+    versionpin_table, versionpin_table_splitter, withs_splitter, LeftToolBarActions,
 };
 use log;
-use packybara::packrat::PackratDb;
-use packybara::traits::*;
 use pbgui_toolbar::toolbar;
 use pbgui_tree::tree;
 use pbgui_withs::WithsList;
@@ -37,7 +35,6 @@ use std::rc::Rc;
 /// Just as it sounds, MainWindow is the MainWindow struct, holding on
 /// to various pointers that need to persist as well as top level slots
 pub struct MainWindow<'a> {
-    _db: &'a mut PackratDb,
     main: CppBox<QMainWindow>,
     main_toolbar: Rc<toolbar::MainToolbar>,
     packages_tree: Rc<RefCell<tree::DistributionTreeView<'a>>>,
@@ -93,7 +90,7 @@ impl<'a> MainWindow<'a> {
     /// ----- center_layout (QVBoxLayourt)
     /// ---- item_list_ptr (MutPtr<QListWidget>)
     /// ```
-    pub fn new(db: &'a mut PackratDb) -> MainWindow<'a> {
+    pub fn new() -> MainWindow<'a> {
         unsafe {
             // create the main window, menus, central widget and layout
             let (mut main_window, main_widget_ptr, mut main_layout_ptr) = create_main_window();
@@ -171,7 +168,6 @@ impl<'a> MainWindow<'a> {
             // Create the MainWindow instance, set up signals and slots, and return
             // the newly minted instance. We are done.
             let main_window_inst = MainWindow {
-                _db: db,
                 main: main_window,
                 main_toolbar: main_toolbar,
                 packages_tree: packages_ptr,
@@ -456,35 +452,5 @@ fn create_main_window() -> (CppBox<QMainWindow>, MutPtr<QWidget>, MutPtr<QVBoxLa
 fn create_top_toolbar(parent: MutPtr<QMainWindow>) -> toolbar::MainToolbar {
     let tb = toolbar::create(parent);
     tb.set_default_stylesheet();
-    let client = ClientProxy::connect().expect("Unable to connect via ClientProxy");
-    let mut db = PackratDb::new(client);
-
-    let results = db
-        .find_all_levels()
-        .query()
-        .expect("unable to find_all_levels");
-    let results = results.iter().map(|s| s.level.as_str()).collect::<Vec<_>>();
-    tb.set_level_items(results);
-
-    let results = db
-        .find_all_roles()
-        .query()
-        .expect("unable to find_all_roless");
-    let results = results.iter().map(|s| s.role.as_str()).collect::<Vec<_>>();
-    tb.set_role_items(results);
-
-    let results = db
-        .find_all_platforms()
-        .query()
-        .expect("unable to find_all_platforms");
-    let results = results.iter().map(|s| s.name.as_str()).collect::<Vec<_>>();
-    tb.set_platform_items(results);
-
-    let results = db
-        .find_all_sites()
-        .query()
-        .expect("unable to find_all_platforms");
-    let results = results.iter().map(|s| s.name.as_str()).collect::<Vec<_>>();
-    tb.set_site_items(results);
     tb
 }
