@@ -15,10 +15,9 @@ use crate::{
     versionpin_table, versionpin_table_splitter, withpackage_widget, withs_splitter, ClientProxy,
     LeftToolBarActions,
 };
-use packybara::traits::*;
-
 use log;
 use packybara::packrat::PackratDb;
+use packybara::traits::*;
 use pbgui_toolbar::toolbar;
 use pbgui_tree::tree;
 use qt_core::{
@@ -31,16 +30,17 @@ use qt_widgets::{
     QWidget, SlotOfQPoint,
 };
 use rustqt_utils::{enclose, enclose_all};
-//use std::cell::RefCell;
+use std::cell;
+use std::cell::RefCell;
 use std::rc::Rc;
 
 /// Just as it sounds, MainWindow is the MainWindow struct, holding on
 /// to various pointers that need to persist as well as top level slots
 pub struct MainWindow<'a> {
     _db: &'a mut PackratDb,
-    _main: CppBox<QMainWindow>,
-    _main_toolbar: Rc<toolbar::MainToolbar>,
-    _packages_tree: Rc<tree::DistributionTreeView<'a>>,
+    main: CppBox<QMainWindow>,
+    main_toolbar: Rc<toolbar::MainToolbar>,
+    packages_tree: Rc<RefCell<tree::DistributionTreeView<'a>>>,
     _vpin_table: MutPtr<QTableWidget>,
     _pinchanges_list: MutPtr<QTableWidget>,
     _save_button: MutPtr<QPushButton>,
@@ -171,9 +171,9 @@ impl<'a> MainWindow<'a> {
             // the newly minted instance. We are done.
             let main_window_inst = MainWindow {
                 _db: db,
-                _main: main_window,
-                _main_toolbar: main_toolbar,
-                _packages_tree: packages_ptr,
+                main: main_window,
+                main_toolbar: main_toolbar,
+                packages_tree: packages_ptr,
                 _vpin_table: vpin_tablewidget_ptr,
                 _save_button: save_button,
                 _pinchanges_list: pinchanges_ptr,
@@ -369,6 +369,54 @@ impl<'a> MainWindow<'a> {
 
             main_window_inst
         }
+    }
+
+    /// Retrieve a Ref wrapped DistributionTreeView instance
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// * Ref<DistributionTreeView>
+    pub unsafe fn packages_tree(&self) -> cell::Ref<tree::DistributionTreeView<'a>> {
+        self.packages_tree.borrow()
+    }
+
+    /// Retrieve an shared copy of the DistributionTreeView
+    pub unsafe fn tree(&self) -> Rc<RefCell<tree::DistributionTreeView<'a>>> {
+        self.packages_tree.clone()
+    }
+    /// Retrieve a RefMut wrapped DistributionTreeView instance
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// * RefMut<DistributionTreeView>
+    pub unsafe fn packages_tree_mut(&self) -> cell::RefMut<tree::DistributionTreeView<'a>> {
+        self.packages_tree.borrow_mut()
+    }
+
+    /// Retrieve an Rc wrapped MainToolbar instance
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// * Rc<MainToolbar>
+    pub unsafe fn main_toolbar(&self) -> Rc<toolbar::MainToolbar> {
+        self.main_toolbar.clone()
+    }
+
+    /// Retrieve a MutPtr to the QMainWindow instance
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// * MutPtr<QMainWindow>
+    pub unsafe fn main(&mut self) -> MutPtr<QMainWindow> {
+        self.main.as_mut_ptr()
     }
 }
 
