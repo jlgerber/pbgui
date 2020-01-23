@@ -9,7 +9,7 @@
 - [ ] add install distro to packybara to populate table 
 - [ ] modify packages tree to use install as source of data
 - [ ] add support for linked shows
-- [ ] update client to use thread for queries
+- [IP] update client to use thread for queries
 - [ ] update history view to present with updates, pin installs, etc 
 - [ ] add support for change sets
 - [ ] add support for servistry configuration
