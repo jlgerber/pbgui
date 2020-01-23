@@ -7,19 +7,13 @@
 pub mod bottom_context_widget;
 /// The bottom stacked widget housese the change table , the hstory table
 pub mod bottom_stacked_widget;
-/// Part of the history widget that shows changes for a particular revision
-pub mod revision_changes_table;
-/// The top submodule
-pub mod top;
-pub use top::main_menu_bar;
-pub use top::package_lineedit;
-pub use top::query_button;
-pub use top::search_comboboxes;
-pub use top::toolbar as top_toolbar;
+
 pub mod center_widget;
 pub mod left_toolbar;
 pub mod package_withs_list;
 pub mod packages_tree;
+/// Part of the history widget that shows changes for a particular revision
+pub mod revision_changes_table;
 pub mod revisions_table;
 pub mod table_headers;
 pub mod versionpin_changes_row;
