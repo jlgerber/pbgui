@@ -815,7 +815,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "pbgui"
-version = "0.30.0"
+version = "0.31.0"
 dependencies = [
  "crossbeam 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "crossbeam-channel 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -824,11 +824,11 @@ dependencies = [
  "log 0.4.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "num_enum 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "packybara 0.32.0 (git+https://github.com/jlgerber/packybara?tag=v0.32.0)",
- "pbgui-messaging 0.9.0 (git+https://github.com/jlgerber/pbgui-messaging?tag=v0.9.0)",
+ "pbgui-messaging 0.10.1 (git+https://github.com/jlgerber/pbgui-messaging?tag=v0.10.1)",
  "pbgui-toolbar 0.8.0 (git+https://github.com/jlgerber/pbgui-toolbar?tag=v0.8.0)",
  "pbgui-tree 0.11.1 (git+https://github.com/jlgerber/pbgui-tree?tag=v0.11.1)",
  "pbgui-vpin 0.8.0 (git+https://github.com/jlgerber/pbgui-vpin?tag=v0.8.0)",
- "pbgui-withs 0.17.0 (git+https://github.com/jlgerber/pbgui-withs?tag=v0.17.0)",
+ "pbgui-withs 0.18.0 (git+https://github.com/jlgerber/pbgui-withs?tag=v0.18.0)",
  "qt_core 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "qt_gui 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "qt_thread_conductor 0.3.0 (git+https://github.com/jlgerber/rust-qt-conductor?tag=v0.3.0)",
@@ -843,8 +843,8 @@ dependencies = [
 
 [[package]]
 name = "pbgui-messaging"
-version = "0.9.0"
-source = "git+https://github.com/jlgerber/pbgui-messaging?tag=v0.9.0#8ddf98cfffdd03e91a37c1d60128f50704fdc4bc"
+version = "0.10.1"
+source = "git+https://github.com/jlgerber/pbgui-messaging?tag=v0.10.1#6dbf13a1d2432177ef7a2af2c07a125735905183"
 dependencies = [
  "crossbeam 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "crossbeam-channel 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -854,6 +854,7 @@ dependencies = [
  "packybara 0.32.0 (git+https://github.com/jlgerber/packybara?tag=v0.32.0)",
  "pbgui-tree 0.11.1 (git+https://github.com/jlgerber/pbgui-tree?tag=v0.11.1)",
  "pbgui-vpin 0.8.0 (git+https://github.com/jlgerber/pbgui-vpin?tag=v0.8.0)",
+ "pbgui-withs 0.18.0 (git+https://github.com/jlgerber/pbgui-withs?tag=v0.18.0)",
  "qt_core 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "qt_gui 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "qt_thread_conductor 0.3.0 (git+https://github.com/jlgerber/rust-qt-conductor?tag=v0.3.0)",
@@ -906,8 +907,8 @@ dependencies = [
 
 [[package]]
 name = "pbgui-withs"
-version = "0.17.0"
-source = "git+https://github.com/jlgerber/pbgui-withs?tag=v0.17.0#70829b9bc9d4393127543d5cac2f80cff508b382"
+version = "0.18.0"
+source = "git+https://github.com/jlgerber/pbgui-withs?tag=v0.18.0#6d6e4b688659d7bfaa1895c3a6c484ea531ecf57"
 dependencies = [
  "log 0.4.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "qt_core 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1848,11 +1849,11 @@ dependencies = [
 "checksum parking_lot 0.10.0 (registry+https://github.com/rust-lang/crates.io-index)" = "92e98c49ab0b7ce5b222f2cc9193fc4efe11c6d0bd4f648e374684a6857b1cfc"
 "checksum parking_lot_core 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)" = "7582838484df45743c8434fbff785e8edf260c28748353d44bc0da32e0ceabf1"
 "checksum pathdiff 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "a3bf70094d203e07844da868b634207e71bfab254fe713171fae9a6e751ccf31"
-"checksum pbgui-messaging 0.9.0 (git+https://github.com/jlgerber/pbgui-messaging?tag=v0.9.0)" = "<none>"
+"checksum pbgui-messaging 0.10.1 (git+https://github.com/jlgerber/pbgui-messaging?tag=v0.10.1)" = "<none>"
 "checksum pbgui-toolbar 0.8.0 (git+https://github.com/jlgerber/pbgui-toolbar?tag=v0.8.0)" = "<none>"
 "checksum pbgui-tree 0.11.1 (git+https://github.com/jlgerber/pbgui-tree?tag=v0.11.1)" = "<none>"
 "checksum pbgui-vpin 0.8.0 (git+https://github.com/jlgerber/pbgui-vpin?tag=v0.8.0)" = "<none>"
-"checksum pbgui-withs 0.17.0 (git+https://github.com/jlgerber/pbgui-withs?tag=v0.17.0)" = "<none>"
+"checksum pbgui-withs 0.18.0 (git+https://github.com/jlgerber/pbgui-withs?tag=v0.18.0)" = "<none>"
 "checksum percent-encoding 2.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "d4fd5641d01c8f18a23da7b6fe29298ff4b55afcccdf78973b24cf3175fee32e"
 "checksum phf 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)" = "3dfb61232e34fcb633f43d12c58f83c1df82962dcdfa565a4e866ffc17dafe12"
 "checksum phf_shared 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)" = "c00cf8b9eafe68dde5e9eaa2cef8ee84a9336a47d566ec55ca16589633b65af7"

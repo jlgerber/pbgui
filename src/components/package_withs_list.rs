@@ -1,8 +1,4 @@
 use crate::utility::create_vlayout;
-//use qt_widgets::q_abstract_item_view::DragDropMode;
-use crate::ClientProxy;
-use packybara::packrat::PackratDb;
-use packybara::traits::*;
 use pbgui_withs::{WithsList, WithsListConfig};
 use qt_widgets::{cpp_core::MutPtr, QFrame, QSplitter, QWidget};
 use std::cell::RefCell;
@@ -18,24 +14,14 @@ use std::rc::Rc;
 /// * A pointer to the WithsList
 pub fn create<'c>(splitter: MutPtr<QSplitter>) -> Rc<RefCell<WithsList<'c>>> {
     unsafe {
-        let withs_list = create_withwidget(splitter);
-
-        let client = ClientProxy::connect().expect("Unable to connect via ClientProxy");
-        let mut packratdb = PackratDb::new(client);
-
-        let packages = packratdb
-            .find_all_packages()
-            .query()
-            .expect("unable to find packages");
-        let packages = packages.into_iter().map(|x| x.name).collect::<Vec<_>>();
-
-        withs_list.borrow().set_cb_items(packages);
-
+        let withs_list = create_package_withs_list(splitter);
         withs_list
     }
 }
 
-unsafe fn create_withwidget<'z>(mut splitter: MutPtr<QSplitter>) -> Rc<RefCell<WithsList<'z>>> {
+unsafe fn create_package_withs_list<'z>(
+    mut splitter: MutPtr<QSplitter>,
+) -> Rc<RefCell<WithsList<'z>>> {
     // create the top frame
     let mut frame = QFrame::new_0a();
     let frame_ptr = frame.as_mut_ptr();

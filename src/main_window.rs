@@ -4,7 +4,7 @@ use crate::{
     center_widget,
     choose_distribution::choose_alternative_distribution,
     constants::COL_REV_TXID,
-    left_toolbar, packages_tree,
+    left_toolbar, package_withs_list, packages_tree,
     save_versionpin_changes::save_versionpin_changes,
     select_history::select_history,
     store_withpackage_changes,
@@ -12,14 +12,14 @@ use crate::{
     update_versionpin_table::update_vpin_table,
     update_withpackages::update_withpackages,
     utility::{create_vlayout, load_stylesheet, qs, resize_window_to_screen},
-    versionpin_table, versionpin_table_splitter, withpackage_widget, withs_splitter, ClientProxy,
-    LeftToolBarActions,
+    versionpin_table, versionpin_table_splitter, withs_splitter, ClientProxy, LeftToolBarActions,
 };
 use log;
 use packybara::packrat::PackratDb;
 use packybara::traits::*;
 use pbgui_toolbar::toolbar;
 use pbgui_tree::tree;
+use pbgui_withs::WithsList;
 use qt_core::{
     QItemSelection, QPoint, QString, Slot, SlotOfBool, SlotOfQItemSelectionQItemSelection,
 };
@@ -41,6 +41,7 @@ pub struct MainWindow<'a> {
     main: CppBox<QMainWindow>,
     main_toolbar: Rc<toolbar::MainToolbar>,
     packages_tree: Rc<RefCell<tree::DistributionTreeView<'a>>>,
+    package_withs_list: Rc<RefCell<WithsList<'a>>>,
     _vpin_table: MutPtr<QTableWidget>,
     _pinchanges_list: MutPtr<QTableWidget>,
     _save_button: MutPtr<QPushButton>,
@@ -142,7 +143,7 @@ impl<'a> MainWindow<'a> {
             let mut dist_popup_menu_ptr = dist_popup_menu.as_mut_ptr();
 
             // create the with with package list on the right hand side
-            let item_list_ptr = withpackage_widget::create(with_splitter_ptr);
+            let item_list_ptr = package_withs_list::create(with_splitter_ptr);
             item_list_ptr.borrow_mut().set_add_mode();
             item_list_ptr.borrow_mut().set_cb_max_visible_items(30);
 
@@ -174,6 +175,7 @@ impl<'a> MainWindow<'a> {
                 main: main_window,
                 main_toolbar: main_toolbar,
                 packages_tree: packages_ptr,
+                package_withs_list: item_list_ptr.clone(),
                 _vpin_table: vpin_tablewidget_ptr,
                 _save_button: save_button,
                 _pinchanges_list: pinchanges_ptr,
@@ -385,6 +387,10 @@ impl<'a> MainWindow<'a> {
     /// Retrieve an shared copy of the DistributionTreeView
     pub unsafe fn tree(&self) -> Rc<RefCell<tree::DistributionTreeView<'a>>> {
         self.packages_tree.clone()
+    }
+    /// Retrieve an shared copy of the DistributionTreeView
+    pub unsafe fn package_withs_list(&self) -> Rc<RefCell<WithsList<'a>>> {
+        self.package_withs_list.clone()
     }
     /// Retrieve a RefMut wrapped DistributionTreeView instance
     ///

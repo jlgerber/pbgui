@@ -58,7 +58,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let mut pbgui_root = main_window::MainWindow::new(&mut vpin_finder);
         init::packages_tree::init(to_thread_sender.clone());
-
+        init::package_withs::init(to_thread_sender.clone());
         let dialog = Rc::new(create_dialog("unset", "unset", pbgui_root.main()));
         init::vpin_dialog::init(to_thread_sender.clone(), "facility");
 
@@ -108,7 +108,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .clicked()
             .connect(&exec_dialog_slot);
 
-        let app_update = new_event_handler(dialog.clone(), pbgui_root.tree(), receiver);
+        let app_update = new_event_handler(
+            dialog.clone(),
+            pbgui_root.tree(),
+            pbgui_root.package_withs_list(),
+            receiver,
+        );
 
         let my_conductor = Conductor::<Event>::new(&app_update);
 
