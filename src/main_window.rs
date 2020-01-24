@@ -35,10 +35,10 @@ use std::rc::Rc;
 /// Just as it sounds, MainWindow is the MainWindow struct, holding on
 /// to various pointers that need to persist as well as top level slots
 pub struct MainWindow<'a> {
-    main: CppBox<QMainWindow>,
-    main_toolbar: Rc<toolbar::MainToolbar>,
-    packages_tree: Rc<RefCell<tree::DistributionTreeView<'a>>>,
-    package_withs_list: Rc<RefCell<WithsList<'a>>>,
+    main: CppBox<QMainWindow>,                                  //
+    main_toolbar: Rc<toolbar::MainToolbar>,                     //
+    packages_tree: Rc<RefCell<tree::DistributionTreeView<'a>>>, //
+    package_withs_list: Rc<RefCell<WithsList<'a>>>,             //
     _vpin_table: MutPtr<QTableWidget>,
     _pinchanges_list: MutPtr<QTableWidget>,
     _save_button: MutPtr<QPushButton>,

@@ -17,6 +17,7 @@ pub use slot_functions::{
     update_changes_table, update_versionpin_table, update_withpackages,
 };
 pub mod change_type;
+pub mod inner_main_window;
 pub mod main_window;
 pub mod traits;
 pub use traits::{RowSetterTrait, RowTrait};

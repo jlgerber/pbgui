@@ -28,11 +28,11 @@
 - [ ] add reload in with package dropdown
 - [ ] add caching (server and/or client side)
 
-## add versionpin dialog
+## changes
 
-select roles
-select sequence / shots
-select locations
+- add an inner_main_window to hold all of the MutPtrs and provide an api
+- spit out the lower window into its own ui
+- move all slot_function impls into pbgui-messages
 
 ## change table
 currently, we have the following rows:
