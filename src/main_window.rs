@@ -24,8 +24,8 @@ use qt_core::{
 use qt_gui::QKeySequence;
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr, Ref as QRef},
-    QAction, QMainWindow, QMenu, QMenuBar, QPushButton, QShortcut, QStackedWidget, QTableWidget,
-    QVBoxLayout, QWidget, SlotOfQPoint,
+    QAction, QMainWindow, QMenu, QMenuBar, QPushButton, QShortcut, QSplitter, QStackedWidget,
+    QTableWidget, QVBoxLayout, QWidget, SlotOfQPoint,
 };
 use rustqt_utils::{enclose, enclose_all};
 use std::cell;
@@ -38,6 +38,7 @@ pub struct InnerMainWindow<'a> {
     main: MutPtr<QMainWindow>,
     main_widget: MutPtr<QWidget>,
     main_toolbar: Rc<toolbar::MainToolbar>,
+    withs_splitter: MutPtr<QSplitter>,
     packages_tree: Rc<RefCell<tree::DistributionTreeView<'a>>>,
     package_withs_list: Rc<RefCell<WithsList<'a>>>,
     vpin_table: MutPtr<QTableWidget>,
@@ -55,7 +56,6 @@ pub struct InnerMainWindow<'a> {
     left_toolbar_actions: LeftToolBarActions,
     search_shortcut: MutPtr<QShortcut>,
     // Slots
-    toggle_packages_tree: SlotOfBool<'a>,
     toggle_withs: SlotOfBool<'a>,
     toggle_vpin_changes: SlotOfBool<'a>,
     revision_changed: SlotOfQItemSelectionQItemSelection<'a>,
@@ -118,13 +118,13 @@ impl<'a> InnerMainWindow<'a> {
 
             let (
                 pinchanges_ptr,
-                mut revisions_ptr,
+                revisions_ptr,
                 mut changes_table_ptr,
                 save_button,
-                mut stacked_ptr,
+                stacked_ptr,
                 pinchanges_button_ptr,
                 history_button_ptr,
-                mut controls_ptr,
+                controls_ptr,
             ) = create_bottom_stacked_widget(&mut vpin_table_splitter);
 
             // setup popup menu for versionpin table
@@ -135,7 +135,7 @@ impl<'a> InnerMainWindow<'a> {
             let _choose_withs_action =
                 dist_popup_menu.add_action_q_string(&QString::from_std_str("Withs"));
 
-            let mut dist_popup_menu_ptr = dist_popup_menu.as_mut_ptr();
+            let dist_popup_menu_ptr = dist_popup_menu.as_mut_ptr();
 
             // create the with with package list on the right hand side
             let item_list_ptr = package_withs_list::create(with_splitter_ptr);
@@ -170,6 +170,7 @@ impl<'a> InnerMainWindow<'a> {
                 main: main_window_ptr,
                 main_widget: main_widget_ptr,
                 main_toolbar: main_toolbar,
+                withs_splitter: with_splitter_ptr,
                 packages_tree: packages_ptr,
                 package_withs_list: item_list_ptr.clone(),
                 vpin_table: vpin_tablewidget_ptr,
@@ -230,10 +231,6 @@ impl<'a> InnerMainWindow<'a> {
                     },
                 ),
 
-                toggle_packages_tree: SlotOfBool::new(move |state: bool| {
-                    let mut frame = with_splitter_ptr.widget(0);
-                    frame.set_visible(state);
-                }),
                 toggle_withs: SlotOfBool::new(move |state: bool| {
                     let mut frame = with_splitter_ptr.widget(2);
                     frame.set_visible(state);
@@ -257,10 +254,6 @@ impl<'a> InnerMainWindow<'a> {
                 .selection_model()
                 .selection_changed()
                 .connect(&main_window_inst.distribution_changed);
-
-            view_packages
-                .toggled()
-                .connect(&main_window_inst.toggle_packages_tree);
 
             view_withs.toggled().connect(&main_window_inst.toggle_withs);
 
@@ -359,6 +352,17 @@ impl<'a> InnerMainWindow<'a> {
         self.main_toolbar.clone()
     }
 
+    /// Retrieve the splitter between the main table widget and the
+    /// withs list
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// * MutPtr<QSplitter>
+    pub unsafe fn withs_splitter(&self) -> MutPtr<QSplitter> {
+        self.withs_splitter
+    }
     pub unsafe fn save_button(&self) -> MutPtr<QPushButton> {
         self.save_button
     }
@@ -433,6 +437,7 @@ pub struct MainWindow<'a> {
     show_dist_menu: SlotOfQPoint<'a>,
     select_pin_changes: Slot<'a>,
     select_history: Slot<'a>,
+    toggle_packages_tree: SlotOfBool<'a>,
 }
 
 impl<'a> MainWindow<'a> {
@@ -508,6 +513,11 @@ impl<'a> MainWindow<'a> {
                 select_history(&mut revisions_ptr, &mut stacked_ptr);
                 controls_ptr.set_current_index(1);
             }}),
+
+            toggle_packages_tree: SlotOfBool::new(enclose! { (main) move |state: bool| {
+                let mut frame = main.withs_splitter().widget(0);
+                frame.set_visible(state);
+            }}),
         };
 
         main.main_toolbar()
@@ -536,6 +546,11 @@ impl<'a> MainWindow<'a> {
         main.history_button()
             .clicked()
             .connect(&main_win.select_history);
+
+        main.left_toolbar_actions()
+            .view_packages
+            .toggled()
+            .connect(&main_win.toggle_packages_tree);
 
         main_win
     }
