@@ -56,7 +56,6 @@ pub struct InnerMainWindow<'a> {
     left_toolbar_actions: LeftToolBarActions,
     search_shortcut: MutPtr<QShortcut>,
     // Slots
-    toggle_withs: SlotOfBool<'a>,
     toggle_vpin_changes: SlotOfBool<'a>,
     revision_changed: SlotOfQItemSelectionQItemSelection<'a>,
     distribution_changed: SlotOfQItemSelectionQItemSelection<'a>,
@@ -231,11 +230,6 @@ impl<'a> InnerMainWindow<'a> {
                     },
                 ),
 
-                toggle_withs: SlotOfBool::new(move |state: bool| {
-                    let mut frame = with_splitter_ptr.widget(2);
-                    frame.set_visible(state);
-                }),
-
                 toggle_vpin_changes: SlotOfBool::new(move |state: bool| {
                     let mut frame = vpin_table_splitter.widget(1);
                     frame.set_visible(state);
@@ -254,8 +248,6 @@ impl<'a> InnerMainWindow<'a> {
                 .selection_model()
                 .selection_changed()
                 .connect(&main_window_inst.distribution_changed);
-
-            view_withs.toggled().connect(&main_window_inst.toggle_withs);
 
             view_pin_changes
                 .toggled()
@@ -438,6 +430,7 @@ pub struct MainWindow<'a> {
     select_pin_changes: Slot<'a>,
     select_history: Slot<'a>,
     toggle_packages_tree: SlotOfBool<'a>,
+    toggle_withs: SlotOfBool<'a>,
 }
 
 impl<'a> MainWindow<'a> {
@@ -518,6 +511,11 @@ impl<'a> MainWindow<'a> {
                 let mut frame = main.withs_splitter().widget(0);
                 frame.set_visible(state);
             }}),
+
+            toggle_withs: SlotOfBool::new(enclose! { (main) move |state: bool| {
+                let mut frame = main.withs_splitter().widget(2);
+                frame.set_visible(state);
+            }}),
         };
 
         main.main_toolbar()
@@ -551,6 +549,11 @@ impl<'a> MainWindow<'a> {
             .view_packages
             .toggled()
             .connect(&main_win.toggle_packages_tree);
+
+        main.left_toolbar_actions()
+            .view_withs
+            .toggled()
+            .connect(&main_win.toggle_withs);
 
         main_win
     }
