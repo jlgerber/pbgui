@@ -35,7 +35,7 @@ use std::rc::Rc;
 /// Just as it sounds, MainWindow is the MainWindow struct, holding on
 /// to various pointers that need to persist as well as top level slots
 pub struct MainWindow<'a> {
-    main: CppBox<QMainWindow>,
+    main: MutPtr<QMainWindow>,
     main_toolbar: Rc<toolbar::MainToolbar>,
     packages_tree: Rc<RefCell<tree::DistributionTreeView<'a>>>,
     package_withs_list: Rc<RefCell<WithsList<'a>>>,
@@ -90,10 +90,11 @@ impl<'a> MainWindow<'a> {
     /// ----- center_layout (QVBoxLayourt)
     /// ---- item_list_ptr (MutPtr<QListWidget>)
     /// ```
-    pub fn new() -> MainWindow<'a> {
+    pub fn new() -> (MainWindow<'a>, CppBox<QMainWindow>) {
         unsafe {
             // create the main window, menus, central widget and layout
             let (mut main_window, main_widget_ptr, mut main_layout_ptr) = create_main_window();
+            let main_window_ret = main_window.as_mut_ptr();
             let mut main_window_ptr = main_window.as_mut_ptr();
             let main_toolbar = Rc::new(create_top_toolbar(main_window_ptr.clone()));
             let main_toolbar_ptr = main_toolbar.clone();
@@ -168,7 +169,7 @@ impl<'a> MainWindow<'a> {
             // Create the MainWindow instance, set up signals and slots, and return
             // the newly minted instance. We are done.
             let main_window_inst = MainWindow {
-                main: main_window,
+                main: main_window_ret,
                 main_toolbar: main_toolbar,
                 packages_tree: packages_ptr,
                 package_withs_list: item_list_ptr.clone(),
@@ -365,7 +366,7 @@ impl<'a> MainWindow<'a> {
             // configuration
             view_withs.set_checked(false);
 
-            main_window_inst
+            (main_window_inst, main_window)
         }
     }
 
@@ -418,7 +419,7 @@ impl<'a> MainWindow<'a> {
     /// # Returns
     /// * MutPtr<QMainWindow>
     pub unsafe fn main(&mut self) -> MutPtr<QMainWindow> {
-        self.main.as_mut_ptr()
+        self.main
     }
 }
 

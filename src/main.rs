@@ -55,7 +55,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let _result =
             QResource::register_resource_q_string(&qs("/Users/jgerber/bin/pbgui_tree.rcc"));
 
-        let mut pbgui_root = main_window::MainWindow::new();
+        let (mut pbgui_root, _pbgui_main_cppbox) = main_window::MainWindow::new();
         init::packages_tree::init(to_thread_sender.clone());
         init::package_withs::init(to_thread_sender.clone());
         init::main_toolbar::init(to_thread_sender.clone());
