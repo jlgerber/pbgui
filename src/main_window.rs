@@ -24,8 +24,8 @@ use qt_core::{
 use qt_gui::QKeySequence;
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr, Ref as QRef},
-    QAction, QMainWindow, QMenu, QMenuBar, QPushButton, QShortcut, QTableWidget, QVBoxLayout,
-    QWidget, SlotOfQPoint,
+    QAction, QMainWindow, QMenu, QMenuBar, QPushButton, QShortcut, QStackedWidget, QTableWidget,
+    QVBoxLayout, QWidget, SlotOfQPoint,
 };
 use rustqt_utils::{enclose, enclose_all};
 use std::cell;
@@ -43,6 +43,8 @@ pub struct InnerMainWindow<'a> {
     vpin_table: MutPtr<QTableWidget>,
     pinchanges_list: MutPtr<QTableWidget>,
     pinchanges_cache: Rc<PinChangesCache>,
+    bottom_stacked_widget: MutPtr<QStackedWidget>,
+    bottom_ctrls_stacked_widget: MutPtr<QStackedWidget>,
     save_button: MutPtr<QPushButton>,
     pin_changes_button: MutPtr<QPushButton>,
     changes_table: MutPtr<QTableWidget>,
@@ -52,7 +54,6 @@ pub struct InnerMainWindow<'a> {
     left_toolbar_actions: LeftToolBarActions,
     search_shortcut: MutPtr<QShortcut>,
     // Slots
-    select_pin_changes: Slot<'a>,
     select_history: Slot<'a>,
     toggle_packages_tree: SlotOfBool<'a>,
     toggle_withs: SlotOfBool<'a>,
@@ -175,6 +176,8 @@ impl<'a> InnerMainWindow<'a> {
                 save_button: save_button,
                 pinchanges_list: pinchanges_ptr,
                 pinchanges_cache,
+                bottom_stacked_widget: stacked_ptr,
+                bottom_ctrls_stacked_widget: controls_ptr,
                 dist_popup_menu: dist_popup_menu_ptr,
                 dist_popup_action: choose_dist_action,
                 // _package_popup_menu: line_edit_popup_menu,
@@ -226,11 +229,6 @@ impl<'a> InnerMainWindow<'a> {
                     },
                 ),
 
-                select_pin_changes: Slot::new(move || {
-                    stacked_ptr.set_current_index(0);
-                    controls_ptr.set_current_index(0);
-                }),
-
                 select_history: Slot::new(move || {
                     select_history(&mut revisions_ptr, &mut stacked_ptr);
                     controls_ptr.set_current_index(1);
@@ -253,10 +251,6 @@ impl<'a> InnerMainWindow<'a> {
             //
             // connect signals to slots
             //
-            pinchanges_button_ptr
-                .clicked()
-                .connect(&main_window_inst.select_pin_changes);
-
             history_button_ptr
                 .clicked()
                 .connect(&main_window_inst.select_history);
@@ -311,6 +305,15 @@ impl<'a> InnerMainWindow<'a> {
     pub fn cache(&self) -> Rc<PinChangesCache> {
         self.pinchanges_cache.clone()
     }
+
+    pub unsafe fn bottom_stacked_widget(&self) -> MutPtr<QStackedWidget> {
+        self.bottom_stacked_widget
+    }
+
+    pub unsafe fn bottom_ctrls_stacked_widget(&self) -> MutPtr<QStackedWidget> {
+        self.bottom_ctrls_stacked_widget
+    }
+
     /// Retrieve a Ref wrapped DistributionTreeView instance
     ///
     /// # Arguments
@@ -347,6 +350,10 @@ impl<'a> InnerMainWindow<'a> {
 
     pub unsafe fn pinchanges_list(&self) -> MutPtr<QTableWidget> {
         self.pinchanges_list
+    }
+
+    pub unsafe fn pinchanges_button(&self) -> MutPtr<QPushButton> {
+        self.pin_changes_button
     }
     /// Retrieve an Rc wrapped MainToolbar instance
     ///
@@ -423,6 +430,7 @@ pub struct MainWindow<'a> {
     save_clicked: Slot<'a>,
     choose_distribution_triggered: Slot<'a>,
     show_dist_menu: SlotOfQPoint<'a>,
+    select_pin_changes: Slot<'a>,
 }
 
 impl<'a> MainWindow<'a> {
@@ -442,6 +450,7 @@ impl<'a> MainWindow<'a> {
                     main.vpin_table(),
                 );
             }}),
+
             save_clicked: Slot::new(enclose! { (main) move || {
                 let mut pinchanges_ptr = main.changes_table();
                 save_versionpin_changes(
@@ -484,6 +493,11 @@ impl<'a> MainWindow<'a> {
                 let _action = main.dist_popup_menu()
                     .exec_1a_mut(main.vpin_table().map_to_global(pos).as_ref());
             }}),
+
+            select_pin_changes: Slot::new(enclose! { (main) move || {
+                main.bottom_stacked_widget().set_current_index(0);
+                main.bottom_ctrls_stacked_widget().set_current_index(0);
+            }}),
         };
 
         main.main_toolbar()
@@ -504,6 +518,10 @@ impl<'a> MainWindow<'a> {
         main.vpin_table()
             .custom_context_menu_requested()
             .connect(&main_win.show_dist_menu);
+
+        main.pinchanges_button()
+            .clicked()
+            .connect(&main_win.select_pin_changes);
 
         main_win
     }
