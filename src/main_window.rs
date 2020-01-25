@@ -49,12 +49,12 @@ pub struct InnerMainWindow<'a> {
     pin_changes_button: MutPtr<QPushButton>,
     changes_table: MutPtr<QTableWidget>,
     history_button: MutPtr<QPushButton>,
+    revisions_table: MutPtr<QTableWidget>,
     dist_popup_menu: MutPtr<QMenu>,
     dist_popup_action: MutPtr<QAction>,
     left_toolbar_actions: LeftToolBarActions,
     search_shortcut: MutPtr<QShortcut>,
     // Slots
-    select_history: Slot<'a>,
     toggle_packages_tree: SlotOfBool<'a>,
     toggle_withs: SlotOfBool<'a>,
     toggle_vpin_changes: SlotOfBool<'a>,
@@ -184,6 +184,7 @@ impl<'a> InnerMainWindow<'a> {
                 pin_changes_button: pinchanges_button_ptr,
                 changes_table: changes_table_ptr,
                 history_button: history_button_ptr,
+                revisions_table: revisions_ptr,
                 left_toolbar_actions: left_toolbar_actions,
                 search_shortcut: search_shortcut.into_ptr(),
                 // slots
@@ -229,10 +230,6 @@ impl<'a> InnerMainWindow<'a> {
                     },
                 ),
 
-                select_history: Slot::new(move || {
-                    select_history(&mut revisions_ptr, &mut stacked_ptr);
-                    controls_ptr.set_current_index(1);
-                }),
                 toggle_packages_tree: SlotOfBool::new(move |state: bool| {
                     let mut frame = with_splitter_ptr.widget(0);
                     frame.set_visible(state);
@@ -251,10 +248,6 @@ impl<'a> InnerMainWindow<'a> {
             //
             // connect signals to slots
             //
-            history_button_ptr
-                .clicked()
-                .connect(&main_window_inst.select_history);
-
             revisions_ptr
                 .selection_model()
                 .selection_changed()
@@ -370,6 +363,14 @@ impl<'a> InnerMainWindow<'a> {
         self.save_button
     }
 
+    pub unsafe fn history_button(&self) -> MutPtr<QPushButton> {
+        self.history_button
+    }
+
+    pub unsafe fn revisions_table(&self) -> MutPtr<QTableWidget> {
+        self.revisions_table
+    }
+
     pub fn left_toolbar_actions(&self) -> &LeftToolBarActions {
         &self.left_toolbar_actions
     }
@@ -431,6 +432,7 @@ pub struct MainWindow<'a> {
     choose_distribution_triggered: Slot<'a>,
     show_dist_menu: SlotOfQPoint<'a>,
     select_pin_changes: Slot<'a>,
+    select_history: Slot<'a>,
 }
 
 impl<'a> MainWindow<'a> {
@@ -498,6 +500,14 @@ impl<'a> MainWindow<'a> {
                 main.bottom_stacked_widget().set_current_index(0);
                 main.bottom_ctrls_stacked_widget().set_current_index(0);
             }}),
+
+            select_history: Slot::new(enclose! { (main) move || {
+                let mut revisions_ptr = main.revisions_table();
+                let mut stacked_ptr = main.bottom_stacked_widget();
+                let mut controls_ptr = main.bottom_ctrls_stacked_widget();
+                select_history(&mut revisions_ptr, &mut stacked_ptr);
+                controls_ptr.set_current_index(1);
+            }}),
         };
 
         main.main_toolbar()
@@ -522,6 +532,10 @@ impl<'a> MainWindow<'a> {
         main.pinchanges_button()
             .clicked()
             .connect(&main_win.select_pin_changes);
+
+        main.history_button()
+            .clicked()
+            .connect(&main_win.select_history);
 
         main_win
     }
