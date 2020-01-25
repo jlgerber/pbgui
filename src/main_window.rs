@@ -57,7 +57,6 @@ pub struct InnerMainWindow<'a> {
     left_toolbar_actions: LeftToolBarActions,
     search_shortcut: MutPtr<QShortcut>,
     // Slots
-    distribution_changed: SlotOfQItemSelectionQItemSelection<'a>,
     save_withpackages: Slot<'a>,
 }
 
@@ -112,7 +111,7 @@ impl<'a> InnerMainWindow<'a> {
             let mut vpin_table_splitter = versionpin_table_splitter::create(&mut center_layout_ptr);
 
             // create the versionpin table
-            let mut vpin_tablewidget_ptr = versionpin_table::create(&mut vpin_table_splitter);
+            let vpin_tablewidget_ptr = versionpin_table::create(&mut vpin_table_splitter);
 
             let (
                 pinchanges_ptr,
@@ -198,33 +197,11 @@ impl<'a> InnerMainWindow<'a> {
                         );
                     }},
                 ),
-
-                distribution_changed: SlotOfQItemSelectionQItemSelection::new(
-                    enclose! { (cache, item_list_ptr)
-                    move |selected: QRef<QItemSelection>, _deselected: QRef<QItemSelection>| {
-                        let ind = selected.indexes();
-                        if ind.count_0a() > 0 {
-                            let txid = ind.at(COL_REV_TXID);
-                            update_withpackages(
-                                txid.row(),
-                                &mut vpin_tablewidget_ptr,
-                                item_list_ptr.clone(),
-                                cache.clone(),
-                            );
-                        } else {
-                            item_list_ptr.borrow_mut().clear();
-                        }
-                    }},
-                ),
             };
 
             //
             // connect signals to slots
             //
-            vpin_tablewidget_ptr
-                .selection_model()
-                .selection_changed()
-                .connect(&main_window_inst.distribution_changed);
 
             withpackage_save
                 .clicked()
@@ -409,6 +386,7 @@ pub struct MainWindow<'a> {
     toggle_withs: SlotOfBool<'a>,
     toggle_vpin_changes: SlotOfBool<'a>,
     revision_changed: SlotOfQItemSelectionQItemSelection<'a>,
+    distribution_changed: SlotOfQItemSelectionQItemSelection<'a>,
 }
 
 impl<'a> MainWindow<'a> {
@@ -511,6 +489,23 @@ impl<'a> MainWindow<'a> {
                     main.changes_table().set_row_count(0);
                 }
             }}),
+
+            distribution_changed: SlotOfQItemSelectionQItemSelection::new(enclose! { (main)
+            move |selected: QRef<QItemSelection>, _deselected: QRef<QItemSelection>| {
+                let ind = selected.indexes();
+                if ind.count_0a() > 0 {
+                    let mut vpin_tablewidget_ptr = main.vpin_table();
+                    let txid = ind.at(COL_REV_TXID);
+                    update_withpackages(
+                        txid.row(),
+                        &mut vpin_tablewidget_ptr,
+                        main.package_withs_list(),//item_list_ptr.clone(),
+                        main.cache(),
+                    );
+                } else {
+                    main.package_withs_list().borrow().clear()//item_list_ptr.borrow_mut().clear();
+                }
+            }}),
         };
 
         main.main_toolbar()
@@ -559,6 +554,11 @@ impl<'a> MainWindow<'a> {
             .selection_model()
             .selection_changed()
             .connect(&main_win.revision_changed);
+
+        main.vpin_table()
+            .selection_model()
+            .selection_changed()
+            .connect(&main_win.distribution_changed);
 
         main_win
     }
