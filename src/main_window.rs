@@ -56,53 +56,35 @@ pub struct InnerMainWindow<'a> {
     dist_popup_action: MutPtr<QAction>,
     left_toolbar_actions: LeftToolBarActions,
     search_shortcut: MutPtr<QShortcut>,
-    // Slots
 }
 
 impl<'a> InnerMainWindow<'a> {
-    /// New up the MainWindow. The MainWindow's primary job is to
-    /// ensure that needed widgets and data remain in scope for the
-    /// lifetime of the application. Other than that, it is fairly
-    /// inert. This is more than in part due to the fact that the
-    /// initialization of QT happens during new, including wiring up
-    /// of signals and slots. Thus, nothing is relying on MainWindow
-    /// methods.
+    /// New up the MainWindow. The MainWindow hosts the InnerMainWindow,
+    /// which houses all of the accessible main window components, along with
+    /// private owned components (exposed as MutPtrs on the InnerMainWinodw),
+    /// and all of the main window Slots.
     ///
-    /// In order to avoid MainWindow becoming completely unreadable,
-    /// MainWindow::new delegates a good deal of construction to
-    /// crate::components, and the bulk of the business logic in
-    /// slot implementation to crate::slot_functions.
-    /// Even so, the main structure is a bit nested.
-    ///
-    /// ```ignore
-    /// main_window (QMainApplication)
-    /// - main_window_bar (QMenuBar)
-    /// - main_widget (QWidget)
-    /// -- main_layout (QHBoxLayout)
-    /// --- with_splitter (QSplitter)
-    /// ---- center_widget (QWidget)
-    /// ----- center_layout (QVBoxLayourt)
-    /// ---- item_list_ptr (MutPtr<QListWidget>)
-    /// ```
+    /// In this way, responibilities are split between the InnerMainWindow, and MainWindow.
+    /// This is a common pattern, mainly designed to allow this author to take advantage
+    /// of an api in slots. Without the division, we would have to duplicate logic between
+    /// slots and external consumers.
     pub fn new() -> (InnerMainWindow<'a>, CppBox<QMainWindow>, CppBox<QMenu>) {
         unsafe {
             // create the main window, menus, central widget and layout
             let (mut main_window, main_widget_ptr, mut main_layout_ptr) = create_main_window();
             let mut main_window_ptr = main_window.as_mut_ptr();
             let main_toolbar = Rc::new(create_top_toolbar(main_window_ptr.clone()));
-            //let main_toolbar_ptr = main_toolbar.clone();
+
             // create left toolbar
             let left_toolbar_actions = left_toolbar::create(&mut main_window_ptr);
-            //let view_packages = left_toolbar_actions.view_packages;
             let mut view_withs = left_toolbar_actions.view_withs;
-            //let view_pin_changes = left_toolbar_actions.view_vpin_changes;
-            //let search_shows = left_toolbar_actions.search_shows;
 
             // create the splitter between the center widget and the withs
             let mut with_splitter_ptr = withs_splitter::create(&mut main_layout_ptr);
 
             // create packages treeview on left side
             let packages_ptr = packages_tree::create(with_splitter_ptr);
+
             // create the center widget
             let mut center_layout_ptr = center_widget::create(&mut with_splitter_ptr);
 
@@ -192,7 +174,7 @@ impl<'a> InnerMainWindow<'a> {
         }
     }
 
-    /// Retrieve a MutPtr to the QMainWindow instance
+    /// Returns a mutable pointer to the QMainWindow instance
     ///
     /// # Arguments
     /// * None
@@ -203,7 +185,7 @@ impl<'a> InnerMainWindow<'a> {
         self.main
     }
 
-    /// Retrieve a pointer to the main widget under the QMainWindow
+    /// Returns a mutable pointer to the main widget under the QMainWindow
     ///
     /// # Arguments
     /// * None
@@ -214,7 +196,7 @@ impl<'a> InnerMainWindow<'a> {
         self.main_widget
     }
 
-    /// Retrieve a Reference Counted pointer to the PinChangedCache. This is not
+    /// Returns a reference counted pointer to the PinChangedCache. This is not
     /// suitable to be moved between threads as it is `Rc`.
     ///
     /// # Arguments
@@ -226,7 +208,7 @@ impl<'a> InnerMainWindow<'a> {
         self.pinchanges_cache.clone()
     }
 
-    ///  Retrieve a mutable pointer to the QStackedWidget used to organize the
+    /// Returns a mutable pointer to the QStackedWidget used to organize the
     /// bottom widget containing the changes, history, etc
     ///
     /// # Arguments
@@ -238,7 +220,7 @@ impl<'a> InnerMainWindow<'a> {
         self.bottom_stacked_widget
     }
 
-    /// Retrurns a mutable pointer to the QStackedWidget used to provide specific
+    /// Returns a mutable pointer to the QStackedWidget used to provide specific
     /// controls in coordination with the bottom_stacked_widget. In otherwords, for
     /// each widget displayed in the bottom_stack, one may provide unique controls
     /// via this widget. It is displayed on the right side of the bar above the
@@ -253,7 +235,7 @@ impl<'a> InnerMainWindow<'a> {
         self.bottom_ctrls_stacked_widget
     }
 
-    /// Retrieve a Ref wrapped DistributionTreeView instance
+    /// Returns a reference (Cell::Ref) wrapped DistributionTreeView instance
     ///
     /// # Arguments
     /// * None
@@ -264,7 +246,7 @@ impl<'a> InnerMainWindow<'a> {
         self.packages_tree.borrow()
     }
 
-    /// Retrieve a Reference Counted pointer to a RefCell wrapped DistributionTreeView
+    /// Returns a reference counted pointer to a RefCell wrapped DistributionTreeView
     ///
     /// # Arguments
     /// * None
@@ -274,7 +256,7 @@ impl<'a> InnerMainWindow<'a> {
     pub unsafe fn tree(&self) -> Rc<RefCell<tree::DistributionTreeView<'a>>> {
         self.packages_tree.clone()
     }
-    /// Retrieve an Reference Counted pointer to a RefCell wrapped WIthsList
+    /// Returns an reference counted pointer to a RefCell wrapped WIthsList
     ///
     /// # Arguments
     /// * None
@@ -285,7 +267,7 @@ impl<'a> InnerMainWindow<'a> {
         self.package_withs_list.clone()
     }
 
-    /// Retrieve a RefMut wrapped DistributionTreeView instance
+    /// Returns a mutable reference to the DistributionTreeView instance
     ///
     /// # Arguments
     /// * None
@@ -340,7 +322,7 @@ impl<'a> InnerMainWindow<'a> {
         self.pin_changes_button
     }
 
-    /// Retrieve an Rc wrapped MainToolbar instance
+    /// Returns a reference counted pointer to the MainToolbar instance
     ///
     /// # Arguments
     /// * None
@@ -351,7 +333,7 @@ impl<'a> InnerMainWindow<'a> {
         self.main_toolbar.clone()
     }
 
-    /// Retrieve the splitter between the main table widget and the
+    /// Returns the a mutable pointer to the splitter between the main table widget and the
     /// withs list
     ///
     /// # Arguments
@@ -363,7 +345,7 @@ impl<'a> InnerMainWindow<'a> {
         self.withs_splitter
     }
 
-    /// Retrieves a mutable pointer to the save button
+    /// Returns a mutable pointer to the save button
     ///
     /// # Arguments
     /// * None
@@ -374,26 +356,69 @@ impl<'a> InnerMainWindow<'a> {
         self.save_button
     }
 
+    /// Returns a mutable pointer to the history button
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// * MutPtr<QPushButton>
     pub unsafe fn history_button(&self) -> MutPtr<QPushButton> {
         self.history_button
     }
 
+    /// Returns a mutable pointer to the revisions table
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// * MutPtr<QTableWidget>
     pub unsafe fn revisions_table(&self) -> MutPtr<QTableWidget> {
         self.revisions_table
     }
 
+    /// Returns a reference to the LeftToolBarActions instance, which collects
+    /// all of the left toolbar's QActions and makes them available.
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// * &LeftToolBarActions
     pub fn left_toolbar_actions(&self) -> &LeftToolBarActions {
         &self.left_toolbar_actions
     }
 
+    /// Returns a mutable pointer to the changes tablewidget
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// * MutPtr<QTableWidget>
     pub unsafe fn changes_table(&self) -> MutPtr<QTableWidget> {
         self.changes_table
     }
 
+    /// Returns a mutable pointer to the distribution popup qmenu
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// * MutPtr<QMenu>
     pub unsafe fn dist_popup_menu(&self) -> MutPtr<QMenu> {
         self.dist_popup_menu
     }
 
+    /// Returns a mutable pointer to the distribution popup action
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// * MutPtr<QAction>
     pub unsafe fn dist_popup_action(&self) -> MutPtr<QAction> {
         self.dist_popup_action
     }
@@ -470,7 +495,9 @@ impl<'a> MainWindow<'a> {
             main: main.clone(),
             _main_box: pbgui_main_cppbox,
             _dist_popup_menu_box: dist_popup_menu_box,
+            //
             // slots
+            //
             query_button_clicked: Slot::new(enclose! {(main) move || {
                 let search_shows = main.left_toolbar_actions().search_shows;
                 update_vpin_table(
@@ -590,6 +617,9 @@ impl<'a> MainWindow<'a> {
             }}),
         };
 
+        //
+        // Wire up signals and slots
+        //
         main.main_toolbar()
             .query_btn()
             .clicked()
@@ -651,9 +681,24 @@ impl<'a> MainWindow<'a> {
         main_win
     }
 
+    /// Returns a reference counted ponter to the InnerMainWindow instance
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// * Rc<InnerMainWindow>>
     pub fn main_win(&self) -> Rc<InnerMainWindow<'a>> {
         self.main.clone()
     }
+
+    /// Returns a mutable pointer to the QMainWindow instance
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// * MutPtr<QMainWindow>
     pub unsafe fn main(&self) -> MutPtr<QMainWindow> {
         let main = self.main_win();
         main.main()
