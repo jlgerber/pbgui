@@ -4,7 +4,7 @@ use crate::{
     center_widget,
     choose_distribution::choose_alternative_distribution,
     constants::COL_REV_TXID,
-    left_toolbar, package_withs_list, packages_tree,
+    inner_main_window, left_toolbar, package_withs_list, packages_tree,
     save_versionpin_changes::save_versionpin_changes,
     select_history::select_history,
     store_withpackage_changes,
@@ -35,19 +35,10 @@ use std::rc::Rc;
 /// Just as it sounds, MainWindow is the MainWindow struct, holding on
 /// to various pointers that need to persist as well as top level slots
 pub struct MainWindow<'a> {
-    main: CppBox<QMainWindow>,                                  //
-    main_toolbar: Rc<toolbar::MainToolbar>,                     //
-    packages_tree: Rc<RefCell<tree::DistributionTreeView<'a>>>, //
-    package_withs_list: Rc<RefCell<WithsList<'a>>>,             //
-    _vpin_table: MutPtr<QTableWidget>,
-    _pinchanges_list: MutPtr<QTableWidget>,
-    _save_button: MutPtr<QPushButton>,
-    _pin_changes_button: MutPtr<QPushButton>,
-    _history_button: MutPtr<QPushButton>,
-    _dist_popup_menu: CppBox<QMenu>,
-    _dist_popup_action: MutPtr<QAction>,
-    _left_toolbar_actions: LeftToolBarActions,
-    search_shortcut: MutPtr<QShortcut>,
+    main: Rc<inner_main_window::InnerMainWindow<'a>>, //
+    main_owned: CppBox<QMainWindow>,
+    dist_popup_menu_owned: CppBox<QMenu>,
+    pinchanges_cache = Rc
     // Slots
     query_button_clicked: Slot<'a>,
     save_clicked: Slot<'a>,
@@ -92,99 +83,21 @@ impl<'a> MainWindow<'a> {
     /// ```
     pub fn new() -> MainWindow<'a> {
         unsafe {
-            // create the main window, menus, central widget and layout
-            let (mut main_window, main_widget_ptr, mut main_layout_ptr) = create_main_window();
-            let mut main_window_ptr = main_window.as_mut_ptr();
-            let main_toolbar = Rc::new(create_top_toolbar(main_window_ptr.clone()));
-            let main_toolbar_ptr = main_toolbar.clone();
-            // create left toolbar
-            let left_toolbar_actions = left_toolbar::create(&mut main_window_ptr);
-            let view_packages = left_toolbar_actions.view_packages;
-            let mut view_withs = left_toolbar_actions.view_withs;
-            let view_pin_changes = left_toolbar_actions.view_vpin_changes;
-            let search_shows = left_toolbar_actions.search_shows;
-
-            // create the splitter between the center widget and the withs
-            let mut with_splitter_ptr = withs_splitter::create(&mut main_layout_ptr);
-
-            // create packages treeview on left side
-            let packages_ptr = packages_tree::create(with_splitter_ptr);
-            // create the center widget
-            let mut center_layout_ptr = center_widget::create(&mut with_splitter_ptr);
-
-            // create the versionpin table splitter
-            let mut vpin_table_splitter = versionpin_table_splitter::create(&mut center_layout_ptr);
-
-            // create the versionpin table
-            let mut vpin_tablewidget_ptr = versionpin_table::create(&mut vpin_table_splitter);
-
-            let (
-                mut pinchanges_ptr,
-                mut revisions_ptr,
-                mut changes_table_ptr,
-                save_button,
-                mut stacked_ptr,
-                pinchanges_button_ptr,
-                history_button_ptr,
-                mut controls_ptr,
-            ) = create_bottom_stacked_widget(&mut vpin_table_splitter);
-
-            // setup popup menu for versionpin table
-            let mut dist_popup_menu = QMenu::new();
-            let choose_dist_action =
-                dist_popup_menu.add_action_q_string(&QString::from_std_str("Change Version"));
-
-            let _choose_withs_action =
-                dist_popup_menu.add_action_q_string(&QString::from_std_str("Withs"));
-
-            let mut dist_popup_menu_ptr = dist_popup_menu.as_mut_ptr();
-
-            // create the with with package list on the right hand side
-            let item_list_ptr = package_withs_list::create(with_splitter_ptr);
-            item_list_ptr.borrow_mut().set_add_mode();
-            item_list_ptr.borrow_mut().set_cb_max_visible_items(30);
-
-            // shortcuts
-            let key_seq = QKeySequence::from_q_string(&qs("Ctrl+Return"));
-            let search_shortcut =
-                QShortcut::new_2a(key_seq.as_ref(), item_list_ptr.borrow().main());
-
-            // persist data
-            let pinchange_cache = Rc::new(PinChangesCache::new());
-            let cache = pinchange_cache.clone();
-            //
-            // final housekeeping before showing main window
-            //
-            versionpin_table_splitter::set_sizes(&mut vpin_table_splitter);
-            withs_splitter::set_sizes(&mut with_splitter_ptr);
-
-            resize_window_to_screen(&mut main_window_ptr, 0.8);
-            load_stylesheet("/Users/jgerber/bin/pbgui.qss", main_window_ptr);
-
-            let withpackage_save = item_list_ptr.borrow().save_button().clone();
-            let versionpin_table = vpin_tablewidget_ptr.clone();
-
-            main_window_ptr.show();
+            let (main, main_owned, dist_popup_menu_owned) =
+                inner_main_window::InnerMainWindow::new();
+            let main = Rc::new(main);
             // Create the MainWindow instance, set up signals and slots, and return
             // the newly minted instance. We are done.
             let main_window_inst = MainWindow {
-                main: main_window,
-                main_toolbar: main_toolbar,
-                packages_tree: packages_ptr,
-                package_withs_list: item_list_ptr.clone(),
-                _vpin_table: vpin_tablewidget_ptr,
-                _save_button: save_button,
-                _pinchanges_list: pinchanges_ptr,
-                _dist_popup_menu: dist_popup_menu,
-                _dist_popup_action: choose_dist_action,
-                // _package_popup_menu: line_edit_popup_menu,
-                _pin_changes_button: pinchanges_button_ptr,
-                _history_button: history_button_ptr,
-                _left_toolbar_actions: left_toolbar_actions,
-                search_shortcut: search_shortcut.into_ptr(),
+                main,
+                main_owned,
+                dist_popup_menu_owned,
                 // slots
                 save_withpackages: Slot::new(
-                    enclose_all! { (pinchange_cache, item_list_ptr) (mut pinchanges_ptr) move || {
+                    enclose! { (main) move || {
+                        let pinchange_cache = None;
+                        let item_list_ptr = None;
+                        let mut pinchanges_ptr = None;
                         store_withpackage_changes::store_withpackage_changes(
                             item_list_ptr.clone(),
                             versionpin_table,

@@ -21,7 +21,7 @@ use std::rc::Rc;
 
 /// Just as it sounds, MainWindow is the MainWindow struct, holding on
 /// to various pointers that need to persist as well as top level slots
-pub struct MainWindow<'a> {
+pub struct InnerMainWindow<'a> {
     main: MutPtr<QMainWindow>,              //CppBox<QMainWindow>
     main_toolbar: Rc<toolbar::MainToolbar>, //
     packages_tree: Rc<RefCell<tree::DistributionTreeView<'a>>>, //does this have to be a refcell?
@@ -31,13 +31,13 @@ pub struct MainWindow<'a> {
     save_button: MutPtr<QPushButton>,
     pin_changes_button: MutPtr<QPushButton>,
     history_button: MutPtr<QPushButton>,
-    dist_popup_menu: MutPtr<QMenu>,
+    dist_popup_menu: MutPtr<QMenu>, //owned
     dist_popup_action: MutPtr<QAction>,
     _left_toolbar_actions: LeftToolBarActions,
     search_shortcut: MutPtr<QShortcut>,
 }
 
-impl<'a> MainWindow<'a> {
+impl<'a> InnerMainWindow<'a> {
     /// New up the MainWindow. The MainWindow's primary job is to
     /// ensure that needed widgets and data remain in scope for the
     /// lifetime of the application. Other than that, it is fairly
@@ -52,7 +52,7 @@ impl<'a> MainWindow<'a> {
     /// slot implementation to crate::slot_functions.
     /// Even so, the main structure is a bit nested.
 
-    pub fn new() -> (MainWindow<'a>, CppBox<QMainWindow>, CppBox<QMenu>) {
+    pub fn new() -> (InnerMainWindow<'a>, CppBox<QMainWindow>, CppBox<QMenu>) {
         unsafe {
             // create the main window, menus, central widget and layout
             let (mut main_window, _main_widget_ptr, mut main_layout_ptr) = create_main_window();
@@ -128,7 +128,7 @@ impl<'a> MainWindow<'a> {
             main_window_ptr.show();
             // Create the MainWindow instance, set up signals and slots, and return
             // the newly minted instance. We are done.
-            let main_window_inst = MainWindow {
+            let main_window_inst = InnerMainWindow {
                 main: main_window.as_mut_ptr(),
                 main_toolbar: main_toolbar,
                 packages_tree: packages_ptr,
