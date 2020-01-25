@@ -57,7 +57,6 @@ pub struct InnerMainWindow<'a> {
     left_toolbar_actions: LeftToolBarActions,
     search_shortcut: MutPtr<QShortcut>,
     // Slots
-    revision_changed: SlotOfQItemSelectionQItemSelection<'a>,
     distribution_changed: SlotOfQItemSelectionQItemSelection<'a>,
     save_withpackages: Slot<'a>,
 }
@@ -118,7 +117,7 @@ impl<'a> InnerMainWindow<'a> {
             let (
                 pinchanges_ptr,
                 revisions_ptr,
-                mut changes_table_ptr,
+                changes_table_ptr,
                 save_button,
                 stacked_ptr,
                 pinchanges_button_ptr,
@@ -217,29 +216,11 @@ impl<'a> InnerMainWindow<'a> {
                         }
                     }},
                 ),
-
-                revision_changed: SlotOfQItemSelectionQItemSelection::new(
-                    move |selected: QRef<QItemSelection>, _deselected: QRef<QItemSelection>| {
-                        let ind = selected.indexes();
-                        if ind.count_0a() > 0 {
-                            let txid = ind.at(COL_REV_TXID);
-                            update_changes_table(txid.row(), revisions_ptr, changes_table_ptr);
-                        } else {
-                            changes_table_ptr.clear_contents();
-                            changes_table_ptr.set_row_count(0);
-                        }
-                    },
-                ),
             };
 
             //
             // connect signals to slots
             //
-            revisions_ptr
-                .selection_model()
-                .selection_changed()
-                .connect(&main_window_inst.revision_changed);
-
             vpin_tablewidget_ptr
                 .selection_model()
                 .selection_changed()
@@ -427,6 +408,7 @@ pub struct MainWindow<'a> {
     toggle_packages_tree: SlotOfBool<'a>,
     toggle_withs: SlotOfBool<'a>,
     toggle_vpin_changes: SlotOfBool<'a>,
+    revision_changed: SlotOfQItemSelectionQItemSelection<'a>,
 }
 
 impl<'a> MainWindow<'a> {
@@ -517,6 +499,18 @@ impl<'a> MainWindow<'a> {
                 let mut frame = main.vpin_table_splitter().widget(1);
                 frame.set_visible(state);
             }}),
+
+            revision_changed: SlotOfQItemSelectionQItemSelection::new(enclose! { (main)
+            move |selected: QRef<QItemSelection>, _deselected: QRef<QItemSelection>| {
+                let ind = selected.indexes();
+                if ind.count_0a() > 0 {
+                    let txid = ind.at(COL_REV_TXID);
+                    update_changes_table(txid.row(), main.revisions_table(), main.changes_table());
+                } else {
+                    main.changes_table().clear_contents();
+                    main.changes_table().set_row_count(0);
+                }
+            }}),
         };
 
         main.main_toolbar()
@@ -560,6 +554,11 @@ impl<'a> MainWindow<'a> {
             .view_vpin_changes
             .toggled()
             .connect(&main_win.toggle_vpin_changes);
+
+        main.revisions_table() //revisions_ptr
+            .selection_model()
+            .selection_changed()
+            .connect(&main_win.revision_changed);
 
         main_win
     }
