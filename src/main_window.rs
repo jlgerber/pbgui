@@ -49,7 +49,7 @@ pub struct InnerMainWindow<'a> {
     left_toolbar_actions: LeftToolBarActions,
     search_shortcut: MutPtr<QShortcut>,
     // Slots
-    query_button_clicked: Slot<'a>,
+    //query_button_clicked: Slot<'a>,
     save_clicked: Slot<'a>,
     choose_distribution_triggered: Slot<'a>,
     show_dist_menu: SlotOfQPoint<'a>,
@@ -254,7 +254,7 @@ impl<'a> InnerMainWindow<'a> {
                         pinchange_cache.clone(),
                     );
                 } }),
-
+                /*
                 query_button_clicked: Slot::new(enclose! {(main_toolbar_ptr) move || {
                     update_vpin_table(
                         main_toolbar_ptr.clone(),
@@ -262,7 +262,7 @@ impl<'a> InnerMainWindow<'a> {
                         vpin_tablewidget_ptr,
                     );
                 }}),
-
+                */
                 choose_distribution_triggered: Slot::new(enclose! { (pinchange_cache) move || {
                     if vpin_tablewidget_ptr.is_null() {
                         log::error!("Error: attempted to access null pointer in choose_distribution_tribbered");
@@ -316,11 +316,11 @@ impl<'a> InnerMainWindow<'a> {
                 .clicked()
                 .connect(&main_window_inst.select_history);
 
-            main_toolbar_ptr
-                //.borrow()
-                .query_btn()
-                .clicked()
-                .connect(&main_window_inst.query_button_clicked);
+            // main_toolbar_ptr
+            //     //.borrow()
+            //     .query_btn()
+            //     .clicked()
+            //     .connect(&main_window_inst.query_button_clicked);
 
             save_button
                 .clicked()
@@ -357,10 +357,11 @@ impl<'a> InnerMainWindow<'a> {
             withpackage_save
                 .clicked()
                 .connect(&main_window_inst.save_withpackages);
-            main_window_inst
-                .search_shortcut
-                .activated()
-                .connect(&main_window_inst.query_button_clicked);
+
+            // main_window_inst
+            //     .search_shortcut
+            //     .activated()
+            //     .connect(&main_window_inst.query_button_clicked);
 
             // configuration
             view_withs.set_checked(false);
@@ -399,6 +400,9 @@ impl<'a> InnerMainWindow<'a> {
         self.packages_tree.borrow_mut()
     }
 
+    pub unsafe fn vpin_table(&self) -> MutPtr<QTableWidget> {
+        self.vpin_table
+    }
     /// Retrieve an Rc wrapped MainToolbar instance
     ///
     /// # Arguments
@@ -409,7 +413,9 @@ impl<'a> InnerMainWindow<'a> {
     pub unsafe fn main_toolbar(&self) -> Rc<toolbar::MainToolbar> {
         self.main_toolbar.clone()
     }
-
+    pub fn left_toolbar_actions(&self) -> &LeftToolBarActions {
+        &self.left_toolbar_actions
+    }
     /// Retrieve a MutPtr to the QMainWindow instance
     ///
     /// # Arguments
@@ -459,22 +465,42 @@ fn create_top_toolbar(parent: MutPtr<QMainWindow>) -> toolbar::MainToolbar {
 pub struct MainWindow<'a> {
     main: Rc<InnerMainWindow<'a>>,
     _main_box: CppBox<QMainWindow>,
+    query_button_clicked: Slot<'a>,
 }
 
 impl<'a> MainWindow<'a> {
-    pub fn new() -> MainWindow<'a> {
+    pub unsafe fn new() -> MainWindow<'a> {
         let (pbgui_root, pbgui_main_cppbox) = InnerMainWindow::new();
-
-        MainWindow {
-            main: Rc::new(pbgui_root),
+        let main = Rc::new(pbgui_root);
+        let main_win = MainWindow {
+            main: main.clone(),
             _main_box: pbgui_main_cppbox,
-        }
+            // slots
+            query_button_clicked: Slot::new(enclose! {(main) move || {
+                let search_shows = main.left_toolbar_actions().search_shows;
+                update_vpin_table(
+                    main.main_toolbar(),
+                    &search_shows,
+                    main.vpin_table(),
+                );
+            }}),
+        };
+
+        main.main_toolbar()
+            .query_btn()
+            .clicked()
+            .connect(&main_win.query_button_clicked);
+
+        main.search_shortcut
+            .activated()
+            .connect(&main_win.query_button_clicked);
+
+        main_win
     }
 
     pub fn main_win(&self) -> Rc<InnerMainWindow<'a>> {
         self.main.clone()
     }
-
     pub unsafe fn main(&self) -> MutPtr<QMainWindow> {
         let main = self.main_win();
         main.main()
