@@ -47,13 +47,11 @@ pub struct InnerMainWindow<'a> {
     pin_changes_button: MutPtr<QPushButton>,
     changes_table: MutPtr<QTableWidget>,
     history_button: MutPtr<QPushButton>,
-    dist_popup_menu: CppBox<QMenu>,
+    dist_popup_menu: MutPtr<QMenu>,
     dist_popup_action: MutPtr<QAction>,
     left_toolbar_actions: LeftToolBarActions,
     search_shortcut: MutPtr<QShortcut>,
     // Slots
-    //choose_distribution_triggered: Slot<'a>,
-    show_dist_menu: SlotOfQPoint<'a>,
     select_pin_changes: Slot<'a>,
     select_history: Slot<'a>,
     toggle_packages_tree: SlotOfBool<'a>,
@@ -89,7 +87,7 @@ impl<'a> InnerMainWindow<'a> {
     /// ----- center_layout (QVBoxLayourt)
     /// ---- item_list_ptr (MutPtr<QListWidget>)
     /// ```
-    pub fn new() -> (InnerMainWindow<'a>, CppBox<QMainWindow>) {
+    pub fn new() -> (InnerMainWindow<'a>, CppBox<QMainWindow>, CppBox<QMenu>) {
         unsafe {
             // create the main window, menus, central widget and layout
             let (mut main_window, main_widget_ptr, mut main_layout_ptr) = create_main_window();
@@ -177,7 +175,7 @@ impl<'a> InnerMainWindow<'a> {
                 save_button: save_button,
                 pinchanges_list: pinchanges_ptr,
                 pinchanges_cache,
-                dist_popup_menu: dist_popup_menu,
+                dist_popup_menu: dist_popup_menu_ptr,
                 dist_popup_action: choose_dist_action,
                 // _package_popup_menu: line_edit_popup_menu,
                 pin_changes_button: pinchanges_button_ptr,
@@ -228,19 +226,6 @@ impl<'a> InnerMainWindow<'a> {
                     },
                 ),
 
-                show_dist_menu: SlotOfQPoint::new(move |pos: QRef<QPoint>| {
-                    if vpin_tablewidget_ptr.is_null() {
-                        log::error!("vpin_tablewidget_ptr is null");
-                        return;
-                    }
-                    if dist_popup_menu_ptr.is_null() {
-                        log::error!("dist_popup_menu_ptr is null");
-                        return;
-                    }
-                    let _action = dist_popup_menu_ptr
-                        .exec_1a_mut(vpin_tablewidget_ptr.map_to_global(pos).as_ref());
-                }),
-
                 select_pin_changes: Slot::new(move || {
                     stacked_ptr.set_current_index(0);
                     controls_ptr.set_current_index(0);
@@ -276,10 +261,6 @@ impl<'a> InnerMainWindow<'a> {
                 .clicked()
                 .connect(&main_window_inst.select_history);
 
-            vpin_tablewidget_ptr
-                .custom_context_menu_requested()
-                .connect(&main_window_inst.show_dist_menu);
-
             revisions_ptr
                 .selection_model()
                 .selection_changed()
@@ -307,7 +288,7 @@ impl<'a> InnerMainWindow<'a> {
             // configuration
             view_withs.set_checked(false);
 
-            (main_window_inst, main_window)
+            (main_window_inst, main_window, dist_popup_menu)
         }
     }
 
@@ -390,9 +371,9 @@ impl<'a> InnerMainWindow<'a> {
         self.changes_table
     }
 
-    // pub unsafe fn dist_popup_menu(&self) -> MutPtr<QMenu> {
-    //     self.dist_popup_menu
-    // }
+    pub unsafe fn dist_popup_menu(&self) -> MutPtr<QMenu> {
+        self.dist_popup_menu
+    }
 
     pub unsafe fn dist_popup_action(&self) -> MutPtr<QAction> {
         self.dist_popup_action
@@ -436,18 +417,22 @@ fn create_top_toolbar(parent: MutPtr<QMainWindow>) -> toolbar::MainToolbar {
 pub struct MainWindow<'a> {
     main: Rc<InnerMainWindow<'a>>,
     _main_box: CppBox<QMainWindow>,
+    _dist_popup_menu_box: CppBox<QMenu>,
+    // slots
     query_button_clicked: Slot<'a>,
     save_clicked: Slot<'a>,
     choose_distribution_triggered: Slot<'a>,
+    show_dist_menu: SlotOfQPoint<'a>,
 }
 
 impl<'a> MainWindow<'a> {
     pub unsafe fn new() -> MainWindow<'a> {
-        let (pbgui_root, pbgui_main_cppbox) = InnerMainWindow::new();
+        let (pbgui_root, pbgui_main_cppbox, dist_popup_menu_box) = InnerMainWindow::new();
         let main = Rc::new(pbgui_root);
         let main_win = MainWindow {
             main: main.clone(),
             _main_box: pbgui_main_cppbox,
+            _dist_popup_menu_box: dist_popup_menu_box,
             // slots
             query_button_clicked: Slot::new(enclose! {(main) move || {
                 let search_shows = main.left_toolbar_actions().search_shows;
@@ -485,6 +470,20 @@ impl<'a> MainWindow<'a> {
                     main.cache(),
                 );
             }}),
+
+            show_dist_menu: SlotOfQPoint::new(enclose! { (main) move |pos: QRef<QPoint>| {
+
+                if main.vpin_table().is_null() {
+                    log::error!("vpin_tablewidget_ptr is null");
+                    return;
+                }
+                if main.dist_popup_menu().is_null() { //dist_popup_menu_item()
+                    log::error!("dist_popup_menu_ptr is null");
+                    return;
+                }
+                let _action = main.dist_popup_menu()
+                    .exec_1a_mut(main.vpin_table().map_to_global(pos).as_ref());
+            }}),
         };
 
         main.main_toolbar()
@@ -501,6 +500,10 @@ impl<'a> MainWindow<'a> {
         main.dist_popup_action()
             .triggered()
             .connect(&main_win.choose_distribution_triggered);
+
+        main.vpin_table()
+            .custom_context_menu_requested()
+            .connect(&main_win.show_dist_menu);
 
         main_win
     }
