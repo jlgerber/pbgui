@@ -1,5 +1,6 @@
 use crate::{
     bottom_stacked_widget::create_bottom_stacked_widget,
+    cache::PinChangesCache,
     center_widget, left_toolbar, package_withs_list, packages_tree,
     utility::{create_vlayout, load_stylesheet, qs, resize_window_to_screen},
     versionpin_table, versionpin_table_splitter, withs_splitter, LeftToolBarActions,
@@ -12,8 +13,8 @@ use qt_core::QString;
 use qt_gui::QKeySequence;
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr},
-    QAction, QMainWindow, QMenu, QMenuBar, QPushButton, QShortcut, QTableWidget, QVBoxLayout,
-    QWidget,
+    QAction, QMainWindow, QMenu, QMenuBar, QPushButton, QShortcut, QSplitter, QStackedWidget,
+    QTableWidget, QVBoxLayout, QWidget,
 };
 use std::cell;
 use std::cell::RefCell;
@@ -22,18 +23,26 @@ use std::rc::Rc;
 /// Just as it sounds, MainWindow is the MainWindow struct, holding on
 /// to various pointers that need to persist as well as top level slots
 pub struct InnerMainWindow<'a> {
-    main: MutPtr<QMainWindow>,              //CppBox<QMainWindow>
+    main: MutPtr<QMainWindow>, //CppBox<QMainWindow>
+    main_widget: MutPtr<QWidget>,
     main_toolbar: Rc<toolbar::MainToolbar>, //
+    withs_splitter: MutPtr<QSplitter>,
     packages_tree: Rc<RefCell<tree::DistributionTreeView<'a>>>, //does this have to be a refcell?
-    package_withs_list: Rc<RefCell<WithsList<'a>>>, //can this be an RC?
+    package_withs_list: Rc<RefCell<WithsList<'a>>>,             //can this be an RC?
     vpin_table: MutPtr<QTableWidget>,
+    vpin_table_splitter: MutPtr<QSplitter>,
     pinchanges_list: MutPtr<QTableWidget>,
+    pinchanges_cache: Rc<PinChangesCache>,
+    bottom_stacked_widget: MutPtr<QStackedWidget>,
+    bottom_ctrls_stacked_widget: MutPtr<QStackedWidget>,
     save_button: MutPtr<QPushButton>,
     pin_changes_button: MutPtr<QPushButton>,
     history_button: MutPtr<QPushButton>,
+    revisions_table: MutPtr<QTableWidget>,
+    changes_table: MutPtr<QTableWidget>,
     dist_popup_menu: MutPtr<QMenu>, //owned
     dist_popup_action: MutPtr<QAction>,
-    _left_toolbar_actions: LeftToolBarActions,
+    left_toolbar_actions: LeftToolBarActions,
     search_shortcut: MutPtr<QShortcut>,
 }
 
@@ -55,7 +64,7 @@ impl<'a> InnerMainWindow<'a> {
     pub fn new() -> (InnerMainWindow<'a>, CppBox<QMainWindow>, CppBox<QMenu>) {
         unsafe {
             // create the main window, menus, central widget and layout
-            let (mut main_window, _main_widget_ptr, mut main_layout_ptr) = create_main_window();
+            let (mut main_window, main_widget_ptr, mut main_layout_ptr) = create_main_window();
             let mut main_window_ptr = main_window.as_mut_ptr();
             let main_toolbar = Rc::new(create_top_toolbar(main_window_ptr.clone()));
             let _main_toolbar_ptr = main_toolbar.clone();
@@ -82,15 +91,16 @@ impl<'a> InnerMainWindow<'a> {
 
             let (
                 pinchanges_ptr,
-                mut _revisions_ptr,
-                mut _changes_table_ptr,
+                revisions_ptr,
+                changes_table_ptr,
                 save_button,
-                mut _stacked_ptr,
+                stacked_ptr,
                 pinchanges_button_ptr,
                 history_button_ptr,
-                mut _controls_ptr,
+                controls_ptr,
             ) = create_bottom_stacked_widget(&mut vpin_table_splitter);
 
+            let pinchanges_cache = Rc::new(PinChangesCache::new());
             // setup popup menu for versionpin table
             let mut dist_popup_menu = QMenu::new();
             let choose_dist_action =
@@ -130,17 +140,25 @@ impl<'a> InnerMainWindow<'a> {
             // the newly minted instance. We are done.
             let main_window_inst = InnerMainWindow {
                 main: main_window.as_mut_ptr(),
+                main_widget: main_widget_ptr,
                 main_toolbar: main_toolbar,
+                withs_splitter: with_splitter_ptr,
                 packages_tree: packages_ptr,
                 package_withs_list: item_list_ptr.clone(),
                 vpin_table: vpin_tablewidget_ptr,
+                vpin_table_splitter,
                 pinchanges_list: pinchanges_ptr,
+                pinchanges_cache,
+                bottom_stacked_widget: stacked_ptr,
+                bottom_ctrls_stacked_widget: controls_ptr,
                 save_button: save_button,
                 pin_changes_button: pinchanges_button_ptr,
                 history_button: history_button_ptr,
+                revisions_table: revisions_ptr,
+                changes_table: changes_table_ptr,
                 dist_popup_menu: dist_popup_menu.as_mut_ptr(),
                 dist_popup_action: choose_dist_action,
-                _left_toolbar_actions: left_toolbar_actions,
+                left_toolbar_actions: left_toolbar_actions,
                 search_shortcut: search_shortcut.into_ptr(),
             };
 
@@ -151,6 +169,21 @@ impl<'a> InnerMainWindow<'a> {
         }
     }
 
+    /// Retrieve a MutPtr to the QMainWindow instance
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// * MutPtr<QMainWindow>
+    pub unsafe fn main(&mut self) -> MutPtr<QMainWindow> {
+        self.main
+    }
+
+    /// Retrieve a pointer to the main widget under the QMainWindow
+    pub unsafe fn main_widget(&self) -> MutPtr<QWidget> {
+        self.main_widget
+    }
     /// Retrieve a Ref wrapped DistributionTreeView instance
     ///
     /// # Arguments
@@ -169,6 +202,10 @@ impl<'a> InnerMainWindow<'a> {
     /// Retrieve an shared copy of the DistributionTreeView
     pub unsafe fn package_withs_list(&self) -> Rc<RefCell<WithsList<'a>>> {
         self.package_withs_list.clone()
+    }
+
+    pub unsafe fn package_withs_list_save(&self) -> MutPtr<QPushButton> {
+        self.package_withs_list().borrow().save_button()
     }
     /// Retrieve a RefMut wrapped DistributionTreeView instance
     ///
@@ -192,23 +229,40 @@ impl<'a> InnerMainWindow<'a> {
         self.main_toolbar.clone()
     }
 
-    /// Retrieve a MutPtr to the QMainWindow instance
+    /// Retrieve the splitter between the main table widget and the
+    /// withs list
     ///
     /// # Arguments
     /// * None
     ///
     /// # Returns
-    /// * MutPtr<QMainWindow>
-    pub unsafe fn main(&mut self) -> MutPtr<QMainWindow> {
-        self.main
+    /// * MutPtr<QSplitter>
+    pub unsafe fn withs_splitter(&self) -> MutPtr<QSplitter> {
+        self.withs_splitter
     }
 
     pub unsafe fn vpin_table(&self) -> MutPtr<QTableWidget> {
         self.vpin_table
     }
 
+    pub unsafe fn vpin_table_splitter(&self) -> MutPtr<QSplitter> {
+        self.vpin_table_splitter
+    }
+
     pub unsafe fn pinchanges_list(&self) -> MutPtr<QTableWidget> {
         self.pinchanges_list
+    }
+
+    pub fn cache(&self) -> Rc<PinChangesCache> {
+        self.pinchanges_cache.clone()
+    }
+
+    pub unsafe fn bottom_stacked_widget(&self) -> MutPtr<QStackedWidget> {
+        self.bottom_stacked_widget
+    }
+
+    pub unsafe fn bottom_ctrls_stacked_widget(&self) -> MutPtr<QStackedWidget> {
+        self.bottom_ctrls_stacked_widget
     }
 
     pub unsafe fn save_button(&self) -> MutPtr<QPushButton> {
@@ -223,6 +277,14 @@ impl<'a> InnerMainWindow<'a> {
         self.history_button
     }
 
+    pub unsafe fn revisions_table(&self) -> MutPtr<QTableWidget> {
+        self.revisions_table
+    }
+
+    pub unsafe fn changes_table(&self) -> MutPtr<QTableWidget> {
+        self.changes_table
+    }
+
     pub unsafe fn dist_popup_menu(&self) -> MutPtr<QMenu> {
         self.dist_popup_menu
     }
@@ -234,6 +296,10 @@ impl<'a> InnerMainWindow<'a> {
     /// Retrieve a MutPTr to the search shortcut
     pub unsafe fn search_shortcut(&self) -> MutPtr<QShortcut> {
         self.search_shortcut
+    }
+
+    pub fn left_toolbar_actions(&self) -> &LeftToolBarActions {
+        &self.left_toolbar_actions
     }
 }
 

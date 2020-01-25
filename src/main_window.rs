@@ -1,33 +1,20 @@
 use crate::{
-    bottom_stacked_widget::create_bottom_stacked_widget,
-    cache::PinChangesCache,
-    center_widget,
-    choose_distribution::choose_alternative_distribution,
-    constants::COL_REV_TXID,
-    inner_main_window, left_toolbar, package_withs_list, packages_tree,
-    save_versionpin_changes::save_versionpin_changes,
-    select_history::select_history,
-    store_withpackage_changes,
-    update_changes_table::update_changes_table,
-    update_versionpin_table::update_vpin_table,
-    update_withpackages::update_withpackages,
-    utility::{create_vlayout, load_stylesheet, qs, resize_window_to_screen},
-    versionpin_table, versionpin_table_splitter, withs_splitter, LeftToolBarActions,
+    cache::PinChangesCache, choose_distribution::choose_alternative_distribution,
+    constants::COL_REV_TXID, inner_main_window, save_versionpin_changes::save_versionpin_changes,
+    select_history::select_history, store_withpackage_changes,
+    update_changes_table::update_changes_table, update_versionpin_table::update_vpin_table,
+    update_withpackages::update_withpackages, utility::create_vlayout,
 };
 use log;
 use pbgui_toolbar::toolbar;
 use pbgui_tree::tree;
 use pbgui_withs::WithsList;
-use qt_core::{
-    QItemSelection, QPoint, QString, Slot, SlotOfBool, SlotOfQItemSelectionQItemSelection,
-};
-use qt_gui::QKeySequence;
+use qt_core::{QItemSelection, QPoint, Slot, SlotOfBool, SlotOfQItemSelectionQItemSelection};
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr, Ref as QRef},
-    QAction, QMainWindow, QMenu, QMenuBar, QPushButton, QShortcut, QTableWidget, QVBoxLayout,
-    QWidget, SlotOfQPoint,
+    QMainWindow, QMenu, QMenuBar, QVBoxLayout, QWidget, SlotOfQPoint,
 };
-use rustqt_utils::{enclose, enclose_all};
+use rustqt_utils::enclose;
 use std::cell;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -36,9 +23,8 @@ use std::rc::Rc;
 /// to various pointers that need to persist as well as top level slots
 pub struct MainWindow<'a> {
     main: Rc<inner_main_window::InnerMainWindow<'a>>, //
-    main_owned: CppBox<QMainWindow>,
-    dist_popup_menu_owned: CppBox<QMenu>,
-    pinchanges_cache = Rc
+    _main_owned: CppBox<QMainWindow>,
+    _dist_popup_menu_owned: CppBox<QMenu>,
     // Slots
     query_button_clicked: Slot<'a>,
     save_clicked: Slot<'a>,
@@ -85,58 +71,62 @@ impl<'a> MainWindow<'a> {
         unsafe {
             let (main, main_owned, dist_popup_menu_owned) =
                 inner_main_window::InnerMainWindow::new();
-            let main = Rc::new(main);
+            let main_ = Rc::new(main);
+            let main = main_.clone();
+            // persist data
             // Create the MainWindow instance, set up signals and slots, and return
             // the newly minted instance. We are done.
             let main_window_inst = MainWindow {
-                main,
-                main_owned,
-                dist_popup_menu_owned,
+                main: main_,
+                _main_owned: main_owned,
+                _dist_popup_menu_owned: dist_popup_menu_owned,
                 // slots
-                save_withpackages: Slot::new(
-                    enclose! { (main) move || {
-                        let pinchange_cache = None;
-                        let item_list_ptr = None;
-                        let mut pinchanges_ptr = None;
-                        store_withpackage_changes::store_withpackage_changes(
-                            item_list_ptr.clone(),
-                            versionpin_table,
-                            &mut pinchanges_ptr,
-                            pinchange_cache.clone(),
-                        );
-                    }},
-                ),
+                save_withpackages: Slot::new(enclose! { (main) move || {
 
-                distribution_changed: SlotOfQItemSelectionQItemSelection::new(
-                    enclose! { (item_list_ptr)
+                    let mut pinchanges_ptr = main.pinchanges_list();
+                    store_withpackage_changes::store_withpackage_changes(
+                        main.package_withs_list(),
+                        main.vpin_table(),
+                        &mut pinchanges_ptr,
+                        main.cache(),
+                    );
+                }}),
+
+                distribution_changed: SlotOfQItemSelectionQItemSelection::new(enclose! { (main)
+                move |selected: QRef<QItemSelection>, _deselected: QRef<QItemSelection>| {
+                    //let item_list_ptr = None;
+                    let mut vpin_tablewidget_ptr = main.vpin_table();
+                    let ind = selected.indexes();
+                    if ind.count_0a() > 0 {
+                        let txid = ind.at(COL_REV_TXID);
+                        update_withpackages(
+                            txid.row(),
+                            &mut vpin_tablewidget_ptr,
+                            main.package_withs_list(),//item_list_ptr.clone(),
+                            main.cache(),
+                        );
+                    } else {
+                       // item_list_ptr.borrow_mut().clear();
+                        main.package_withs_list().borrow().clear();
+                    }
+                }}),
+
+                revision_changed: SlotOfQItemSelectionQItemSelection::new(enclose! { (main)
                     move |selected: QRef<QItemSelection>, _deselected: QRef<QItemSelection>| {
                         let ind = selected.indexes();
                         if ind.count_0a() > 0 {
                             let txid = ind.at(COL_REV_TXID);
-                            update_withpackages(
+                            update_changes_table(
                                 txid.row(),
-                                &mut vpin_tablewidget_ptr,
-                                item_list_ptr.clone(),
-                                cache.clone(),
+                                main.revisions_table(), //revisions_ptr,
+                                main.changes_table(),   //changes_table_ptr,
                             );
                         } else {
-                            item_list_ptr.borrow_mut().clear();
+                            main.changes_table().clear_contents();
+                            main.changes_table().set_row_count(0);
                         }
-                    }},
-                ),
-
-                revision_changed: SlotOfQItemSelectionQItemSelection::new(
-                    move |selected: QRef<QItemSelection>, _deselected: QRef<QItemSelection>| {
-                        let ind = selected.indexes();
-                        if ind.count_0a() > 0 {
-                            let txid = ind.at(COL_REV_TXID);
-                            update_changes_table(txid.row(), revisions_ptr, changes_table_ptr);
-                        } else {
-                            changes_table_ptr.clear_contents();
-                            changes_table_ptr.set_row_count(0);
-                        }
-                    },
-                ),
+                    }
+                }),
 
                 // clear_package: Slot::new(move || {
                 //     line_edit_ptr.clear();
@@ -146,142 +136,183 @@ impl<'a> MainWindow<'a> {
                 //     let _action = line_edit_popup_menu_ptr
                 //         .exec_1a_mut(line_edit_ptr.map_to_global(pos).as_ref());
                 // }),
-                show_dist_menu: SlotOfQPoint::new(move |pos: QRef<QPoint>| {
-                    if vpin_tablewidget_ptr.is_null() {
+                show_dist_menu: SlotOfQPoint::new(enclose! { (main) move |pos: QRef<QPoint>| {
+                    if main.vpin_table().is_null()
+                    //vpin_tablewidget_ptr.is_null()
+                    {
                         log::error!("vpin_tablewidget_ptr is null");
                         return;
                     }
-                    if dist_popup_menu_ptr.is_null() {
+                    if main.dist_popup_menu().is_null()
+                    //dist_popup_menu_ptr.is_null()
+                    {
                         log::error!("dist_popup_menu_ptr is null");
                         return;
                     }
-                    let _action = dist_popup_menu_ptr
-                        .exec_1a_mut(vpin_tablewidget_ptr.map_to_global(pos).as_ref());
-                }),
+                    let _action = main
+                        .dist_popup_menu() //dist_popup_menu_ptr
+                        .exec_1a_mut(
+                            //vpin_tablewidget_ptr
+                            main.vpin_table().map_to_global(pos).as_ref(),
+                        );
+                }}),
 
-                save_clicked: Slot::new(enclose! { (pinchange_cache, main_toolbar_ptr) move || {
+                save_clicked: Slot::new(enclose! { (main) move || {
+                    //let pinchange_cache = None;
+                    //let main_toolbar_ptr = None;
+                    let mut pinchanges_ptr = main.changes_table();
                     save_versionpin_changes(
-                        main_widget_ptr,
+                        main.main_widget(),//main_widget_ptr,
                         &mut pinchanges_ptr,
-                        main_toolbar_ptr.clone(),
-                        pinchange_cache.clone(),
+                        main.main_toolbar(),//main_toolbar_ptr.clone(),
+                        main.cache()//pinchange_cache.clone(),
                     );
                 } }),
 
-                query_button_clicked: Slot::new(enclose! {(main_toolbar_ptr) move || {
+                query_button_clicked: Slot::new(enclose! {(main) move || {
                     update_vpin_table(
-                        main_toolbar_ptr.clone(),
-                        &search_shows,
-                        vpin_tablewidget_ptr,
+                        main.main_toolbar(),
+                        &main.left_toolbar_actions().search_shows,
+                        main.vpin_table()//vpin_tablewidget_ptr,
                     );
                 }}),
 
-                choose_distribution_triggered: Slot::new(enclose! { (pinchange_cache) move || {
-                    if vpin_tablewidget_ptr.is_null() {
+                choose_distribution_triggered: Slot::new(enclose! { (main) move || {
+                    if main.vpin_table().is_null() {
                         log::error!("Error: attempted to access null pointer in choose_distribution_tribbered");
                         return;
                     }
-                    if vpin_tablewidget_ptr.row_count() == 0 {
+                    if main.vpin_table().row_count() == 0 {
                         return;
                     }
-                    let current_row = vpin_tablewidget_ptr.current_row();
+                    let current_row = main.vpin_table().current_row();
                     choose_alternative_distribution(
                         current_row,
-                        vpin_tablewidget_ptr,
-                        main_widget_ptr,
-                        pinchanges_ptr,
-                        pinchange_cache.clone(),
+                        main.vpin_table(),//vpin_tablewidget_ptr,
+                        main.main_widget(),//main_widget_ptr,
+                        main.pinchanges_list(), //pinchanges_ptr,
+                        main.cache(), //pinchange_cache.clone(),
                     );
                 }}),
 
-                select_pin_changes: Slot::new(move || {
-                    stacked_ptr.set_current_index(0);
-                    controls_ptr.set_current_index(0);
-                }),
+                select_pin_changes: Slot::new(enclose! { (main) move || {
+                    // todo - move bottom stacked widget into own component
+                    main.bottom_stacked_widget().set_current_index(0); //.stacked_ptr.set_current_index(0);
+                                                                       //controls_ptr.set_current_index(0);
+                    main.bottom_ctrls_stacked_widget().set_current_index(0);
+                }}),
 
-                select_history: Slot::new(move || {
-                    select_history(&mut revisions_ptr, &mut stacked_ptr);
-                    controls_ptr.set_current_index(1);
-                }),
-                toggle_packages_tree: SlotOfBool::new(move |state: bool| {
-                    let mut frame = with_splitter_ptr.widget(0);
-                    frame.set_visible(state);
-                }),
-                toggle_withs: SlotOfBool::new(move |state: bool| {
-                    let mut frame = with_splitter_ptr.widget(2);
-                    frame.set_visible(state);
-                }),
+                select_history: Slot::new(enclose! { (main) move || {
+                    let mut revisions_ptr = main.revisions_table();
+                    let mut stacked_ptr = main.bottom_stacked_widget();
+                    select_history(
+                        &mut revisions_ptr,
+                        &mut stacked_ptr);
+                    //controls_ptr.set_current_index(1);
+                    main.bottom_ctrls_stacked_widget().set_current_index(1);
+                }}),
 
-                toggle_vpin_changes: SlotOfBool::new(move |state: bool| {
-                    let mut frame = vpin_table_splitter.widget(1);
+                toggle_packages_tree: SlotOfBool::new(enclose! { (main) move |state: bool| {
+                    let mut frame = main.withs_splitter().widget(0);
+                    //let mut frame = with_splitter_ptr.widget(0);
                     frame.set_visible(state);
-                }),
+                }}),
+                toggle_withs: SlotOfBool::new(enclose! { (main) move |state: bool| {
+                    let mut frame = main.withs_splitter().widget(2);
+                    //let mut frame = with_splitter_ptr.widget(2);
+                    frame.set_visible(state);
+                }}),
+
+                toggle_vpin_changes: SlotOfBool::new(enclose! { (main) move |state: bool| {
+                    let mut frame = main.vpin_table_splitter().widget(1);
+                    frame.set_visible(state);
+                }}),
             };
 
             //
             // connect signals to slots
             //
-            pinchanges_button_ptr
+            //pinchanges_button_ptr
+            main.pinchanges_button()
                 .clicked()
                 .connect(&main_window_inst.select_pin_changes);
 
-            history_button_ptr
+            main.history_button()
+                //history_button_ptr
                 .clicked()
                 .connect(&main_window_inst.select_history);
 
-            main_toolbar_ptr
+            main.main_toolbar()
+                //main_toolbar_ptr
                 //.borrow()
                 .query_btn()
                 .clicked()
                 .connect(&main_window_inst.query_button_clicked);
 
-            save_button
+            main.save_button()
+                //save_button
                 .clicked()
                 .connect(&main_window_inst.save_clicked);
 
-            vpin_tablewidget_ptr
+            main.vpin_table()
+                //vpin_tablewidget_ptr
                 .custom_context_menu_requested()
                 .connect(&main_window_inst.show_dist_menu);
 
-            choose_dist_action
+            main.dist_popup_action()
+                //choose_dist_action
                 .triggered()
                 .connect(&main_window_inst.choose_distribution_triggered);
 
-            revisions_ptr
+            main.revisions_table()
+                //.revisions_ptr
                 .selection_model()
                 .selection_changed()
                 .connect(&main_window_inst.revision_changed);
 
-            vpin_tablewidget_ptr
+            main.vpin_table()
+                //vpin_tablewidget_ptr
                 .selection_model()
                 .selection_changed()
                 .connect(&main_window_inst.distribution_changed);
 
-            view_packages
+            main.left_toolbar_actions()
+                .view_packages
                 .toggled()
                 .connect(&main_window_inst.toggle_packages_tree);
 
-            view_withs.toggled().connect(&main_window_inst.toggle_withs);
+            main.left_toolbar_actions()
+                .view_withs
+                .toggled()
+                .connect(&main_window_inst.toggle_withs);
 
-            view_pin_changes
+            main.left_toolbar_actions()
+                .view_vpin_changes
                 .toggled()
                 .connect(&main_window_inst.toggle_vpin_changes);
 
-            withpackage_save
+            main.package_withs_list_save()
+                //withpackage_save
                 .clicked()
                 .connect(&main_window_inst.save_withpackages);
-            main_window_inst
-                .search_shortcut
+
+            main.search_shortcut()
+                //main_window_inst
+                //    .search_shortcut
                 .activated()
                 .connect(&main_window_inst.query_button_clicked);
 
             // configuration
+            let mut view_withs = main.left_toolbar_actions().view_withs;
             view_withs.set_checked(false);
 
             main_window_inst
         }
     }
 
+    pub fn cache(&self) -> Rc<PinChangesCache> {
+        self.main.cache()
+    }
     /// Retrieve a Ref wrapped DistributionTreeView instance
     ///
     /// # Arguments
@@ -290,16 +321,17 @@ impl<'a> MainWindow<'a> {
     /// # Returns
     /// * Ref<DistributionTreeView>
     pub unsafe fn packages_tree(&self) -> cell::Ref<tree::DistributionTreeView<'a>> {
-        self.packages_tree.borrow()
+        self.main.packages_tree()
     }
 
     /// Retrieve an shared copy of the DistributionTreeView
     pub unsafe fn tree(&self) -> Rc<RefCell<tree::DistributionTreeView<'a>>> {
-        self.packages_tree.clone()
+        self.main.tree()
     }
+
     /// Retrieve an shared copy of the DistributionTreeView
     pub unsafe fn package_withs_list(&self) -> Rc<RefCell<WithsList<'a>>> {
-        self.package_withs_list.clone()
+        self.main.package_withs_list()
     }
     /// Retrieve a RefMut wrapped DistributionTreeView instance
     ///
@@ -309,7 +341,7 @@ impl<'a> MainWindow<'a> {
     /// # Returns
     /// * RefMut<DistributionTreeView>
     pub unsafe fn packages_tree_mut(&self) -> cell::RefMut<tree::DistributionTreeView<'a>> {
-        self.packages_tree.borrow_mut()
+        self.main.packages_tree_mut()
     }
 
     /// Retrieve an Rc wrapped MainToolbar instance
@@ -320,7 +352,7 @@ impl<'a> MainWindow<'a> {
     /// # Returns
     /// * Rc<MainToolbar>
     pub unsafe fn main_toolbar(&self) -> Rc<toolbar::MainToolbar> {
-        self.main_toolbar.clone()
+        self.main_toolbar()
     }
 
     /// Retrieve a MutPtr to the QMainWindow instance
@@ -330,8 +362,8 @@ impl<'a> MainWindow<'a> {
     ///
     /// # Returns
     /// * MutPtr<QMainWindow>
-    pub unsafe fn main(&mut self) -> MutPtr<QMainWindow> {
-        self.main.as_mut_ptr()
+    pub unsafe fn main(&self) -> MutPtr<QMainWindow> {
+        self.main()
     }
 }
 
