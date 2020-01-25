@@ -1,3 +1,5 @@
+resource_target ?= ~/bin/pbgui-resources
+
 build:
 	cargo build --release
 
@@ -5,12 +7,13 @@ install:
 	cp ./target/release/pbgui ~/bin/.
 
 install-stylesheet:
-	cp ./resources/pbgui.qss ~/bin/.
+	cd ./pbgui && make install-stylesheet
 
 rcc:
-	rcc -binary ./resources/pbgui.qrc -o ./resources/pbgui.rcc
+	cd ./pbgui && make rcc
 
 install-rcc:
-	cp ./resources/pbgui.rcc ~/bin/. && rm ./resources/pbgui.rcc
+	mkdir -p $(resource_target)
+	cp ./pbgui/resources/pbgui.rcc $(resource_target)/. && rm ./pbgui/resources/pbgui.rcc
 
 all: build install install-stylesheet rcc install-rcc

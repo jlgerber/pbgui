@@ -51,11 +51,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     //let client = ClientProxy::connect()?;
     //let mut vpin_finder = PackratDb::new(client);
     QApplication::init(|app| unsafe {
-        let _result = QResource::register_resource_q_string(&qs("/Users/jgerber/bin/pbgui.rcc"));
+        let _result = QResource::register_resource_q_string(&qs(
+            "/Users/jgerber/bin/pbgui-resources/pbgui.rcc",
+        ));
         let _result =
             QResource::register_resource_q_string(&qs("/Users/jgerber/bin/pbgui_tree.rcc"));
 
-        //let (mut pbgui_root, _pbgui_main_cppbox) = main_window::MainWindow::new();
         let pbgui_root = main_window::MainWindow::new();
         init::packages_tree::init(to_thread_sender.clone());
         init::package_withs::init(to_thread_sender.clone());

@@ -1,0 +1,29 @@
+[package]
+name = "pbgui"
+version = "0.33.0"
+authors = ["jgerber <jlgerber@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+packybara = {git= "https://github.com/jlgerber/packybara", tag="v0.32.0"}
+qt_thread_conductor = {git= "https://github.com/jlgerber/rust-qt-conductor", tag="v0.3.0"}
+qt_core = "~0.4.1"
+qt_gui = "~0.4.1"
+qt_widgets = "~0.4.1"
+qt_ui_tools = "~0.4.1"
+whoami = "~0.7.0"
+log = "~0.4.8"
+env_logger = "~0.7.1"
+structopt = "~0.3.7"
+num_enum = "~0.4.2"
+strum = "~0.17.1"
+strum_macros = "~0.17.1"
+pbgui-withs = {git= "https://github.com/jlgerber/pbgui-withs", tag="v0.18.0"}
+pbgui-toolbar = {git="https://github.com/jlgerber/pbgui-toolbar", tag="v0.8.0"}
+pbgui-tree = {git="https://github.com/jlgerber/pbgui-tree", tag="v0.11.1"}
+rustqt-utils = {git = "https://github.com/jlgerber/rustqt-utils", tag="v0.6.0"}
+pbgui-vpin = {git="https://github.com/jlgerber/pbgui-vpin", tag="v0.8.0"}
+pbgui-messaging = {git="https://github.com/jlgerber/pbgui-messaging", tag="v0.11.0"}
+crossbeam = "0.7.3"
+crossbeam-utils = "0.7.0"
+crossbeam-channel = "0.4.0"
