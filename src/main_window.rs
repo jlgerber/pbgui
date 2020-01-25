@@ -42,6 +42,7 @@ pub struct InnerMainWindow<'a> {
     packages_tree: Rc<RefCell<tree::DistributionTreeView<'a>>>,
     package_withs_list: Rc<RefCell<WithsList<'a>>>,
     vpin_table: MutPtr<QTableWidget>,
+    vpin_table_splitter: MutPtr<QSplitter>,
     pinchanges_list: MutPtr<QTableWidget>,
     pinchanges_cache: Rc<PinChangesCache>,
     bottom_stacked_widget: MutPtr<QStackedWidget>,
@@ -56,7 +57,6 @@ pub struct InnerMainWindow<'a> {
     left_toolbar_actions: LeftToolBarActions,
     search_shortcut: MutPtr<QShortcut>,
     // Slots
-    toggle_vpin_changes: SlotOfBool<'a>,
     revision_changed: SlotOfQItemSelectionQItemSelection<'a>,
     distribution_changed: SlotOfQItemSelectionQItemSelection<'a>,
     save_withpackages: Slot<'a>,
@@ -173,6 +173,7 @@ impl<'a> InnerMainWindow<'a> {
                 packages_tree: packages_ptr,
                 package_withs_list: item_list_ptr.clone(),
                 vpin_table: vpin_tablewidget_ptr,
+                vpin_table_splitter,
                 save_button: save_button,
                 pinchanges_list: pinchanges_ptr,
                 pinchanges_cache,
@@ -229,11 +230,6 @@ impl<'a> InnerMainWindow<'a> {
                         }
                     },
                 ),
-
-                toggle_vpin_changes: SlotOfBool::new(move |state: bool| {
-                    let mut frame = vpin_table_splitter.widget(1);
-                    frame.set_visible(state);
-                }),
             };
 
             //
@@ -248,10 +244,6 @@ impl<'a> InnerMainWindow<'a> {
                 .selection_model()
                 .selection_changed()
                 .connect(&main_window_inst.distribution_changed);
-
-            view_pin_changes
-                .toggled()
-                .connect(&main_window_inst.toggle_vpin_changes);
 
             withpackage_save
                 .clicked()
@@ -326,6 +318,9 @@ impl<'a> InnerMainWindow<'a> {
         self.vpin_table
     }
 
+    pub unsafe fn vpin_table_splitter(&self) -> MutPtr<QSplitter> {
+        self.vpin_table_splitter
+    }
     pub unsafe fn pinchanges_list(&self) -> MutPtr<QTableWidget> {
         self.pinchanges_list
     }
@@ -431,6 +426,7 @@ pub struct MainWindow<'a> {
     select_history: Slot<'a>,
     toggle_packages_tree: SlotOfBool<'a>,
     toggle_withs: SlotOfBool<'a>,
+    toggle_vpin_changes: SlotOfBool<'a>,
 }
 
 impl<'a> MainWindow<'a> {
@@ -516,6 +512,11 @@ impl<'a> MainWindow<'a> {
                 let mut frame = main.withs_splitter().widget(2);
                 frame.set_visible(state);
             }}),
+
+            toggle_vpin_changes: SlotOfBool::new(enclose! { (main) move |state: bool| {
+                let mut frame = main.vpin_table_splitter().widget(1);
+                frame.set_visible(state);
+            }}),
         };
 
         main.main_toolbar()
@@ -554,6 +555,11 @@ impl<'a> MainWindow<'a> {
             .view_withs
             .toggled()
             .connect(&main_win.toggle_withs);
+
+        main.left_toolbar_actions()
+            .view_vpin_changes
+            .toggled()
+            .connect(&main_win.toggle_vpin_changes);
 
         main_win
     }
