@@ -52,11 +52,8 @@ pub struct InnerMainWindow<'a> {
     left_toolbar_actions: LeftToolBarActions,
     search_shortcut: MutPtr<QShortcut>,
     // Slots
-    //save_clicked: Slot<'a>,
     choose_distribution_triggered: Slot<'a>,
     show_dist_menu: SlotOfQPoint<'a>,
-    //clear_package: Slot<'a>,
-    // show_line_edit_menu: SlotOfQPoint<'a>,
     select_pin_changes: Slot<'a>,
     select_history: Slot<'a>,
     toggle_packages_tree: SlotOfBool<'a>,
@@ -121,7 +118,7 @@ impl<'a> InnerMainWindow<'a> {
             let mut vpin_tablewidget_ptr = versionpin_table::create(&mut vpin_table_splitter);
 
             let (
-                mut pinchanges_ptr,
+                pinchanges_ptr,
                 mut revisions_ptr,
                 mut changes_table_ptr,
                 save_button,
@@ -231,14 +228,6 @@ impl<'a> InnerMainWindow<'a> {
                     },
                 ),
 
-                // clear_package: Slot::new(move || {
-                //     line_edit_ptr.clear();
-                // }),
-
-                // show_line_edit_menu: SlotOfQPoint::new(move |pos: QRef<QPoint>| {
-                //     let _action = line_edit_popup_menu_ptr
-                //         .exec_1a_mut(line_edit_ptr.map_to_global(pos).as_ref());
-                // }),
                 show_dist_menu: SlotOfQPoint::new(move |pos: QRef<QPoint>| {
                     if vpin_tablewidget_ptr.is_null() {
                         log::error!("vpin_tablewidget_ptr is null");
@@ -252,14 +241,6 @@ impl<'a> InnerMainWindow<'a> {
                         .exec_1a_mut(vpin_tablewidget_ptr.map_to_global(pos).as_ref());
                 }),
 
-                // save_clicked: Slot::new(enclose! { (pinchange_cache, main_toolbar_ptr) move || {
-                //     save_versionpin_changes(
-                //         main_widget_ptr,
-                //         &mut pinchanges_ptr,
-                //         main_toolbar_ptr.clone(),
-                //         pinchange_cache.clone(),
-                //     );
-                // } }),
                 choose_distribution_triggered: Slot::new(enclose! { (cache) move || {
                     if vpin_tablewidget_ptr.is_null() {
                         log::error!("Error: attempted to access null pointer in choose_distribution_tribbered");
@@ -312,10 +293,6 @@ impl<'a> InnerMainWindow<'a> {
             history_button_ptr
                 .clicked()
                 .connect(&main_window_inst.select_history);
-
-            // save_button
-            //     .clicked()
-            //     .connect(&main_window_inst.save_clicked);
 
             vpin_tablewidget_ptr
                 .custom_context_menu_requested()
@@ -489,9 +466,6 @@ impl<'a> MainWindow<'a> {
                 );
             }}),
             save_clicked: Slot::new(enclose! { (main) move || {
-                //pinchange_cache, main_toolbar_ptr
-                //let pinchanges
-
                 let mut pinchanges_ptr = main.changes_table();
                 save_versionpin_changes(
                     main.main_widget(),//main_widget_ptr,
@@ -500,13 +474,6 @@ impl<'a> MainWindow<'a> {
                     main.cache()//pinchange_cache.clone(),
                 );
 
-                // save_versionpin_changes(
-                //     main.main()
-                //     //main_widget_ptr,
-                //     &mut pinchanges_ptr,
-                //     main_toolbar_ptr.clone(),
-                //     pinchange_cache.clone(),
-                // );
             } }),
         };
 
