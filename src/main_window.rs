@@ -3,7 +3,7 @@ use crate::{
     constants::COL_REV_TXID, inner_main_window, save_versionpin_changes::save_versionpin_changes,
     select_history::select_history, store_withpackage_changes,
     update_changes_table::update_changes_table, update_versionpin_table::update_vpin_table,
-    update_withpackages::update_withpackages, utility::create_vlayout,
+    update_withpackages::update_withpackages,
 };
 use log;
 use pbgui_toolbar::toolbar;
@@ -12,7 +12,7 @@ use pbgui_withs::WithsList;
 use qt_core::{QItemSelection, QPoint, Slot, SlotOfBool, SlotOfQItemSelectionQItemSelection};
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr, Ref as QRef},
-    QMainWindow, QMenu, QMenuBar, QVBoxLayout, QWidget, SlotOfQPoint,
+    QMainWindow, QMenu, SlotOfQPoint,
 };
 use rustqt_utils::enclose;
 use std::cell;
@@ -367,35 +367,35 @@ impl<'a> MainWindow<'a> {
     }
 }
 
-// create the main window, the main menubar, and the central widget
-fn create_main_window() -> (CppBox<QMainWindow>, MutPtr<QWidget>, MutPtr<QVBoxLayout>) {
-    unsafe {
-        let mut main_window = QMainWindow::new_0a();
-        // the qmainwindow takes ownership of the menubar,
-        // even though it takes a MutPtr instead of a Cpp
-        let main_menu_bar = QMenuBar::new_0a();
-        main_window.set_menu_bar(main_menu_bar.into_ptr());
+// // create the main window, the main menubar, and the central widget
+// fn create_main_window() -> (CppBox<QMainWindow>, MutPtr<QWidget>, MutPtr<QVBoxLayout>) {
+//     unsafe {
+//         let mut main_window = QMainWindow::new_0a();
+//         // the qmainwindow takes ownership of the menubar,
+//         // even though it takes a MutPtr instead of a Cpp
+//         let main_menu_bar = QMenuBar::new_0a();
+//         main_window.set_menu_bar(main_menu_bar.into_ptr());
 
-        // main_widget - central widget of teh main_window
+//         // main_widget - central widget of teh main_window
 
-        let mut main_widget = QWidget::new_0a();
-        let main_widget_ptr = main_widget.as_mut_ptr();
+//         let mut main_widget = QWidget::new_0a();
+//         let main_widget_ptr = main_widget.as_mut_ptr();
 
-        // main_layout
+//         // main_layout
 
-        let mut main_layout = create_vlayout();
-        let main_layout_ptr = main_layout.as_mut_ptr();
-        main_widget.set_layout(main_layout.into_ptr());
+//         let mut main_layout = create_vlayout();
+//         let main_layout_ptr = main_layout.as_mut_ptr();
+//         main_widget.set_layout(main_layout.into_ptr());
 
-        // set main_widget as the central widget in main_window
-        main_window.set_central_widget(main_widget.into_ptr());
+//         // set main_widget as the central widget in main_window
+//         main_window.set_central_widget(main_widget.into_ptr());
 
-        (main_window, main_widget_ptr, main_layout_ptr)
-    }
-}
+//         (main_window, main_widget_ptr, main_layout_ptr)
+//     }
+// }
 
-fn create_top_toolbar(parent: MutPtr<QMainWindow>) -> toolbar::MainToolbar {
-    let tb = toolbar::create(parent);
-    tb.set_default_stylesheet();
-    tb
-}
+// fn create_top_toolbar(parent: MutPtr<QMainWindow>) -> toolbar::MainToolbar {
+//     let tb = toolbar::create(parent);
+//     tb.set_default_stylesheet();
+//     tb
+// }
