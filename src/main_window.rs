@@ -27,7 +27,7 @@ use qt_widgets::{
     QAction, QMainWindow, QMenu, QMenuBar, QPushButton, QShortcut, QSplitter, QStackedWidget,
     QTableWidget, QVBoxLayout, QWidget, SlotOfQPoint,
 };
-use rustqt_utils::{enclose, enclose_all};
+use rustqt_utils::enclose;
 use std::cell;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -57,7 +57,6 @@ pub struct InnerMainWindow<'a> {
     left_toolbar_actions: LeftToolBarActions,
     search_shortcut: MutPtr<QShortcut>,
     // Slots
-    save_withpackages: Slot<'a>,
 }
 
 impl<'a> InnerMainWindow<'a> {
@@ -91,13 +90,13 @@ impl<'a> InnerMainWindow<'a> {
             let (mut main_window, main_widget_ptr, mut main_layout_ptr) = create_main_window();
             let mut main_window_ptr = main_window.as_mut_ptr();
             let main_toolbar = Rc::new(create_top_toolbar(main_window_ptr.clone()));
-            let main_toolbar_ptr = main_toolbar.clone();
+            //let main_toolbar_ptr = main_toolbar.clone();
             // create left toolbar
             let left_toolbar_actions = left_toolbar::create(&mut main_window_ptr);
-            let view_packages = left_toolbar_actions.view_packages;
+            //let view_packages = left_toolbar_actions.view_packages;
             let mut view_withs = left_toolbar_actions.view_withs;
-            let view_pin_changes = left_toolbar_actions.view_vpin_changes;
-            let search_shows = left_toolbar_actions.search_shows;
+            //let view_pin_changes = left_toolbar_actions.view_vpin_changes;
+            //let search_shows = left_toolbar_actions.search_shows;
 
             // create the splitter between the center widget and the withs
             let mut with_splitter_ptr = withs_splitter::create(&mut main_layout_ptr);
@@ -146,8 +145,6 @@ impl<'a> InnerMainWindow<'a> {
 
             // persist data
             let pinchanges_cache = Rc::new(PinChangesCache::new());
-            let cache = pinchanges_cache.clone();
-            //
             // final housekeeping before showing main window
             //
             versionpin_table_splitter::set_sizes(&mut vpin_table_splitter);
@@ -155,9 +152,6 @@ impl<'a> InnerMainWindow<'a> {
 
             resize_window_to_screen(&mut main_window_ptr, 0.8);
             load_stylesheet("/Users/jgerber/bin/pbgui.qss", main_window_ptr.clone());
-
-            let withpackage_save = item_list_ptr.borrow().save_button().clone();
-            let versionpin_table = vpin_tablewidget_ptr.clone();
 
             main_window_ptr.show();
 
@@ -179,33 +173,17 @@ impl<'a> InnerMainWindow<'a> {
                 bottom_ctrls_stacked_widget: controls_ptr,
                 dist_popup_menu: dist_popup_menu_ptr,
                 dist_popup_action: choose_dist_action,
-                // _package_popup_menu: line_edit_popup_menu,
                 pin_changes_button: pinchanges_button_ptr,
                 changes_table: changes_table_ptr,
                 history_button: history_button_ptr,
                 revisions_table: revisions_ptr,
                 left_toolbar_actions: left_toolbar_actions,
                 search_shortcut: search_shortcut.into_ptr(),
-                // slots
-                save_withpackages: Slot::new(
-                    enclose_all! { (cache, item_list_ptr) (mut pinchanges_ptr) move || {
-                        store_withpackage_changes::store_withpackage_changes(
-                            item_list_ptr.clone(),
-                            versionpin_table,
-                            &mut pinchanges_ptr,
-                            cache.clone(),
-                        );
-                    }},
-                ),
             };
 
             //
             // connect signals to slots
             //
-
-            withpackage_save
-                .clicked()
-                .connect(&main_window_inst.save_withpackages);
 
             // configuration
             view_withs.set_checked(false);
@@ -226,18 +204,51 @@ impl<'a> InnerMainWindow<'a> {
     }
 
     /// Retrieve a pointer to the main widget under the QMainWindow
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// * MutPtr to the main widget, which is the main widget of the QMainWindow
     pub unsafe fn main_widget(&self) -> MutPtr<QWidget> {
         self.main_widget
     }
 
+    /// Retrieve a Reference Counted pointer to the PinChangedCache. This is not
+    /// suitable to be moved between threads as it is `Rc`.
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// * Rc<PinChangesCache>
     pub fn cache(&self) -> Rc<PinChangesCache> {
         self.pinchanges_cache.clone()
     }
 
+    ///  Retrieve a mutable pointer to the QStackedWidget used to organize the
+    /// bottom widget containing the changes, history, etc
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// * MutPtr<QStackedWidget>
     pub unsafe fn bottom_stacked_widget(&self) -> MutPtr<QStackedWidget> {
         self.bottom_stacked_widget
     }
 
+    /// Retrurns a mutable pointer to the QStackedWidget used to provide specific
+    /// controls in coordination with the bottom_stacked_widget. In otherwords, for
+    /// each widget displayed in the bottom_stack, one may provide unique controls
+    /// via this widget. It is displayed on the right side of the bar above the
+    /// bottom_stacked_widget
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// * MutPtr<QStackedWidget>
     pub unsafe fn bottom_ctrls_stacked_widget(&self) -> MutPtr<QStackedWidget> {
         self.bottom_ctrls_stacked_widget
     }
@@ -253,14 +264,27 @@ impl<'a> InnerMainWindow<'a> {
         self.packages_tree.borrow()
     }
 
-    /// Retrieve an shared copy of the DistributionTreeView
+    /// Retrieve a Reference Counted pointer to a RefCell wrapped DistributionTreeView
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// * Rc<RefCell<DistributionTreeView>>>
     pub unsafe fn tree(&self) -> Rc<RefCell<tree::DistributionTreeView<'a>>> {
         self.packages_tree.clone()
     }
-    /// Retrieve an shared copy of the DistributionTreeView
+    /// Retrieve an Reference Counted pointer to a RefCell wrapped WIthsList
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// * Rc<RefCell<WithsList>>>
     pub unsafe fn package_withs_list(&self) -> Rc<RefCell<WithsList<'a>>> {
         self.package_withs_list.clone()
     }
+
     /// Retrieve a RefMut wrapped DistributionTreeView instance
     ///
     /// # Arguments
@@ -272,20 +296,50 @@ impl<'a> InnerMainWindow<'a> {
         self.packages_tree.borrow_mut()
     }
 
+    /// returns a mutable pointer to the versionpin table widget
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// * MutPtr<QTableWidget>
     pub unsafe fn vpin_table(&self) -> MutPtr<QTableWidget> {
         self.vpin_table
     }
 
+    /// Returns a mutable pointer to the versionpin table qsplitter
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// * MutPtr<QSplitter>
     pub unsafe fn vpin_table_splitter(&self) -> MutPtr<QSplitter> {
         self.vpin_table_splitter
     }
+
+    /// Returns a mutable pointer to the pinchanges list tablewidet
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// * MutPtr<QTableWidget>
     pub unsafe fn pinchanges_list(&self) -> MutPtr<QTableWidget> {
         self.pinchanges_list
     }
 
+    /// Returns a mutable pointer to the pinchanges pushbutton
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// * MutPtr<QPushButton>
     pub unsafe fn pinchanges_button(&self) -> MutPtr<QPushButton> {
         self.pin_changes_button
     }
+
     /// Retrieve an Rc wrapped MainToolbar instance
     ///
     /// # Arguments
@@ -308,6 +362,14 @@ impl<'a> InnerMainWindow<'a> {
     pub unsafe fn withs_splitter(&self) -> MutPtr<QSplitter> {
         self.withs_splitter
     }
+
+    /// Retrieves a mutable pointer to the save button
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// * MutPtr<QPushButton>
     pub unsafe fn save_button(&self) -> MutPtr<QPushButton> {
         self.save_button
     }
@@ -370,12 +432,15 @@ fn create_top_toolbar(parent: MutPtr<QMainWindow>) -> toolbar::MainToolbar {
     tb
 }
 
-/// Holder of
+/// Holds a reference counted pointer to the InnerMainWindow instance, along with
+/// pointers to owned CppBoxed items, and all of the slots that call on the InnerMainWindow
 pub struct MainWindow<'a> {
     main: Rc<InnerMainWindow<'a>>,
     _main_box: CppBox<QMainWindow>,
     _dist_popup_menu_box: CppBox<QMenu>,
+    //
     // slots
+    //
     query_button_clicked: Slot<'a>,
     save_clicked: Slot<'a>,
     choose_distribution_triggered: Slot<'a>,
@@ -387,9 +452,17 @@ pub struct MainWindow<'a> {
     toggle_vpin_changes: SlotOfBool<'a>,
     revision_changed: SlotOfQItemSelectionQItemSelection<'a>,
     distribution_changed: SlotOfQItemSelectionQItemSelection<'a>,
+    save_withpackages: Slot<'a>,
 }
 
 impl<'a> MainWindow<'a> {
+    /// New up the MainWindow instance
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// * MainWindow instance
     pub unsafe fn new() -> MainWindow<'a> {
         let (pbgui_root, pbgui_main_cppbox, dist_popup_menu_box) = InnerMainWindow::new();
         let main = Rc::new(pbgui_root);
@@ -410,10 +483,10 @@ impl<'a> MainWindow<'a> {
             save_clicked: Slot::new(enclose! { (main) move || {
                 let mut pinchanges_ptr = main.changes_table();
                 save_versionpin_changes(
-                    main.main_widget(),//main_widget_ptr,
+                    main.main_widget(),
                     &mut pinchanges_ptr,
-                    main.main_toolbar(),//main_toolbar_ptr.clone(),
-                    main.cache()//pinchange_cache.clone(),
+                    main.main_toolbar(),
+                    main.cache()
                 );
             } }),
 
@@ -431,7 +504,7 @@ impl<'a> MainWindow<'a> {
                     current_row,
                     vpin_tablewidget_ptr,
                     main.main_widget(),
-                    main.pinchanges_list(),//pinchanges_ptr,
+                    main.pinchanges_list(),
                     main.cache(),
                 );
             }}),
@@ -442,7 +515,7 @@ impl<'a> MainWindow<'a> {
                     log::error!("vpin_tablewidget_ptr is null");
                     return;
                 }
-                if main.dist_popup_menu().is_null() { //dist_popup_menu_item()
+                if main.dist_popup_menu().is_null() {
                     log::error!("dist_popup_menu_ptr is null");
                     return;
                 }
@@ -499,12 +572,21 @@ impl<'a> MainWindow<'a> {
                     update_withpackages(
                         txid.row(),
                         &mut vpin_tablewidget_ptr,
-                        main.package_withs_list(),//item_list_ptr.clone(),
+                        main.package_withs_list(),
                         main.cache(),
                     );
                 } else {
-                    main.package_withs_list().borrow().clear()//item_list_ptr.borrow_mut().clear();
+                    main.package_withs_list().borrow().clear()
                 }
+            }}),
+            save_withpackages: Slot::new(enclose! { (main) move || {
+                let mut pinchanges_ptr = main.pinchanges_list();
+                store_withpackage_changes::store_withpackage_changes(
+                    main.package_withs_list(),
+                    main.vpin_table(),
+                    &mut pinchanges_ptr,
+                    main.cache(),
+                );
             }}),
         };
 
@@ -550,7 +632,7 @@ impl<'a> MainWindow<'a> {
             .toggled()
             .connect(&main_win.toggle_vpin_changes);
 
-        main.revisions_table() //revisions_ptr
+        main.revisions_table()
             .selection_model()
             .selection_changed()
             .connect(&main_win.revision_changed);
@@ -560,6 +642,12 @@ impl<'a> MainWindow<'a> {
             .selection_changed()
             .connect(&main_win.distribution_changed);
 
+        main.package_withs_list()
+            .borrow()
+            .save_button()
+            .clone()
+            .clicked()
+            .connect(&main_win.save_withpackages);
         main_win
     }
 
