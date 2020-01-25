@@ -52,7 +52,7 @@ pub struct InnerMainWindow<'a> {
     left_toolbar_actions: LeftToolBarActions,
     search_shortcut: MutPtr<QShortcut>,
     // Slots
-    choose_distribution_triggered: Slot<'a>,
+    //choose_distribution_triggered: Slot<'a>,
     show_dist_menu: SlotOfQPoint<'a>,
     select_pin_changes: Slot<'a>,
     select_history: Slot<'a>,
@@ -241,24 +241,6 @@ impl<'a> InnerMainWindow<'a> {
                         .exec_1a_mut(vpin_tablewidget_ptr.map_to_global(pos).as_ref());
                 }),
 
-                choose_distribution_triggered: Slot::new(enclose! { (cache) move || {
-                    if vpin_tablewidget_ptr.is_null() {
-                        log::error!("Error: attempted to access null pointer in choose_distribution_tribbered");
-                        return;
-                    }
-                    if vpin_tablewidget_ptr.row_count() == 0 {
-                        return;
-                    }
-                    let current_row = vpin_tablewidget_ptr.current_row();
-                    choose_alternative_distribution(
-                        current_row,
-                        vpin_tablewidget_ptr,
-                        main_widget_ptr,
-                        pinchanges_ptr,
-                        cache.clone(),
-                    );
-                }}),
-
                 select_pin_changes: Slot::new(move || {
                     stacked_ptr.set_current_index(0);
                     controls_ptr.set_current_index(0);
@@ -298,10 +280,6 @@ impl<'a> InnerMainWindow<'a> {
                 .custom_context_menu_requested()
                 .connect(&main_window_inst.show_dist_menu);
 
-            choose_dist_action
-                .triggered()
-                .connect(&main_window_inst.choose_distribution_triggered);
-
             revisions_ptr
                 .selection_model()
                 .selection_changed()
@@ -331,6 +309,17 @@ impl<'a> InnerMainWindow<'a> {
 
             (main_window_inst, main_window)
         }
+    }
+
+    /// Retrieve a MutPtr to the QMainWindow instance
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// * MutPtr<QMainWindow>
+    pub unsafe fn main(&self) -> MutPtr<QMainWindow> {
+        self.main
     }
 
     /// Retrieve a pointer to the main widget under the QMainWindow
@@ -374,6 +363,10 @@ impl<'a> InnerMainWindow<'a> {
     pub unsafe fn vpin_table(&self) -> MutPtr<QTableWidget> {
         self.vpin_table
     }
+
+    pub unsafe fn pinchanges_list(&self) -> MutPtr<QTableWidget> {
+        self.pinchanges_list
+    }
     /// Retrieve an Rc wrapped MainToolbar instance
     ///
     /// # Arguments
@@ -392,19 +385,17 @@ impl<'a> InnerMainWindow<'a> {
     pub fn left_toolbar_actions(&self) -> &LeftToolBarActions {
         &self.left_toolbar_actions
     }
-    /// Retrieve a MutPtr to the QMainWindow instance
-    ///
-    /// # Arguments
-    /// * None
-    ///
-    /// # Returns
-    /// * MutPtr<QMainWindow>
-    pub unsafe fn main(&self) -> MutPtr<QMainWindow> {
-        self.main
-    }
 
     pub unsafe fn changes_table(&self) -> MutPtr<QTableWidget> {
         self.changes_table
+    }
+
+    // pub unsafe fn dist_popup_menu(&self) -> MutPtr<QMenu> {
+    //     self.dist_popup_menu
+    // }
+
+    pub unsafe fn dist_popup_action(&self) -> MutPtr<QAction> {
+        self.dist_popup_action
     }
 }
 
@@ -447,6 +438,7 @@ pub struct MainWindow<'a> {
     _main_box: CppBox<QMainWindow>,
     query_button_clicked: Slot<'a>,
     save_clicked: Slot<'a>,
+    choose_distribution_triggered: Slot<'a>,
 }
 
 impl<'a> MainWindow<'a> {
@@ -473,8 +465,26 @@ impl<'a> MainWindow<'a> {
                     main.main_toolbar(),//main_toolbar_ptr.clone(),
                     main.cache()//pinchange_cache.clone(),
                 );
-
             } }),
+
+            choose_distribution_triggered: Slot::new(enclose! { (main) move || {
+                let vpin_tablewidget_ptr = main.vpin_table();
+                if vpin_tablewidget_ptr.is_null() {
+                    log::error!("Error: attempted to access null pointer in choose_distribution_tribbered");
+                    return;
+                }
+                if vpin_tablewidget_ptr.row_count() == 0 {
+                    return;
+                }
+                let current_row = vpin_tablewidget_ptr.current_row();
+                choose_alternative_distribution(
+                    current_row,
+                    vpin_tablewidget_ptr,
+                    main.main_widget(),
+                    main.pinchanges_list(),//pinchanges_ptr,
+                    main.cache(),
+                );
+            }}),
         };
 
         main.main_toolbar()
@@ -487,6 +497,11 @@ impl<'a> MainWindow<'a> {
             .connect(&main_win.query_button_clicked);
 
         main.save_button().clicked().connect(&main_win.save_clicked);
+
+        main.dist_popup_action()
+            .triggered()
+            .connect(&main_win.choose_distribution_triggered);
+
         main_win
     }
 
