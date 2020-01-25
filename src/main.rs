@@ -55,7 +55,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let _result =
             QResource::register_resource_q_string(&qs("/Users/jgerber/bin/pbgui_tree.rcc"));
 
-        let (mut pbgui_root, _pbgui_main_cppbox) = main_window::MainWindow::new();
+        //let (mut pbgui_root, _pbgui_main_cppbox) = main_window::MainWindow::new();
+        let pbgui_root = main_window::MainWindow::new();
         init::packages_tree::init(to_thread_sender.clone());
         init::package_withs::init(to_thread_sender.clone());
         init::main_toolbar::init(to_thread_sender.clone());
@@ -88,7 +89,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         // Connect the accepted signal to the accepted slot
         dialog.accepted().connect(&accepted_slot);
 
-        let mtoolbar = pbgui_root.main_toolbar();
+        //let mtoolbar = pbgui_root.main_toolbar();
+        let mtoolbar = pbgui_root.main_win().main_toolbar();
 
         let exec_dialog_slot = SlotOfQModelIndex::new(
             enclose! { (dialog, to_thread_sender) move |idx: Ref<QModelIndex>| {
@@ -105,15 +107,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         );
 
         pbgui_root
+            .main_win()
             .packages_tree()
             .clicked()
             .connect(&exec_dialog_slot);
 
         let app_update = new_event_handler(
             dialog.clone(),
-            pbgui_root.tree(),
-            pbgui_root.package_withs_list(),
-            pbgui_root.main_toolbar(),
+            pbgui_root.main_win().tree(),
+            pbgui_root.main_win().package_withs_list(),
+            pbgui_root.main_win().main_toolbar(),
             receiver,
         );
 

@@ -34,19 +34,19 @@ use std::rc::Rc;
 
 /// Just as it sounds, MainWindow is the MainWindow struct, holding on
 /// to various pointers that need to persist as well as top level slots
-pub struct MainWindow<'a> {
+pub struct InnerMainWindow<'a> {
     main: MutPtr<QMainWindow>,
     main_toolbar: Rc<toolbar::MainToolbar>,
     packages_tree: Rc<RefCell<tree::DistributionTreeView<'a>>>,
     package_withs_list: Rc<RefCell<WithsList<'a>>>,
-    _vpin_table: MutPtr<QTableWidget>,
-    _pinchanges_list: MutPtr<QTableWidget>,
-    _save_button: MutPtr<QPushButton>,
-    _pin_changes_button: MutPtr<QPushButton>,
-    _history_button: MutPtr<QPushButton>,
-    _dist_popup_menu: CppBox<QMenu>,
-    _dist_popup_action: MutPtr<QAction>,
-    _left_toolbar_actions: LeftToolBarActions,
+    vpin_table: MutPtr<QTableWidget>,
+    pinchanges_list: MutPtr<QTableWidget>,
+    save_button: MutPtr<QPushButton>,
+    pin_changes_button: MutPtr<QPushButton>,
+    history_button: MutPtr<QPushButton>,
+    dist_popup_menu: CppBox<QMenu>,
+    dist_popup_action: MutPtr<QAction>,
+    left_toolbar_actions: LeftToolBarActions,
     search_shortcut: MutPtr<QShortcut>,
     // Slots
     query_button_clicked: Slot<'a>,
@@ -65,7 +65,7 @@ pub struct MainWindow<'a> {
     save_withpackages: Slot<'a>,
 }
 
-impl<'a> MainWindow<'a> {
+impl<'a> InnerMainWindow<'a> {
     /// New up the MainWindow. The MainWindow's primary job is to
     /// ensure that needed widgets and data remain in scope for the
     /// lifetime of the application. Other than that, it is fairly
@@ -90,7 +90,7 @@ impl<'a> MainWindow<'a> {
     /// ----- center_layout (QVBoxLayourt)
     /// ---- item_list_ptr (MutPtr<QListWidget>)
     /// ```
-    pub fn new() -> (MainWindow<'a>, CppBox<QMainWindow>) {
+    pub fn new() -> (InnerMainWindow<'a>, CppBox<QMainWindow>) {
         unsafe {
             // create the main window, menus, central widget and layout
             let (mut main_window, main_widget_ptr, mut main_layout_ptr) = create_main_window();
@@ -167,20 +167,20 @@ impl<'a> MainWindow<'a> {
             main_window_ptr.show();
             // Create the MainWindow instance, set up signals and slots, and return
             // the newly minted instance. We are done.
-            let main_window_inst = MainWindow {
+            let main_window_inst = InnerMainWindow {
                 main: main_window_ptr,
                 main_toolbar: main_toolbar,
                 packages_tree: packages_ptr,
                 package_withs_list: item_list_ptr.clone(),
-                _vpin_table: vpin_tablewidget_ptr,
-                _save_button: save_button,
-                _pinchanges_list: pinchanges_ptr,
-                _dist_popup_menu: dist_popup_menu,
-                _dist_popup_action: choose_dist_action,
+                vpin_table: vpin_tablewidget_ptr,
+                save_button: save_button,
+                pinchanges_list: pinchanges_ptr,
+                dist_popup_menu: dist_popup_menu,
+                dist_popup_action: choose_dist_action,
                 // _package_popup_menu: line_edit_popup_menu,
-                _pin_changes_button: pinchanges_button_ptr,
-                _history_button: history_button_ptr,
-                _left_toolbar_actions: left_toolbar_actions,
+                pin_changes_button: pinchanges_button_ptr,
+                history_button: history_button_ptr,
+                left_toolbar_actions: left_toolbar_actions,
                 search_shortcut: search_shortcut.into_ptr(),
                 // slots
                 save_withpackages: Slot::new(
@@ -417,7 +417,7 @@ impl<'a> MainWindow<'a> {
     ///
     /// # Returns
     /// * MutPtr<QMainWindow>
-    pub unsafe fn main(&mut self) -> MutPtr<QMainWindow> {
+    pub unsafe fn main(&self) -> MutPtr<QMainWindow> {
         self.main
     }
 }
@@ -453,4 +453,30 @@ fn create_top_toolbar(parent: MutPtr<QMainWindow>) -> toolbar::MainToolbar {
     let tb = toolbar::create(parent);
     tb.set_default_stylesheet();
     tb
+}
+
+/// Holder of
+pub struct MainWindow<'a> {
+    main: Rc<InnerMainWindow<'a>>,
+    _main_box: CppBox<QMainWindow>,
+}
+
+impl<'a> MainWindow<'a> {
+    pub fn new() -> MainWindow<'a> {
+        let (pbgui_root, pbgui_main_cppbox) = InnerMainWindow::new();
+
+        MainWindow {
+            main: Rc::new(pbgui_root),
+            _main_box: pbgui_main_cppbox,
+        }
+    }
+
+    pub fn main_win(&self) -> Rc<InnerMainWindow<'a>> {
+        self.main.clone()
+    }
+
+    pub unsafe fn main(&self) -> MutPtr<QMainWindow> {
+        let main = self.main_win();
+        main.main()
+    }
 }
