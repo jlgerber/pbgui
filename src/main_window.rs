@@ -94,7 +94,6 @@ impl<'a> MainWindow<'a> {
         unsafe {
             // create the main window, menus, central widget and layout
             let (mut main_window, main_widget_ptr, mut main_layout_ptr) = create_main_window();
-            let main_window_ret = main_window.as_mut_ptr();
             let mut main_window_ptr = main_window.as_mut_ptr();
             let main_toolbar = Rc::new(create_top_toolbar(main_window_ptr.clone()));
             let main_toolbar_ptr = main_toolbar.clone();
@@ -160,7 +159,7 @@ impl<'a> MainWindow<'a> {
             withs_splitter::set_sizes(&mut with_splitter_ptr);
 
             resize_window_to_screen(&mut main_window_ptr, 0.8);
-            load_stylesheet("/Users/jgerber/bin/pbgui.qss", main_window_ptr);
+            load_stylesheet("/Users/jgerber/bin/pbgui.qss", main_window_ptr.clone());
 
             let withpackage_save = item_list_ptr.borrow().save_button().clone();
             let versionpin_table = vpin_tablewidget_ptr.clone();
@@ -169,7 +168,7 @@ impl<'a> MainWindow<'a> {
             // Create the MainWindow instance, set up signals and slots, and return
             // the newly minted instance. We are done.
             let main_window_inst = MainWindow {
-                main: main_window_ret,
+                main: main_window_ptr,
                 main_toolbar: main_toolbar,
                 packages_tree: packages_ptr,
                 package_withs_list: item_list_ptr.clone(),
