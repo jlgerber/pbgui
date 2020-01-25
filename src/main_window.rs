@@ -36,21 +36,23 @@ use std::rc::Rc;
 /// to various pointers that need to persist as well as top level slots
 pub struct InnerMainWindow<'a> {
     main: MutPtr<QMainWindow>,
+    main_widget: MutPtr<QWidget>,
     main_toolbar: Rc<toolbar::MainToolbar>,
     packages_tree: Rc<RefCell<tree::DistributionTreeView<'a>>>,
     package_withs_list: Rc<RefCell<WithsList<'a>>>,
     vpin_table: MutPtr<QTableWidget>,
     pinchanges_list: MutPtr<QTableWidget>,
+    pinchanges_cache: Rc<PinChangesCache>,
     save_button: MutPtr<QPushButton>,
     pin_changes_button: MutPtr<QPushButton>,
+    changes_table: MutPtr<QTableWidget>,
     history_button: MutPtr<QPushButton>,
     dist_popup_menu: CppBox<QMenu>,
     dist_popup_action: MutPtr<QAction>,
     left_toolbar_actions: LeftToolBarActions,
     search_shortcut: MutPtr<QShortcut>,
     // Slots
-    //query_button_clicked: Slot<'a>,
-    save_clicked: Slot<'a>,
+    //save_clicked: Slot<'a>,
     choose_distribution_triggered: Slot<'a>,
     show_dist_menu: SlotOfQPoint<'a>,
     //clear_package: Slot<'a>,
@@ -150,8 +152,8 @@ impl<'a> InnerMainWindow<'a> {
                 QShortcut::new_2a(key_seq.as_ref(), item_list_ptr.borrow().main());
 
             // persist data
-            let pinchange_cache = Rc::new(PinChangesCache::new());
-            let cache = pinchange_cache.clone();
+            let pinchanges_cache = Rc::new(PinChangesCache::new());
+            let cache = pinchanges_cache.clone();
             //
             // final housekeeping before showing main window
             //
@@ -165,37 +167,41 @@ impl<'a> InnerMainWindow<'a> {
             let versionpin_table = vpin_tablewidget_ptr.clone();
 
             main_window_ptr.show();
+
             // Create the MainWindow instance, set up signals and slots, and return
             // the newly minted instance. We are done.
             let main_window_inst = InnerMainWindow {
                 main: main_window_ptr,
+                main_widget: main_widget_ptr,
                 main_toolbar: main_toolbar,
                 packages_tree: packages_ptr,
                 package_withs_list: item_list_ptr.clone(),
                 vpin_table: vpin_tablewidget_ptr,
                 save_button: save_button,
                 pinchanges_list: pinchanges_ptr,
+                pinchanges_cache,
                 dist_popup_menu: dist_popup_menu,
                 dist_popup_action: choose_dist_action,
                 // _package_popup_menu: line_edit_popup_menu,
                 pin_changes_button: pinchanges_button_ptr,
+                changes_table: changes_table_ptr,
                 history_button: history_button_ptr,
                 left_toolbar_actions: left_toolbar_actions,
                 search_shortcut: search_shortcut.into_ptr(),
                 // slots
                 save_withpackages: Slot::new(
-                    enclose_all! { (pinchange_cache, item_list_ptr) (mut pinchanges_ptr) move || {
+                    enclose_all! { (cache, item_list_ptr) (mut pinchanges_ptr) move || {
                         store_withpackage_changes::store_withpackage_changes(
                             item_list_ptr.clone(),
                             versionpin_table,
                             &mut pinchanges_ptr,
-                            pinchange_cache.clone(),
+                            cache.clone(),
                         );
                     }},
                 ),
 
                 distribution_changed: SlotOfQItemSelectionQItemSelection::new(
-                    enclose! { (item_list_ptr)
+                    enclose! { (cache, item_list_ptr)
                     move |selected: QRef<QItemSelection>, _deselected: QRef<QItemSelection>| {
                         let ind = selected.indexes();
                         if ind.count_0a() > 0 {
@@ -246,24 +252,15 @@ impl<'a> InnerMainWindow<'a> {
                         .exec_1a_mut(vpin_tablewidget_ptr.map_to_global(pos).as_ref());
                 }),
 
-                save_clicked: Slot::new(enclose! { (pinchange_cache, main_toolbar_ptr) move || {
-                    save_versionpin_changes(
-                        main_widget_ptr,
-                        &mut pinchanges_ptr,
-                        main_toolbar_ptr.clone(),
-                        pinchange_cache.clone(),
-                    );
-                } }),
-                /*
-                query_button_clicked: Slot::new(enclose! {(main_toolbar_ptr) move || {
-                    update_vpin_table(
-                        main_toolbar_ptr.clone(),
-                        &search_shows,
-                        vpin_tablewidget_ptr,
-                    );
-                }}),
-                */
-                choose_distribution_triggered: Slot::new(enclose! { (pinchange_cache) move || {
+                // save_clicked: Slot::new(enclose! { (pinchange_cache, main_toolbar_ptr) move || {
+                //     save_versionpin_changes(
+                //         main_widget_ptr,
+                //         &mut pinchanges_ptr,
+                //         main_toolbar_ptr.clone(),
+                //         pinchange_cache.clone(),
+                //     );
+                // } }),
+                choose_distribution_triggered: Slot::new(enclose! { (cache) move || {
                     if vpin_tablewidget_ptr.is_null() {
                         log::error!("Error: attempted to access null pointer in choose_distribution_tribbered");
                         return;
@@ -277,7 +274,7 @@ impl<'a> InnerMainWindow<'a> {
                         vpin_tablewidget_ptr,
                         main_widget_ptr,
                         pinchanges_ptr,
-                        pinchange_cache.clone(),
+                        cache.clone(),
                     );
                 }}),
 
@@ -316,15 +313,9 @@ impl<'a> InnerMainWindow<'a> {
                 .clicked()
                 .connect(&main_window_inst.select_history);
 
-            // main_toolbar_ptr
-            //     //.borrow()
-            //     .query_btn()
+            // save_button
             //     .clicked()
-            //     .connect(&main_window_inst.query_button_clicked);
-
-            save_button
-                .clicked()
-                .connect(&main_window_inst.save_clicked);
+            //     .connect(&main_window_inst.save_clicked);
 
             vpin_tablewidget_ptr
                 .custom_context_menu_requested()
@@ -358,11 +349,6 @@ impl<'a> InnerMainWindow<'a> {
                 .clicked()
                 .connect(&main_window_inst.save_withpackages);
 
-            // main_window_inst
-            //     .search_shortcut
-            //     .activated()
-            //     .connect(&main_window_inst.query_button_clicked);
-
             // configuration
             view_withs.set_checked(false);
 
@@ -370,6 +356,14 @@ impl<'a> InnerMainWindow<'a> {
         }
     }
 
+    /// Retrieve a pointer to the main widget under the QMainWindow
+    pub unsafe fn main_widget(&self) -> MutPtr<QWidget> {
+        self.main_widget
+    }
+
+    pub fn cache(&self) -> Rc<PinChangesCache> {
+        self.pinchanges_cache.clone()
+    }
     /// Retrieve a Ref wrapped DistributionTreeView instance
     ///
     /// # Arguments
@@ -413,6 +407,11 @@ impl<'a> InnerMainWindow<'a> {
     pub unsafe fn main_toolbar(&self) -> Rc<toolbar::MainToolbar> {
         self.main_toolbar.clone()
     }
+
+    pub unsafe fn save_button(&self) -> MutPtr<QPushButton> {
+        self.save_button
+    }
+
     pub fn left_toolbar_actions(&self) -> &LeftToolBarActions {
         &self.left_toolbar_actions
     }
@@ -425,6 +424,10 @@ impl<'a> InnerMainWindow<'a> {
     /// * MutPtr<QMainWindow>
     pub unsafe fn main(&self) -> MutPtr<QMainWindow> {
         self.main
+    }
+
+    pub unsafe fn changes_table(&self) -> MutPtr<QTableWidget> {
+        self.changes_table
     }
 }
 
@@ -466,6 +469,7 @@ pub struct MainWindow<'a> {
     main: Rc<InnerMainWindow<'a>>,
     _main_box: CppBox<QMainWindow>,
     query_button_clicked: Slot<'a>,
+    save_clicked: Slot<'a>,
 }
 
 impl<'a> MainWindow<'a> {
@@ -484,6 +488,26 @@ impl<'a> MainWindow<'a> {
                     main.vpin_table(),
                 );
             }}),
+            save_clicked: Slot::new(enclose! { (main) move || {
+                //pinchange_cache, main_toolbar_ptr
+                //let pinchanges
+
+                let mut pinchanges_ptr = main.changes_table();
+                save_versionpin_changes(
+                    main.main_widget(),//main_widget_ptr,
+                    &mut pinchanges_ptr,
+                    main.main_toolbar(),//main_toolbar_ptr.clone(),
+                    main.cache()//pinchange_cache.clone(),
+                );
+
+                // save_versionpin_changes(
+                //     main.main()
+                //     //main_widget_ptr,
+                //     &mut pinchanges_ptr,
+                //     main_toolbar_ptr.clone(),
+                //     pinchange_cache.clone(),
+                // );
+            } }),
         };
 
         main.main_toolbar()
@@ -495,6 +519,7 @@ impl<'a> MainWindow<'a> {
             .activated()
             .connect(&main_win.query_button_clicked);
 
+        main.save_button().clicked().connect(&main_win.save_clicked);
         main_win
     }
 
