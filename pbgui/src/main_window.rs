@@ -1,3 +1,5 @@
+use crate::messaging::OMsg;
+use crate::messaging::Sender;
 use crate::{
     bottom_stacked_widget::create_bottom_stacked_widget,
     cache::PinChangesCache,
@@ -490,7 +492,7 @@ impl<'a> MainWindow<'a> {
     ///
     /// # Returns
     /// * MainWindow instance
-    pub unsafe fn new() -> MainWindow<'a> {
+    pub unsafe fn new(to_thread_sender: Sender<OMsg>) -> MainWindow<'a> {
         let (pbgui_root, pbgui_main_cppbox, dist_popup_menu_box) = InnerMainWindow::new();
         let main = Rc::new(pbgui_root);
         let main_win = MainWindow {
@@ -501,11 +503,9 @@ impl<'a> MainWindow<'a> {
             // slots
             //
             query_button_clicked: Slot::new(enclose! {(main) move || {
-                let search_shows = main.left_toolbar_actions().search_shows;
                 update_vpin_table(
                     main.main_toolbar(),
-                    &search_shows,
-                    main.vpin_table(),
+                    to_thread_sender.clone(),
                 );
             }}),
 

@@ -19,7 +19,7 @@ pub unsafe fn match_main_win<'a>(
                 vpin_tablewidget_ptr.set_sorting_enabled(false);
                 vpin_tablewidget_ptr.set_row_count(0);
                 vpin_tablewidget_ptr.set_row_count(vpins.len() as i32);
-                let mut filtered_cnt = 0;
+                //let mut filtered_cnt = 0;
                 for result in vpins {
                     result.set_table_row(&mut vpin_tablewidget_ptr, cnt);
                     cnt += 1;
