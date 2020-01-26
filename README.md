@@ -1,7 +1,25 @@
 
+# Introduction
+
+Pbgui is now a multi-crate project, consisting of:
+
+* pbgui - The primary user interface, importing all the other crates 
+* pbgui-messaging - Secondary thread which communicates with the database
+* pbgui-tree - The left hand project / distribution / platform tree view
+* pbgui-withs - The right hand package withs list
+* pbgui-vpin - The dialog to choose select or create a versionpin for a distribution
+ 
+So, why has this been broken up thusly? A reasonable question for certain. I tend to find it simpler to isolate major systems and work on them separately. At a certain point, I decided to do just this. 
+Initially, these were all separate crates with separate projects in github. And, besides dealing with synch'ing dependencies, this worked out pretty well. In fact, I would say that I wish I had started down this route, as there is a still in the main pgui project which could be isolated. The other benefit to doing this is that I refined my component pattern for working with rust-qt - splitting a component into an inner component that stores MutPtrs to qt widgets, and exposes an api to access them, and an outer component that holds a reference counted pointer to the inner component, along with zero or more CppBoxed, owned components, and the component's Slot impls. 
+
+Splitting the widgets and slots into different structs allows me to define and use an api in order to access and mutate the widgets, both externally, and, more importantly, from the slot implementations.
+
+Truthfully, I am not completely sold on this being a multi-project setup and will evaluate how it goes. At some point, I may slurp everything back into pbgui. We will see.
+
 # Design Notes
 
 ## Todos - p1
+- [IP] update client to use separate thread for persistence, including all db queries and updates.
 - [ ] add selected distro/platform to current level
 - [ ] modify current pin's platform / role / etc
 - [ ] add packages.xml generation / installation
@@ -9,7 +27,6 @@
 - [ ] add install distro to packybara to populate table 
 - [ ] modify packages tree to use install as source of data
 - [ ] add support for linked shows
-- [IP] update client to use thread for queries
 - [ ] update history view to present with updates, pin installs, etc 
 - [ ] add support for change sets
 - [ ] add support for servistry configuration
