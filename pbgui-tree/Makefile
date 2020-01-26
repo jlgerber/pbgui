@@ -7,6 +7,6 @@ rcc:
 	rcc -binary ./resources/pbgui_tree.qrc -o ./resources/pbgui_tree.rcc
 
 install-rcc:
- 	cp ./resources/pbgui_tree.rcc $(resource_target)/. && rm ./resources/pbgui_tree.rcc
+	cp ./resources/pbgui_tree.rcc $(resource_target)/. && rm ./resources/pbgui_tree.rcc
 
 all: rcc run

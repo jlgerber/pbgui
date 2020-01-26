@@ -857,7 +857,6 @@ dependencies = [
  "qt_ui_tools 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "qt_widgets 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustqt-utils 0.6.0 (git+https://github.com/jlgerber/rustqt-utils?tag=v0.6.0)",
- "whoami 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
