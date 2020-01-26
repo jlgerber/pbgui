@@ -509,13 +509,11 @@ impl<'a> MainWindow<'a> {
                 );
             }}),
 
-            save_clicked: Slot::new(enclose! { (main) move || {
-                let mut pinchanges_ptr = main.vpin_requested_changes_table();
+            save_clicked: Slot::new(enclose! { (main, to_thread_sender) move || {
                 save_versionpin_changes(
                     main.main_widget(),
-                    &mut pinchanges_ptr,
-                    main.main_toolbar(),
-                    main.cache()
+                    main.cache(),
+                    to_thread_sender.clone()
                 );
             } }),
 

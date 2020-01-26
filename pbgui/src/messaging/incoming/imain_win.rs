@@ -9,6 +9,7 @@ pub enum IMainWin {
     WithPackages(Vec<FindAllWithsRow>),
     Changes(Vec<FindAllChangesRow>),
     HistoryRevisions(Vec<FindAllRevisionsRow>),
+    SaveVpinChanges(bool), //consider changing to Result<(),>
 }
 
 impl ToIMsg for IMainWin {

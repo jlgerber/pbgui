@@ -4,12 +4,12 @@ use crate::{
     main_window::InnerMainWindow,
     messaging::{event::main_win::MainWin, incoming::imain_win::IMainWin},
     traits::RowSetterTrait,
-    utility::{update_row, RowType},
+    utility::{qs, update_row, RowType},
 };
 use std::rc::Rc;
 
 use qt_core::{QString, QVariant};
-use qt_widgets::QTableWidgetItem;
+use qt_widgets::{QMessageBox, QTableWidgetItem};
 
 pub unsafe fn match_main_win<'a>(
     event: MainWin,
@@ -151,6 +151,32 @@ pub unsafe fn match_main_win<'a>(
                     ));
                     revisions_ptr.set_item(cnt, COL_REV_COMMENT, revisions_table_item.into_ptr());
                     cnt += 1;
+                }
+            } else {
+                log::error!("PackagesTree::GetHistoryRevisions IMsg does not match event state");
+            }
+        }
+        MainWin::SaveVpinChanges => {
+            if let Ok(IMsg::MainWin(IMainWin::SaveVpinChanges(success))) = receiver.recv() {
+                let toolbar = main_win.main_toolbar();
+                let mut pinchanges_ptr = main_win.vpin_requested_changes_table();
+
+                let qb = toolbar.query_btn();
+                let mut query_btn = qb.as_mut_ref().expect("unable to convert to mut");
+                if success {
+                    pinchanges_ptr.clear();
+                    pinchanges_ptr.set_row_count(0);
+                    let mut mb = QMessageBox::new();
+                    // re-execute query
+                    query_btn.click();
+                    mb.set_text(&qs("Success"));
+                    mb.exec();
+                //todo - reset color of query
+                } else {
+                    let mut mb = QMessageBox::new();
+                    mb.set_text(&qs("Error Occured"));
+                    mb.set_detailed_text(&qs(format!("{:#?}", success)));
+                    mb.exec();
                 }
             } else {
                 log::error!("PackagesTree::GetHistoryRevisions IMsg does not match event state");

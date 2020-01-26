@@ -1,25 +1,19 @@
 use crate::cache::PinChangesCache;
 use crate::change_type::Change;
+use crate::messaging::outgoing::omain_win::OMainWin;
+use crate::messaging::OMsg;
+use crate::messaging::Sender;
 use crate::utility::qs;
-use crate::ClientProxy;
-use packybara::traits::*;
-use pbgui_toolbar::toolbar;
-
 use log;
-use packybara::db::update::versionpins::VersionPinChange;
-use packybara::packrat::PackratDb;
-use qt_widgets::{cpp_core::MutPtr, QInputDialog, QMessageBox, QTableWidget, QWidget};
-//use std::cell::RefCell;
+use qt_widgets::{cpp_core::MutPtr, QInputDialog, QMessageBox, QWidget};
 use std::rc::Rc;
 use whoami;
 
 pub fn save_versionpin_changes(
     root_widget_ptr: MutPtr<QWidget>,
-    pinchanges_ptr: &mut MutPtr<QTableWidget>,
-    toolbar: Rc<toolbar::MainToolbar>,
     pinchange_cache: Rc<PinChangesCache>,
+    to_thread_sender: Sender<OMsg>,
 ) {
-    let client = ClientProxy::connect().expect("unable to connect via ClientProxy");
     unsafe {
         // grab all the data from the pin changes
         let mut ok = false;
@@ -34,59 +28,29 @@ pub fn save_versionpin_changes(
                 return;
             }
         };
-        // update fields.
-        let mut pb = PackratDb::new(client);
-        let mut tx = pb.transaction();
-        let mut tx_cnt = 0;
+
+        // We will send change to secondary thread as vec<change>
+        let mut change_vec: Vec<Change> = Vec::new();
+
         for idx in pinchange_cache.change_indexes() {
             let change = pinchange_cache
                 .change_at(idx)
                 .expect("unable to unwrap change");
-            match change {
-                Change::ChangeDistribution {
-                    vpin_id,
-                    new_dist_id,
-                } => {
-                    let change = VersionPinChange::new(vpin_id, Some(new_dist_id), None);
-                    let mut update = PackratDb::update_versionpins(tx)
-                        .change(change)
-                        .update()
-                        .unwrap();
-                    tx = update.take_tx();
-                    tx_cnt += 1;
-                }
-                Change::ChangeWiths { vpin_id, withs } => {
-                    let mut update = PackratDb::add_withs(tx).create(vpin_id, withs).unwrap();
-                    tx = update.take_tx()
-                }
-                _ => panic!("not implemented"),
-            }
+
+            change_vec.push(change);
         }
         let user = whoami::username();
+
         // reset book keeping
         pinchange_cache.reset();
-        let results = PackratDb::commit(tx, user.as_str(), comments.as_str(), tx_cnt);
-        // avoid runtime borrow issues. Since we can upgrade with impunity in qt
-        // we simply borrow and upgrade instead of perform a borrow_mut(), which
-        // causes a panic
-        let qb = toolbar.query_btn();
-        let mut query_btn = qb.as_mut_ref().expect("unable to convert to mut");
-        if results.is_ok() {
-            pinchanges_ptr.clear();
-            pinchanges_ptr.set_row_count(0);
-            let mut mb = QMessageBox::new();
-            // re-execute query
-            query_btn.click();
-            mb.set_text(&qs("Success"));
-            mb.exec();
 
-        //todo - reset color of query
-        } else {
-            let mut mb = QMessageBox::new();
-            mb.set_text(&qs("Error Occured"));
-            mb.set_detailed_text(&qs(format!("{:#?}", results)));
-            mb.exec();
-        }
+        to_thread_sender
+            .send(OMsg::MainWin(OMainWin::SaveVpinChanges {
+                changes: change_vec,
+                user,
+                comments,
+            }))
+            .expect("unable to get history revisions");
     }
 }
 

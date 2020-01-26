@@ -1,4 +1,6 @@
 use super::*;
+use crate::change_type::Change;
+use packybara::db::update::versionpins::VersionPinChange;
 use packybara::LtreeSearchMode;
 use packybara::OrderDirection;
 use packybara::OrderRevisionBy;
@@ -119,6 +121,60 @@ pub(crate) fn match_main_win(
                 .send(IMainWin::HistoryRevisions(revisions).to_imsg())
                 .expect("unable to send revisions");
             conductor.signal(MainWin::GetHistoryRevisions.to_event());
+        }
+        OMainWin::SaveVpinChanges {
+            changes,
+            comments,
+            user,
+        } => {
+            // let results = db
+            //     .find_all_revisions()
+            //     //transaction_id(tx_id as i64)
+            //     .order_by(vec![OrderRevisionBy::Id])
+            //     .order_direction(OrderDirection::Desc)
+            //     .query();
+            // let revisions = match results {
+            //     Ok(revisions) => revisions,
+            //     Err(err) => {
+            //         sender
+            //             .send(IMsg::Error(format!(
+            //                 "Unable to get with revisions from db: {}",
+            //                 err
+            //             )))
+            //             .expect("unable to send error msg");
+            //         conductor.signal(Event::Error);
+            //         return;
+            //     }
+            // };
+            let mut tx = db.transaction();
+            let mut tx_cnt = 0;
+            for change in changes {
+                match change {
+                    Change::ChangeDistribution {
+                        vpin_id,
+                        new_dist_id,
+                    } => {
+                        let change = VersionPinChange::new(vpin_id, Some(new_dist_id), None);
+                        let mut update = PackratDb::update_versionpins(tx)
+                            .change(change)
+                            .update()
+                            .unwrap();
+                        tx = update.take_tx();
+                        tx_cnt += 1;
+                    }
+                    Change::ChangeWiths { vpin_id, withs } => {
+                        let mut update = PackratDb::add_withs(tx).create(vpin_id, withs).unwrap();
+                        tx = update.take_tx()
+                    }
+                    _ => panic!("not implemented"),
+                }
+            }
+            let results = PackratDb::commit(tx, user.as_str(), comments.as_str(), tx_cnt);
+
+            sender
+                .send(IMainWin::SaveVpinChanges(results.is_ok()).to_imsg())
+                .expect("unable to send changes");
+            conductor.signal(MainWin::SaveVpinChanges.to_event());
         }
     }
 }
