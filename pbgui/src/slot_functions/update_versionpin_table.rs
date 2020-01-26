@@ -23,7 +23,12 @@ pub fn update_vpin_table(toolbar: Rc<toolbar::MainToolbar>, to_thread_sender: Se
         let roletxt = toolbar.role().current_text().to_std_string();
         let platformtxt = toolbar.platform().current_text().to_std_string();
         let sitetxt = toolbar.site().current_text().to_std_string();
-
+        let packagetxt = toolbar.line_edit().text().to_std_string();
+        let packagetxt = if &packagetxt != "" {
+            Some(packagetxt)
+        } else {
+            None
+        };
         to_thread_sender
             .send(OMsg::MainWin(OMainWin::GetVpins {
                 level: showtxt,
@@ -31,7 +36,7 @@ pub fn update_vpin_table(toolbar: Rc<toolbar::MainToolbar>, to_thread_sender: Se
                 platform: platformtxt,
                 site: sitetxt,
                 dir: dirtxt,
-                package: None,
+                package: packagetxt,
             }))
             .expect("unable to get vpins");
     }

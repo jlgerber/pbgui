@@ -26,11 +26,10 @@ pub(crate) fn match_main_win(
                 .site(site.as_str())
                 .search_mode(LtreeSearchMode::from_str(dir.as_str()).expect("unable to find vpin"))
                 .query();
-            //.expect("unable to unwrap vpin_finder.query");
 
             //let filter_package = if line_edit_txt != "" { true } else { false };
 
-            let vpins = match results {
+            let mut vpins = match results {
                 Ok(vpins) => vpins,
                 Err(err) => {
                     sender
@@ -43,10 +42,12 @@ pub(crate) fn match_main_win(
                     return;
                 }
             };
-            // let vpins = vpins
-            //     .into_iter()
-            //     .map(|mut x| std::mem::replace(&mut x.name, String::new()))
-            //     .collect::<Vec<_>>();
+            if let Some(package_str) = package {
+                vpins = vpins
+                    .into_iter()
+                    .filter(|x| x.distribution.package().starts_with(&package_str))
+                    .collect::<Vec<_>>();
+            }
             sender
                 .send(IMainWin::Vpins(vpins).to_imsg())
                 .expect("unable to send version pins");

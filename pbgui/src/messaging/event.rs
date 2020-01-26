@@ -4,6 +4,7 @@
 //! The Event signals that a given state has changed.
 //! THe IMsg provides the details of the state change.
 use qt_core::QString;
+use qt_thread_conductor::conductor::RESET;
 use qt_thread_conductor::traits::*;
 use qt_widgets::cpp_core::{CppBox, Ref};
 
@@ -34,6 +35,7 @@ pub enum Event {
     PackageWiths(PackageWiths),
     MainToolbar(MainToolbar),
     MainWin(MainWin),
+    Noop,
     Error,
 }
 
@@ -45,6 +47,7 @@ impl ToQString for Event {
             &Event::PackageWiths(package_withs) => package_withs.to_qstring(),
             &Event::MainToolbar(main_toolbar) => main_toolbar.to_qstring(),
             &Event::MainWin(main_win) => main_win.to_qstring(),
+            &Event::Noop => QString::from_std_str(RESET),
             &Event::Error => QString::from_std_str("Error"),
         }
     }
@@ -70,8 +73,9 @@ impl FromQString for Event {
             test_str if test_str.starts_with("MainWin::") => {
                 Event::MainWin(MainWin::from_qstring(qs))
             }
+            RESET => Event::Noop,
             "Error" => Event::Error,
-            _ => panic!("Unable to convert to Event"),
+            _ => panic!("Unable to convert to Event: {}", test_str),
         }
     }
 }

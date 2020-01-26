@@ -57,6 +57,11 @@ pub fn new_event_handler<'a>(
             Event::MainWin(main_win_event) => {
                 match_main_win(main_win_event, main.clone(), &receiver)
             }
+            Event::Noop => {
+                // we do nothing. this is a quirk of qt. We need to overcome
+                // a signal optimization where it wont send the same signal twice
+                // in a row... see the conductor doc
+            }
             Event::Error => {
                 if let Ok(IMsg::Error(error)) = receiver.recv() {
                     log::error!("{}", error);

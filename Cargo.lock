@@ -813,7 +813,7 @@ dependencies = [
  "pbgui-withs 0.18.0",
  "qt_core 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "qt_gui 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "qt_thread_conductor 0.3.0 (git+https://github.com/jlgerber/rust-qt-conductor?tag=v0.3.0)",
+ "qt_thread_conductor 0.3.1 (git+https://github.com/jlgerber/rust-qt-conductor?tag=v0.3.1)",
  "qt_ui_tools 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "qt_widgets 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustqt-utils 0.6.0 (git+https://github.com/jlgerber/rustqt-utils?tag=v0.6.0)",
@@ -844,7 +844,7 @@ dependencies = [
  "packybara 0.32.0 (git+https://github.com/jlgerber/packybara?tag=v0.32.0)",
  "qt_core 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "qt_gui 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "qt_thread_conductor 0.3.0 (git+https://github.com/jlgerber/rust-qt-conductor?tag=v0.3.0)",
+ "qt_thread_conductor 0.3.1 (git+https://github.com/jlgerber/rust-qt-conductor?tag=v0.3.1)",
  "qt_ui_tools 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "qt_widgets 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustqt-utils 0.6.0 (git+https://github.com/jlgerber/rustqt-utils?tag=v0.6.0)",
@@ -1070,13 +1070,14 @@ dependencies = [
 
 [[package]]
 name = "qt_thread_conductor"
-version = "0.3.0"
-source = "git+https://github.com/jlgerber/rust-qt-conductor?tag=v0.3.0#4fd3142f446631730708d4d9689ab0e4776c87fe"
+version = "0.3.1"
+source = "git+https://github.com/jlgerber/rust-qt-conductor?tag=v0.3.1#59c5cd820a11787155ecf222c488dc56c9d3924d"
 dependencies = [
  "qt_core 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "qt_gui 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "qt_ui_tools 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "qt_widgets 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "structopt 0.3.8 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1824,7 +1825,7 @@ dependencies = [
 "checksum qt_gui 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)" = "adf2aae3568081eccc3d98a2dd495243be517669164903b8dc6b88062a12f73c"
 "checksum qt_ritual_build 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)" = "f25c08e1fd291ec9940d0f53e35f5c33e393b126410a81664312801b1681bde1"
 "checksum qt_ritual_common 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)" = "6f9f085d73e2bb6be6b3ab4513383cd19df12a2bd9119fe4a5b71f6199ef4fb6"
-"checksum qt_thread_conductor 0.3.0 (git+https://github.com/jlgerber/rust-qt-conductor?tag=v0.3.0)" = "<none>"
+"checksum qt_thread_conductor 0.3.1 (git+https://github.com/jlgerber/rust-qt-conductor?tag=v0.3.1)" = "<none>"
 "checksum qt_ui_tools 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)" = "8b07b0b55eb4e8034735360edfe9818d6720ddce8b79c6e1ad63597c7d3bc02a"
 "checksum qt_widgets 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)" = "6ddb098a3fed1e1a6f2329e1fb13a823200897ca4ac53bf37acf4cf8958b9646"
 "checksum quick-error 1.2.3 (registry+https://github.com/rust-lang/crates.io-index)" = "a1d01941d82fa2ab50be1e79e6714289dd7cde78eba4c074bc5a4374f650dfe0"
