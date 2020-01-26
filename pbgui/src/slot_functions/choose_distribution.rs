@@ -3,7 +3,6 @@ use crate::messaging::outgoing::omain_win::OMainWin;
 use crate::messaging::OMsg;
 use crate::messaging::Sender;
 pub use crate::utility::qs;
-pub use crate::ClientProxy;
 use log;
 use qt_widgets::{cpp_core::MutPtr, QTableWidget, QWidget};
 

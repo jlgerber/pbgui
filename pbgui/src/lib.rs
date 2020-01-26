@@ -1,10 +1,8 @@
-pub mod api;
 pub mod cache;
 pub mod constants;
 pub mod slot_functions;
 pub mod utility;
-pub use api::client_proxy::ClientProxy;
-// needed so that qt wont segfault
+// needed so that qt wont segfault (what was I referring to????)
 pub mod components;
 pub use components::left_toolbar::LeftToolBarActions;
 pub use components::{
