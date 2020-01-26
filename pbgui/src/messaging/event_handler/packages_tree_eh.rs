@@ -1,5 +1,5 @@
 use super::*;
-use crate::{event::packages_tree::PackagesTree, IPackagesTree};
+use crate::messaging::{event::packages_tree::PackagesTree, IPackagesTree};
 use pbgui_tree::tree;
 use std::cell::RefCell;
 use std::rc::Rc;

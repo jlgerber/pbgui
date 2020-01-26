@@ -1,6 +1,6 @@
-use crate::outgoing::ovpin_dialog::OVpinDialog;
-use crate::OMsg;
-use crate::Sender;
+use crate::messaging::outgoing::ovpin_dialog::OVpinDialog;
+use crate::messaging::OMsg;
+use crate::messaging::Sender;
 
 /// Given a channel Sender and a default show, request that the VpinDialog
 /// be initialized.

@@ -4,12 +4,12 @@ use env_logger::Env;
 //use log;
 use crossbeam_channel::{unbounded as channel, Receiver, Sender};
 use pbgui::main_window;
-use pbgui::utility::{distribution_from_idx, qs};
-use pbgui_messaging::init;
-use pbgui_messaging::{
+use pbgui::messaging::init;
+use pbgui::messaging::{
     client_proxy::ConnectParams, event::Event, new_event_handler, thread as pbthread, IMsg, OMsg,
     OVpinDialog,
 };
+use pbgui::utility::{distribution_from_idx, qs};
 use pbgui_vpin::vpin_dialog;
 use qt_core::{QModelIndex, QResource, Slot, SlotOfQModelIndex};
 use qt_thread_conductor::conductor::Conductor;
@@ -116,6 +116,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let app_update = new_event_handler(
             dialog.clone(),
+            pbgui_root.main_win(),
             pbgui_root.main_win().tree(),
             pbgui_root.main_win().package_withs_list(),
             pbgui_root.main_win().main_toolbar(),

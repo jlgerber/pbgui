@@ -807,7 +807,6 @@ dependencies = [
  "log 0.4.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "num_enum 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "packybara 0.32.0 (git+https://github.com/jlgerber/packybara?tag=v0.32.0)",
- "pbgui-messaging 0.12.0",
  "pbgui-toolbar 0.8.0",
  "pbgui-tree 0.11.1",
  "pbgui-vpin 0.8.0",
@@ -822,28 +821,6 @@ dependencies = [
  "strum 0.17.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "strum_macros 0.17.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "whoami 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "pbgui-messaging"
-version = "0.12.0"
-dependencies = [
- "crossbeam 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)",
- "crossbeam-channel 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "crossbeam-utils 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "env_logger 0.7.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "log 0.4.8 (registry+https://github.com/rust-lang/crates.io-index)",
- "packybara 0.32.0 (git+https://github.com/jlgerber/packybara?tag=v0.32.0)",
- "pbgui-toolbar 0.8.0",
- "pbgui-tree 0.11.1",
- "pbgui-vpin 0.8.0",
- "pbgui-withs 0.18.0",
- "qt_core 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "qt_gui 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "qt_thread_conductor 0.3.0 (git+https://github.com/jlgerber/rust-qt-conductor?tag=v0.3.0)",
- "qt_ui_tools 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "qt_widgets 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "rustqt-utils 0.6.0 (git+https://github.com/jlgerber/rustqt-utils?tag=v0.6.0)",
 ]
 
 [[package]]

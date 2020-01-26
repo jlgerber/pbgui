@@ -1,5 +1,7 @@
 use super::*;
-use crate::{event::package_withs::PackageWiths, incoming::ipackage_withs::IPackageWiths};
+use crate::messaging::{
+    event::package_withs::PackageWiths, incoming::ipackage_withs::IPackageWiths,
+};
 use pbgui_withs::WithsList;
 use std::cell::RefCell;
 use std::rc::Rc;

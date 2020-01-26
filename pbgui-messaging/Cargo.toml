@@ -1,6 +1,6 @@
 [package]
 name = "pbgui-messaging"
-version = "0.12.0"
+version = "0.13.0"
 authors = ["jlgerber <jlgerber@gmail.com>"]
 edition = "2018"
 
@@ -30,6 +30,6 @@ pbgui-withs = {path="../pbgui-withs"}
 #pbgui-toolbar = {git="https://github.com/jlgerber/pbgui-toolbar", tag="v0.8.0"}
 pbgui-toolbar = {path="../pbgui-toolbar"}
 
+pbgui = {path = "../pbgui"}
 
-[dev-dependencies]
 

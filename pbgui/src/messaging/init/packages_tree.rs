@@ -1,6 +1,6 @@
-use crate::outgoing::opackages_tree::OPackagesTree;
-use crate::OMsg;
-use crate::Sender;
+use crate::messaging::outgoing::opackages_tree::OPackagesTree;
+use crate::messaging::OMsg;
+use crate::messaging::Sender;
 
 pub fn init(to_thread_sender: Sender<OMsg>) {
     to_thread_sender

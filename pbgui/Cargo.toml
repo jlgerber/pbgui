@@ -1,6 +1,6 @@
 [package]
 name = "pbgui"
-version = "0.35.0"
+version = "0.36.0"
 authors = ["jgerber <jlgerber@gmail.com>"]
 edition = "2018"
 
@@ -26,4 +26,4 @@ pbgui-withs = {path= "../pbgui-withs"}
 pbgui-toolbar = {path="../pbgui-toolbar"}
 pbgui-tree = {path="../pbgui-tree"}
 pbgui-vpin = {path="../pbgui-vpin"}
-pbgui-messaging = {path="../pbgui-messaging"}
+#pbgui-messaging = {path="../pbgui-messaging"}

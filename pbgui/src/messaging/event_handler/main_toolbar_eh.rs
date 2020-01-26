@@ -1,5 +1,5 @@
 use super::*;
-use crate::{event::main_toolbar::MainToolbar, incoming::imain_toolbar::IMainToolbar};
+use crate::messaging::{event::main_toolbar::MainToolbar, incoming::imain_toolbar::IMainToolbar};
 use pbgui_toolbar::toolbar::MainToolbar as MainToolbarUiElem;
 use std::rc::Rc;
 

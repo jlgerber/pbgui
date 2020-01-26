@@ -18,6 +18,10 @@ pub use package_withs::PackageWiths;
 
 pub mod main_toolbar;
 pub use main_toolbar::MainToolbar;
+
+pub mod main_win;
+pub use main_win::MainWin;
+
 /// ergonomics related trait. Convert a nested enum to an event
 pub trait ToEvent {
     fn to_event(self) -> Event;
@@ -29,6 +33,7 @@ pub enum Event {
     PackagesTree(PackagesTree),
     PackageWiths(PackageWiths),
     MainToolbar(MainToolbar),
+    MainWin(MainWin),
     Error,
 }
 
@@ -39,6 +44,7 @@ impl ToQString for Event {
             &Event::PackagesTree(packages_tree) => packages_tree.to_qstring(),
             &Event::PackageWiths(package_withs) => package_withs.to_qstring(),
             &Event::MainToolbar(main_toolbar) => main_toolbar.to_qstring(),
+            &Event::MainWin(main_win) => main_win.to_qstring(),
             &Event::Error => QString::from_std_str("Error"),
         }
     }
@@ -60,6 +66,9 @@ impl FromQString for Event {
             }
             test_str if test_str.starts_with("MainToolbar::") => {
                 Event::MainToolbar(MainToolbar::from_qstring(qs))
+            }
+            test_str if test_str.starts_with("MainWin::") => {
+                Event::MainWin(MainWin::from_qstring(qs))
             }
             "Error" => Event::Error,
             _ => panic!("Unable to convert to Event"),

@@ -1,9 +1,9 @@
 //! handle queries in a separate thread
-use crate::{
+use crate::messaging::{
     client_proxy::{ClientProxy, ConnectParams},
-    event::{MainToolbar, PackageWiths, PackagesTree},
-    incoming::{IMainToolbar, IPackageWiths, IPackagesTree},
-    outgoing::{OMainToolbar, OPackageWiths, OPackagesTree},
+    event::{MainToolbar, MainWin, PackageWiths, PackagesTree},
+    incoming::{IMainToolbar, IMainWin, IPackageWiths, IPackagesTree},
+    outgoing::{OMainToolbar, OMainWin, OPackageWiths, OPackagesTree},
     Event, IMsg, IVpinDialog, OMsg, OVpinDialog, ToEvent, ToIMsg, VpinDialog,
 };
 use crossbeam_channel::{Receiver, Sender};
@@ -28,6 +28,8 @@ use packages_tree::match_packages_tree;
 pub mod main_toolbar;
 use main_toolbar::match_main_toolbar;
 
+pub mod main_win;
+use main_win::match_main_win;
 /// Create the thread that handles requests for data from the ui. The thread
 /// receives messages via the `receiver`, matches against them, and sends data
 /// back to the UI via the `sender`. Finally, triggering an appropriate update
@@ -79,6 +81,9 @@ pub fn create(
                     }
                     OMsg::MainToolbar(msg) => {
                         match_main_toolbar(msg, &mut db, &mut conductor, &sender);
+                    }
+                    OMsg::MainWin(msg) => {
+                        match_main_win(msg, &mut db, &mut conductor, &sender);
                     }
                     OMsg::Quit => {
                         log::info!("From secondary thread. Quitting after receiving OMsg::Quit");

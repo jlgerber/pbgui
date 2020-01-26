@@ -27,6 +27,7 @@ pub enum IMsg {
     PackagesTree(IPackagesTree),
     PackageWiths(IPackageWiths),
     MainToolbar(IMainToolbar),
+    MainWin(IMainWin),
     Error(String),
 }
 
@@ -41,3 +42,6 @@ pub use ipackage_withs::IPackageWiths;
 
 pub mod imain_toolbar;
 pub use imain_toolbar::IMainToolbar;
+
+pub mod imain_win;
+pub use imain_win::IMainWin;

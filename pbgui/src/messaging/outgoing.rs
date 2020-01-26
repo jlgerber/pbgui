@@ -7,6 +7,9 @@ pub mod opackage_withs;
 pub use opackage_withs::OPackageWiths;
 pub mod omain_toolbar;
 pub use omain_toolbar::OMainToolbar;
+
+pub mod omain_win;
+pub use omain_win::OMainWin;
 ///
 pub trait ToOMsg {
     fn to_omsg(self) -> OMsg;
@@ -18,5 +21,6 @@ pub enum OMsg {
     PackagesTree(OPackagesTree),
     PackageWiths(OPackageWiths),
     MainToolbar(OMainToolbar),
+    MainWin(OMainWin),
     Quit,
 }

@@ -1,7 +1,7 @@
 use crossbeam_channel::{unbounded as channel, Receiver, Sender};
 use env_logger::Env;
-use pbgui_messaging::init;
-use pbgui_messaging::{
+use pbgui::messaging::init;
+use pbgui::messaging::{
     client_proxy::ConnectParams, event::Event, new_event_handler, thread as pbthread, IMsg, OMsg,
 };
 use pbgui_toolbar::toolbar;
