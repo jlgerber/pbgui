@@ -1,8 +1,12 @@
-//! Event is used to formalize the qt signal that triggers an
-//! update application side.
-//! The messaging to the application from the db is split between the Event and the IMsg.
-//! The Event signals that a given state has changed.
-//! THe IMsg provides the details of the state change.
+//! The Event is used to formalize the qt signal that triggers an update
+//! application side. The event is sent by the Conductor and received by
+//! the event_handler, in the primary thread. THe event_handler is responsible
+//! for updating the state of the ui in response to a particular Event.
+//!
+//! The Event itself functions as a routing key, allowing the `event_handler` to
+//! invoke a specific method depending upon the Event. It should be noted
+//! that the Event itself does not transport data from the secondary thread;
+//! this is the job of the IMsg, which is transported by an mpsc channel.
 use qt_core::QString;
 use qt_thread_conductor::conductor::RESET;
 use qt_thread_conductor::traits::*;

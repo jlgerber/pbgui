@@ -1,10 +1,12 @@
 use super::*;
+use packybara::db::find_all::changes::FindAllChangesRow;
 use packybara::db::find_all::versionpin_withs::FindAllWithsRow;
 use packybara::db::find_all::versionpins::FindAllVersionPinsRow;
 
 pub enum IMainWin {
     Vpins(Vec<FindAllVersionPinsRow>),
     WithPackages(Vec<FindAllWithsRow>),
+    Changes(Vec<FindAllChangesRow>),
 }
 
 impl ToIMsg for IMainWin {

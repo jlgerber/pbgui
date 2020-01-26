@@ -580,17 +580,24 @@ impl<'a> MainWindow<'a> {
                 frame.set_visible(state);
             }}),
 
-            revision_changed: SlotOfQItemSelectionQItemSelection::new(enclose! { (main)
-            move |selected: QRef<QItemSelection>, _deselected: QRef<QItemSelection>| {
-                let ind = selected.indexes();
-                if ind.count_0a() > 0 {
-                    let txid = ind.at(COL_REV_TXID);
-                    update_changes_table(txid.row(), main.revisions_table(), main.revision_changes_table());
-                } else {
-                    main.revision_changes_table().clear_contents();
-                    main.revision_changes_table().set_row_count(0);
-                }
-            }}),
+            revision_changed: SlotOfQItemSelectionQItemSelection::new(
+                enclose! { (main, to_thread_sender)
+                move |selected: QRef<QItemSelection>, _deselected: QRef<QItemSelection>| {
+                    let ind = selected.indexes();
+                    if ind.count_0a() > 0 {
+                        let txid = ind.at(COL_REV_TXID);
+                        update_changes_table(
+                            txid.row(),
+                            main.revisions_table(),
+                            main.revision_changes_table(),
+                            to_thread_sender.clone())
+                        ;
+                    } else {
+                        main.revision_changes_table().clear_contents();
+                        main.revision_changes_table().set_row_count(0);
+                    }
+                }},
+            ),
 
             distribution_changed: SlotOfQItemSelectionQItemSelection::new(
                 enclose! { (main, to_thread_sender)

@@ -1,3 +1,15 @@
+//! The event handler is responsible for updating the ui in response to events
+//! emitted by the Conductor. The event handler runs in the main thread. It
+//! is implementad as a qt Slot and is connected to the Conductor's signal.
+//!
+//!  The actual data consumed by the event handler is provided via a crossbean
+//! channel, which has a message of type IMsg.
+//!
+//! Responsibility for handling events is delegated by the event handler to
+//! a specific handler, depending upon the Event. This provides an affordance
+//! for scaling the solution, making maintenance reasonably straight forward.
+//!
+//! The specific event handlers may be found in the event_handler subdirectory.
 use crate::main_window::InnerMainWindow;
 use crate::messaging::{prelude::*, Event, IMsg, IVpinDialog, VpinDialog};
 use crossbeam_channel::Receiver;

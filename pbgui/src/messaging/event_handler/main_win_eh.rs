@@ -3,6 +3,8 @@ use crate::main_window::InnerMainWindow;
 use crate::messaging::{event::main_win::MainWin, incoming::imain_win::IMainWin};
 use crate::traits::RowSetterTrait;
 //use std::cell::RefCell;
+use crate::constants::*;
+use crate::utility::{update_row, RowType};
 use std::rc::Rc;
 
 pub unsafe fn match_main_win<'a>(
@@ -30,7 +32,6 @@ pub unsafe fn match_main_win<'a>(
                 log::error!("PackagesTree::GetPackages IMsg does not match event state");
             }
         }
-        //TODO: finish
         MainWin::GetWithsForVpin => {
             if let Ok(IMsg::MainWin(IMainWin::WithPackages(withs))) = receiver.recv() {
                 let withs = withs.iter().map(|x| x.with.as_str()).collect();
@@ -38,6 +39,83 @@ pub unsafe fn match_main_win<'a>(
                 withs_list.borrow_mut().set_items(withs);
             } else {
                 log::error!("PackagesTree::GetPackages IMsg does not match event state");
+            }
+        }
+        // TODO
+        MainWin::GetTransactionChanges => {
+            if let Ok(IMsg::MainWin(IMainWin::Changes(changes))) = receiver.recv() {
+                //let chan_ref = sites.iter().map(|x| x.as_str()).collect::<Vec<_>>();
+                // toolbar.set_site_items(sites_ref);
+                let mut changes_table_ptr = main_win.revision_changes_table();
+                let mut cnt = 0;
+                let r_len = changes.len() as i32;
+                changes_table_ptr.set_row_count(r_len);
+                for result in changes {
+                    update_row(
+                        RowType::Int(result.id as i32),
+                        &mut changes_table_ptr,
+                        cnt,
+                        COL_CHNG_ID,
+                    );
+                    update_row(
+                        RowType::Int(result.transaction_id as i32),
+                        &mut changes_table_ptr,
+                        cnt,
+                        COL_CHNG_TXID,
+                    );
+                    update_row(
+                        RowType::Str(result.action.to_string().as_str()),
+                        &mut changes_table_ptr,
+                        cnt,
+                        COL_CHNG_ACTION,
+                    );
+                    update_row(
+                        RowType::Str(result.level.to_string().as_str()),
+                        &mut changes_table_ptr,
+                        cnt,
+                        COL_CHNG_LEVEL,
+                    );
+                    update_row(
+                        RowType::Str(result.role.to_string().as_str()),
+                        &mut changes_table_ptr,
+                        cnt,
+                        COL_CHNG_ROLE,
+                    );
+                    update_row(
+                        RowType::Str(&result.platform.to_string()),
+                        &mut changes_table_ptr,
+                        cnt,
+                        COL_CHNG_PLATFORM,
+                    );
+                    update_row(
+                        RowType::Str(&result.site.to_string()),
+                        &mut changes_table_ptr,
+                        cnt,
+                        COL_CHNG_SITE,
+                    );
+                    update_row(
+                        RowType::Str(&result.package.to_string()),
+                        &mut changes_table_ptr,
+                        cnt,
+                        COL_CHNG_PKG,
+                    );
+                    update_row(
+                        RowType::Str(&result.old.version()),
+                        &mut changes_table_ptr,
+                        cnt,
+                        COL_CHNG_OLD,
+                    );
+                    update_row(
+                        RowType::Str(&result.new.version()),
+                        &mut changes_table_ptr,
+                        cnt,
+                        COL_CHNG_NEW,
+                    );
+
+                    cnt += 1;
+                }
+            } else {
+                log::error!("MainToolbar::GetSites IMsg does not match event state");
             }
         }
     }

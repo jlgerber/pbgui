@@ -4,6 +4,7 @@ use super::*;
 pub enum MainWin {
     GetVpins,
     GetWithsForVpin,
+    GetTransactionChanges,
 }
 
 impl ToEvent for MainWin {
@@ -17,6 +18,9 @@ impl ToQString for MainWin {
         match &self {
             &MainWin::GetVpins => QString::from_std_str("MainWin::GetVpins"),
             &MainWin::GetWithsForVpin => QString::from_std_str("MainWin::GetWithsForVpin"),
+            &MainWin::GetTransactionChanges => {
+                QString::from_std_str("MainWin::GetTransactionChanges")
+            }
         }
     }
 }
@@ -26,6 +30,7 @@ impl FromQString for MainWin {
         match qs.to_std_string().as_str() {
             "MainWin::GetVpins" => MainWin::GetVpins,
             "MainWin::GetWithsForVpin" => MainWin::GetWithsForVpin,
+            "MainWin::GetTransactionChanges" => MainWin::GetTransactionChanges,
             _ => panic!("Unable to convert to Event"),
         }
     }

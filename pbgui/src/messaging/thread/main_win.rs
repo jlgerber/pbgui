@@ -73,5 +73,25 @@ pub(crate) fn match_main_win(
                 .expect("unable to send version pins");
             conductor.signal(MainWin::GetWithsForVpin.to_event());
         }
+        OMainWin::GetTransactionChanges { tx_id } => {
+            let results = db.find_all_changes().transaction_id(tx_id as i64).query();
+            let changes = match results {
+                Ok(changes) => changes,
+                Err(err) => {
+                    sender
+                        .send(IMsg::Error(format!(
+                            "Unable to get with packages from db: {}",
+                            err
+                        )))
+                        .expect("unable to send error msg");
+                    conductor.signal(Event::Error);
+                    return;
+                }
+            };
+            sender
+                .send(IMainWin::Changes(changes).to_imsg())
+                .expect("unable to send version pins");
+            conductor.signal(MainWin::GetTransactionChanges.to_event());
+        }
     }
 }

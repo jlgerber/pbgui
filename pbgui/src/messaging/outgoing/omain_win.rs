@@ -13,6 +13,9 @@ pub enum OMainWin {
     GetWithsForVpin {
         vpin_id: i32,
     },
+    GetTransactionChanges {
+        tx_id: i32,
+    },
 }
 
 impl ToOMsg for OMainWin {
