@@ -43,13 +43,13 @@ pub struct InnerMainWindow<'a> {
     package_withs_list: Rc<RefCell<WithsList<'a>>>,
     vpin_table: MutPtr<QTableWidget>,
     vpin_table_splitter: MutPtr<QSplitter>,
-    pinchanges_list: MutPtr<QTableWidget>,
+    vpin_requested_changes_table: MutPtr<QTableWidget>,
     pinchanges_cache: Rc<PinChangesCache>,
     bottom_stacked_widget: MutPtr<QStackedWidget>,
     bottom_ctrls_stacked_widget: MutPtr<QStackedWidget>,
     save_button: MutPtr<QPushButton>,
     pin_changes_button: MutPtr<QPushButton>,
-    changes_table: MutPtr<QTableWidget>,
+    revision_changes_table: MutPtr<QTableWidget>,
     history_button: MutPtr<QPushButton>,
     revisions_table: MutPtr<QTableWidget>,
     dist_popup_menu: MutPtr<QMenu>,
@@ -149,14 +149,14 @@ impl<'a> InnerMainWindow<'a> {
                 vpin_table: vpin_tablewidget_ptr,
                 vpin_table_splitter,
                 save_button: save_button,
-                pinchanges_list: pinchanges_ptr,
+                vpin_requested_changes_table: pinchanges_ptr,
                 pinchanges_cache,
                 bottom_stacked_widget: stacked_ptr,
                 bottom_ctrls_stacked_widget: controls_ptr,
                 dist_popup_menu: dist_popup_menu_ptr,
                 dist_popup_action: choose_dist_action,
                 pin_changes_button: pinchanges_button_ptr,
-                changes_table: changes_table_ptr,
+                revision_changes_table: changes_table_ptr,
                 history_button: history_button_ptr,
                 revisions_table: revisions_ptr,
                 left_toolbar_actions: left_toolbar_actions,
@@ -300,15 +300,16 @@ impl<'a> InnerMainWindow<'a> {
         self.vpin_table_splitter
     }
 
-    /// Returns a mutable pointer to the pinchanges list tablewidet
+    /// Returns a mutable pointer to the table of requested vpin changes. These must be
+    /// finalized by hitting the "save" button in order to be persisted to the database.
     ///
     /// # Arguments
     /// * None
     ///
     /// # Returns
     /// * MutPtr<QTableWidget>
-    pub unsafe fn pinchanges_list(&self) -> MutPtr<QTableWidget> {
-        self.pinchanges_list
+    pub unsafe fn vpin_requested_changes_table(&self) -> MutPtr<QTableWidget> {
+        self.vpin_requested_changes_table
     }
 
     /// Returns a mutable pointer to the pinchanges pushbutton
@@ -390,15 +391,16 @@ impl<'a> InnerMainWindow<'a> {
         &self.left_toolbar_actions
     }
 
-    /// Returns a mutable pointer to the changes tablewidget
+    /// Returns a mutable pointer to the changes tablewidget. A revsion, may
+    /// have one or more associated changes. These are they.
     ///
     /// # Arguments
     /// * None
     ///
     /// # Returns
     /// * MutPtr<QTableWidget>
-    pub unsafe fn changes_table(&self) -> MutPtr<QTableWidget> {
-        self.changes_table
+    pub unsafe fn revision_changes_table(&self) -> MutPtr<QTableWidget> {
+        self.revision_changes_table
     }
 
     /// Returns a mutable pointer to the distribution popup qmenu
@@ -508,7 +510,7 @@ impl<'a> MainWindow<'a> {
             }}),
 
             save_clicked: Slot::new(enclose! { (main) move || {
-                let mut pinchanges_ptr = main.changes_table();
+                let mut pinchanges_ptr = main.vpin_requested_changes_table();
                 save_versionpin_changes(
                     main.main_widget(),
                     &mut pinchanges_ptr,
@@ -531,7 +533,7 @@ impl<'a> MainWindow<'a> {
                     current_row,
                     vpin_tablewidget_ptr,
                     main.main_widget(),
-                    main.pinchanges_list(),
+                    main.vpin_requested_changes_table(),
                     main.cache(),
                 );
             }}),
@@ -583,10 +585,10 @@ impl<'a> MainWindow<'a> {
                 let ind = selected.indexes();
                 if ind.count_0a() > 0 {
                     let txid = ind.at(COL_REV_TXID);
-                    update_changes_table(txid.row(), main.revisions_table(), main.changes_table());
+                    update_changes_table(txid.row(), main.revisions_table(), main.revision_changes_table());
                 } else {
-                    main.changes_table().clear_contents();
-                    main.changes_table().set_row_count(0);
+                    main.revision_changes_table().clear_contents();
+                    main.revision_changes_table().set_row_count(0);
                 }
             }}),
 
@@ -607,7 +609,7 @@ impl<'a> MainWindow<'a> {
                 }
             }}),
             save_withpackages: Slot::new(enclose! { (main) move || {
-                let mut pinchanges_ptr = main.pinchanges_list();
+                let mut pinchanges_ptr = main.vpin_requested_changes_table();
                 store_withpackage_changes::store_withpackage_changes(
                     main.package_withs_list(),
                     main.vpin_table(),
