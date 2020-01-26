@@ -117,9 +117,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let app_update = new_event_handler(
             dialog.clone(),
             pbgui_root.main_win(),
-            pbgui_root.main_win().tree(),
-            pbgui_root.main_win().package_withs_list(),
-            pbgui_root.main_win().main_toolbar(),
+            //pbgui_root.main_win().tree(),
+            //pbgui_root.main_win().package_withs_list(),
+            //pbgui_root.main_win().main_toolbar(),
             receiver,
         );
 
