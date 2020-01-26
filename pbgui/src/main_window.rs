@@ -557,11 +557,11 @@ impl<'a> MainWindow<'a> {
                 main.bottom_ctrls_stacked_widget().set_current_index(0);
             }}),
 
-            select_history: Slot::new(enclose! { (main) move || {
+            select_history: Slot::new(enclose! { (main, to_thread_sender) move || {
                 let mut revisions_ptr = main.revisions_table();
                 let mut stacked_ptr = main.bottom_stacked_widget();
                 let mut controls_ptr = main.bottom_ctrls_stacked_widget();
-                select_history(&mut revisions_ptr, &mut stacked_ptr);
+                select_history(&mut revisions_ptr, &mut stacked_ptr, to_thread_sender.clone());
                 controls_ptr.set_current_index(1);
             }}),
 

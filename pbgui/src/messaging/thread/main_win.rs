@@ -1,5 +1,7 @@
 use super::*;
 use packybara::LtreeSearchMode;
+use packybara::OrderDirection;
+use packybara::OrderRevisionBy;
 use std::str::FromStr;
 
 pub(crate) fn match_main_win(
@@ -92,6 +94,31 @@ pub(crate) fn match_main_win(
                 .send(IMainWin::Changes(changes).to_imsg())
                 .expect("unable to send version pins");
             conductor.signal(MainWin::GetTransactionChanges.to_event());
+        }
+        OMainWin::GetHistoryRevisions => {
+            let results = db
+                .find_all_revisions()
+                //transaction_id(tx_id as i64)
+                .order_by(vec![OrderRevisionBy::Id])
+                .order_direction(OrderDirection::Desc)
+                .query();
+            let revisions = match results {
+                Ok(revisions) => revisions,
+                Err(err) => {
+                    sender
+                        .send(IMsg::Error(format!(
+                            "Unable to get with revisions from db: {}",
+                            err
+                        )))
+                        .expect("unable to send error msg");
+                    conductor.signal(Event::Error);
+                    return;
+                }
+            };
+            sender
+                .send(IMainWin::HistoryRevisions(revisions).to_imsg())
+                .expect("unable to send revisions");
+            conductor.signal(MainWin::GetHistoryRevisions.to_event());
         }
     }
 }

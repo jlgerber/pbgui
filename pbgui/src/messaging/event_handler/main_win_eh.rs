@@ -1,11 +1,15 @@
 use super::*;
-use crate::main_window::InnerMainWindow;
-use crate::messaging::{event::main_win::MainWin, incoming::imain_win::IMainWin};
-use crate::traits::RowSetterTrait;
-//use std::cell::RefCell;
-use crate::constants::*;
-use crate::utility::{update_row, RowType};
+use crate::{
+    constants::*,
+    main_window::InnerMainWindow,
+    messaging::{event::main_win::MainWin, incoming::imain_win::IMainWin},
+    traits::RowSetterTrait,
+    utility::{update_row, RowType},
+};
 use std::rc::Rc;
+
+use qt_core::{QString, QVariant};
+use qt_widgets::QTableWidgetItem;
 
 pub unsafe fn match_main_win<'a>(
     event: MainWin,
@@ -41,11 +45,8 @@ pub unsafe fn match_main_win<'a>(
                 log::error!("PackagesTree::GetPackages IMsg does not match event state");
             }
         }
-        // TODO
         MainWin::GetTransactionChanges => {
             if let Ok(IMsg::MainWin(IMainWin::Changes(changes))) = receiver.recv() {
-                //let chan_ref = sites.iter().map(|x| x.as_str()).collect::<Vec<_>>();
-                // toolbar.set_site_items(sites_ref);
                 let mut changes_table_ptr = main_win.revision_changes_table();
                 let mut cnt = 0;
                 let r_len = changes.len() as i32;
@@ -115,7 +116,44 @@ pub unsafe fn match_main_win<'a>(
                     cnt += 1;
                 }
             } else {
-                log::error!("MainToolbar::GetSites IMsg does not match event state");
+                log::error!("MainToolbar::GetTransactionChanges IMsg does not match event state");
+            }
+        }
+        MainWin::GetHistoryRevisions => {
+            if let Ok(IMsg::MainWin(IMainWin::HistoryRevisions(revisions))) = receiver.recv() {
+                let mut revisions_ptr = main_win.revisions_table();
+                let r_len = revisions.len() as i32;
+                revisions_ptr.set_row_count(r_len);
+                let mut cnt = 0;
+                for revision in revisions {
+                    let mut revisions_table_item = QTableWidgetItem::new();
+                    let variant = QVariant::from_int(revision.transaction_id as i32);
+                    revisions_table_item.set_data(
+                        2, // EditRole
+                        variant.as_ref(),
+                    );
+                    revisions_ptr.set_item(cnt, COL_REV_TXID, revisions_table_item.into_ptr());
+                    // Author
+                    let mut revisions_table_item = QTableWidgetItem::new();
+                    revisions_table_item
+                        .set_text(&QString::from_std_str(revision.author.to_string().as_str()));
+                    revisions_ptr.set_item(cnt, COL_REV_AUTHOR, revisions_table_item.into_ptr());
+                    // Datetime
+                    let mut revisions_table_item = QTableWidgetItem::new();
+                    revisions_table_item.set_text(&QString::from_std_str(
+                        revision.datetime.format("%F %r").to_string().as_str(),
+                    ));
+                    revisions_ptr.set_item(cnt, COL_REV_DATETIME, revisions_table_item.into_ptr());
+                    // comment
+                    let mut revisions_table_item = QTableWidgetItem::new();
+                    revisions_table_item.set_text(&QString::from_std_str(
+                        revision.comment.to_string().as_str(),
+                    ));
+                    revisions_ptr.set_item(cnt, COL_REV_COMMENT, revisions_table_item.into_ptr());
+                    cnt += 1;
+                }
+            } else {
+                log::error!("PackagesTree::GetHistoryRevisions IMsg does not match event state");
             }
         }
     }

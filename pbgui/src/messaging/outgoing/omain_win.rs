@@ -16,6 +16,7 @@ pub enum OMainWin {
     GetTransactionChanges {
         tx_id: i32,
     },
+    GetHistoryRevisions,
 }
 
 impl ToOMsg for OMainWin {
