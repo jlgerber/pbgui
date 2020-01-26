@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 61.2 (89653) - https://sketch.com -->
+    <title>package_sm</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="12.9″-iPad-Pro" transform="translate(-92.000000, -1136.000000)">
+            <g id="package_sm" transform="translate(92.000000, 1136.000000)">
+                <path d="M0,1.66347948 L2.44,2.21247948 L2.44030366,7.02832031 L4.31746032,7.65442918 L4.317,2.63547948 L7.88405797,3.43899287 L7.88405797,15.9918377 L0,10.9384177 L0,1.66347948 Z" id="Combined-Shape" fill="#FFFFFF"></path>
+                <polygon id="Rectangle" fill="#6A6A6A" points="8.11594203 3.43899287 16 1.66347948 16 10.9384177 8.11594203 15.9918377"></polygon>
+                <polygon id="top_back" fill="#F1F1F1" points="0 1.37195365 8.19808651 0.230643657 10.8985507 0.614713548 2.70305334 1.90228545"></polygon>
+                <polygon id="top_front" fill="#F2F2F2" points="4.4057971 2.37714031 12.8726725 0.947061567 16 1.41662012 7.88322685 3.0963153"></polygon>
+            </g>
+        </g>
+    </g>
+</svg>

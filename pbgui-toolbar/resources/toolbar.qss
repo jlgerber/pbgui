@@ -1,0 +1,155 @@
+
+#ButtonFrame {
+    margin: 0px;
+    border: 1px solid rgb(120,120,120);
+    border-right: none;
+    background: rgb(60,60,60);
+}
+
+QPushButton#QueryButton {
+    padding: 2px;
+    margin-right: 8px;
+    margin-left: 8px;
+    background: transparent; 
+    width: 16px;
+    height: 16px;
+    image: url(:/images/magnify_us_med.png);
+}
+
+QPushButton#QueryButton::hover {
+    image: url(:/images/magnify.png);
+}
+
+QPushButton#QueryButton:pressed {
+    image: url(:/images/magnify.png);
+    border-radius: 3px;
+    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+    stop: 0 #006DCC, stop: .6 #006DCC,stop: 1.0 #0033BF);
+}
+
+QFrame > QLabel {
+    margin-right: 10px;
+}
+
+#ComboFrame {
+    border: 1px solid rgb(120,120,120);
+    border-left: none;
+    margin: 0px;
+    padding: 0px;
+    padding-left: 10px;
+    padding-right: 10px;
+    background: rgb(60,60,60);
+}
+
+#FirstComboFrame {
+    margin: 0px;
+    border: 1px solid rgb(120,120,120);
+    padding: 0px;
+    padding-left: 10px;
+     padding-right: 10px;
+    background: rgb(60,60,60);
+}
+
+#FirstComboFrame > QLabel, #ComboFrame > QLabel {
+    /*temp while figuring out the centering issue */
+    margin-top: 3px;
+}
+QComboBox#RoleCB, 
+QComboBox#LevelCB, 
+QComboBox#PlatformCB, 
+QComboBox#SiteCB, 
+QComboBox#DirCB {
+    border: none; 
+    /* height: 20px; */
+/* temp */
+    margin-top:3px;
+
+    background: rgb(60,60,60);
+}
+
+QComboBox#PlatformCB, 
+QComboBox#SiteCB {
+    min-width: 7em;
+}
+
+QComboBox#RoleCB {
+    min-width: 9em;
+}
+
+QComboBox#LevelCB {
+    min-width:6em;
+}
+
+QComboBox#DirCB {
+   min-width: 7em; 
+}
+
+QComboBox:on { 
+    padding-top: 3px;
+    padding-left: 4px;
+}
+
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    border-left-width: none; 
+    border-top-right-radius: 3px; 
+    border-bottom-right-radius: 3px;
+}
+
+QComboBox#RoleCB::down-arrow,
+QComboBox#LevelCB::down-arrow,
+QComboBox#PlatformCB::down-arrow,
+QComboBox#SiteCB::down-arrow,
+QComboBox#DirCB::down-arrow 
+{
+    color: darkgray;
+    image: url(:/images/dropdown.png);
+    width: 10px;
+    height: 10px;
+    left: 4px;
+}
+
+QComboBox QAbstractItemView {
+    min-width: 8em;
+}
+
+QPushButton#LevelIcon {
+    background: transparent;
+    image: url(:images/volume.png);
+    margin-right:5px;
+}
+
+QPushButton#RoleIcon {
+    background: transparent;
+    image: url(:images/facehappy.png);
+    margin-right:5px;
+}
+
+QPushButton#PlatformIcon {
+    background: transparent;
+    image: url(:images/computer2.png);
+    margin-right:5px;
+}
+
+QPushButton#SiteIcon {
+    background: transparent;
+    image: url(:images/earth.png);
+    margin-right:5px;
+}
+
+QFrame#PackageLineEditFrame {
+    border: 1px solid rgb(120,120,120);
+    background: rgb(60,60,60);
+}
+
+QLineEdit {
+    border-radius: 10px;
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    border: 1px solid rgb(80,80,80);
+    margin-left:10px;
+    margin-right:10px;
+}

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="48px" height="48px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 61.2 (89653) - https://sketch.com -->
+    <title>package</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="12.9″-iPad-Pro" transform="translate(-37.000000, -1069.000000)">
+            <g id="package" transform="translate(37.000000, 1069.034180)">
+                <path d="M0,4.99043843 L7.32,6.63843843 L7.32091097,15.8278052 L12.952381,17.8103651 L12.952,7.90743843 L23.6521739,10.3169786 L23.6521739,47.9755131 L0,32.8152531 L0,4.99043843 Z" id="Combined-Shape" fill="#FFFFFF"></path>
+                <path d="M25.8478261,11.516741 L25.8478261,45.2323819 L46.5,31.9950225 L46.5,6.86580978 L25.8478261,11.516741 Z" id="Rectangle" stroke="#FFFFFF" stroke-width="3"></path>
+                <polygon id="top_back" fill="#FFFFFF" points="0 4.11586095 24.5942595 0.69193097 32.6956522 1.84414064 8.10916003 5.70685634"></polygon>
+                <polygon id="top_front" fill="#FFFFFF" points="13.2173913 7.13142094 38.6180176 2.8411847 48 4.24986035 23.6496806 9.2889459"></polygon>
+            </g>
+        </g>
+    </g>
+</svg>

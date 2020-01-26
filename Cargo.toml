@@ -2,4 +2,6 @@
 
 members = [
     "pbgui",
+    "pbgui-tree",
+    "pbgui-messaging"
 ]

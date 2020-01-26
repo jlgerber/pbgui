@@ -1,0 +1,8 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+    <file>images/dropdown.png</file>
+    <file>images/radio_btn_sel.svg</file>
+    <file>images/radio_btn.svg</file>
+
+</qresource>
+</RCC>
