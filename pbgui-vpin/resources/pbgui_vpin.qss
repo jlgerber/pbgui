@@ -1,0 +1,32 @@
+
+
+QLabel#DistributionLabel {
+    margin-top: 30px;
+    margin-bottom: 30px;
+    font-size: 24px;
+}
+
+QGroupBox#SelectRolesGroupBox{
+    padding: 10px;
+    margin-top: 10px;
+}
+
+QGroupBox#SelectLevelsGroupBox {
+    margin-top: 6px;
+}
+
+QLabel#SelectSiteLabel {
+    margin-top: 20px;
+}
+QGroupBox#SelectSiteGroupBox {
+    margin-top: 6px;
+}
+QLabel#SelectLevelsLabel {
+    padding:2px;
+}
+QLineEdit#RolesFilterLineEdit {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    margin-left: 10px;
+}

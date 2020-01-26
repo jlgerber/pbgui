@@ -3,5 +3,7 @@
 members = [
     "pbgui",
     "pbgui-tree",
+    "pbgui-toolbar",
+    "pbgui-withs",
     "pbgui-messaging"
 ]

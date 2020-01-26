@@ -1,0 +1,16 @@
+[package]
+name = "pbgui-vpin"
+version = "0.8.0"
+authors = ["jlgerber <jlgerber@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+rustqt-utils = {git = "https://github.com/jlgerber/rustqt-utils", tag="v0.6.0"}
+qt_core = "~0.4.1"
+qt_gui = "~0.4.1"
+qt_widgets = "~0.4.1"
+qt_ui_tools = "~0.4.1"
+
+[dev.dependencies]
+# packybara = {git= "https://github.com/jlgerber/packybara", tag="v0.32.0"}
+# qt_thread_conductor = {git= "https://github.com/jlgerber/rust-qt-conductor", tag="v0.3.0"}
