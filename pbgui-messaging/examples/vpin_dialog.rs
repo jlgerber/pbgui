@@ -28,7 +28,7 @@ fn main() {
 
     QApplication::init(|app| unsafe {
         let mut main = QMainWindow::new_0a();
-        let mut main_ptr = main.as_mut_ptr();
+        let main_ptr = main.as_mut_ptr();
         let mut myframe = QFrame::new_0a();
         let mut myframe_ptr = myframe.as_mut_ptr();
 
