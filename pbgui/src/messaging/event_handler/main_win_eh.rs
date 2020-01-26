@@ -30,5 +30,15 @@ pub unsafe fn match_main_win<'a>(
                 log::error!("PackagesTree::GetPackages IMsg does not match event state");
             }
         }
+        //TODO: finish
+        MainWin::GetWithsForVpin => {
+            if let Ok(IMsg::MainWin(IMainWin::WithPackages(withs))) = receiver.recv() {
+                let withs = withs.iter().map(|x| x.with.as_str()).collect();
+                let withs_list = main_win.package_withs_list();
+                withs_list.borrow_mut().set_items(withs);
+            } else {
+                log::error!("PackagesTree::GetPackages IMsg does not match event state");
+            }
+        }
     }
 }

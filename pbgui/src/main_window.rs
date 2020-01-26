@@ -502,7 +502,7 @@ impl<'a> MainWindow<'a> {
             //
             // slots
             //
-            query_button_clicked: Slot::new(enclose! {(main) move || {
+            query_button_clicked: Slot::new(enclose! {(main, to_thread_sender) move || {
                 update_vpin_table(
                     main.main_toolbar(),
                     to_thread_sender.clone(),
@@ -592,22 +592,25 @@ impl<'a> MainWindow<'a> {
                 }
             }}),
 
-            distribution_changed: SlotOfQItemSelectionQItemSelection::new(enclose! { (main)
-            move |selected: QRef<QItemSelection>, _deselected: QRef<QItemSelection>| {
-                let ind = selected.indexes();
-                if ind.count_0a() > 0 {
-                    let mut vpin_tablewidget_ptr = main.vpin_table();
-                    let txid = ind.at(COL_REV_TXID);
-                    update_withpackages(
-                        txid.row(),
-                        &mut vpin_tablewidget_ptr,
-                        main.package_withs_list(),
-                        main.cache(),
-                    );
-                } else {
-                    main.package_withs_list().borrow().clear()
-                }
-            }}),
+            distribution_changed: SlotOfQItemSelectionQItemSelection::new(
+                enclose! { (main, to_thread_sender)
+                move |selected: QRef<QItemSelection>, _deselected: QRef<QItemSelection>| {
+                    let ind = selected.indexes();
+                    if ind.count_0a() > 0 {
+                        let mut vpin_tablewidget_ptr = main.vpin_table();
+                        let txid = ind.at(COL_REV_TXID);
+                        update_withpackages(
+                            txid.row(),
+                            &mut vpin_tablewidget_ptr,
+                            main.package_withs_list(),
+                            main.cache(),
+                            to_thread_sender.clone()
+                        );
+                    } else {
+                        main.package_withs_list().borrow().clear()
+                    }
+                }},
+            ),
             save_withpackages: Slot::new(enclose! { (main) move || {
                 let mut pinchanges_ptr = main.vpin_requested_changes_table();
                 store_withpackage_changes::store_withpackage_changes(

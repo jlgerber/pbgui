@@ -53,5 +53,25 @@ pub(crate) fn match_main_win(
                 .expect("unable to send version pins");
             conductor.signal(MainWin::GetVpins.to_event());
         }
+        OMainWin::GetWithsForVpin { vpin_id } => {
+            let results = db.find_all_versionpin_withs(vpin_id).query();
+            let withs = match results {
+                Ok(withs) => withs,
+                Err(err) => {
+                    sender
+                        .send(IMsg::Error(format!(
+                            "Unable to get with packages from db: {}",
+                            err
+                        )))
+                        .expect("unable to send error msg");
+                    conductor.signal(Event::Error);
+                    return;
+                }
+            };
+            sender
+                .send(IMainWin::WithPackages(withs).to_imsg())
+                .expect("unable to send version pins");
+            conductor.signal(MainWin::GetWithsForVpin.to_event());
+        }
     }
 }

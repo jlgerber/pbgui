@@ -10,6 +10,9 @@ pub enum OMainWin {
         dir: String,
         package: Option<String>,
     },
+    GetWithsForVpin {
+        vpin_id: i32,
+    },
 }
 
 impl ToOMsg for OMainWin {
