@@ -26,4 +26,3 @@ pbgui-withs = {path= "../pbgui-withs"}
 pbgui-toolbar = {path="../pbgui-toolbar"}
 pbgui-tree = {path="../pbgui-tree"}
 pbgui-vpin = {path="../pbgui-vpin"}
-#pbgui-messaging = {path="../pbgui-messaging"}
