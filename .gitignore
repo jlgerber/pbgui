@@ -3,3 +3,4 @@
 *.rcc
 .idea
 **/*.rcc
+.vscode
