@@ -50,7 +50,7 @@ pub fn save_versionpin_changes(
                 user,
                 comments,
             }))
-            .expect("unable to get history revisions");
+            .expect("unable to save versionpin changes");
     }
 }
 

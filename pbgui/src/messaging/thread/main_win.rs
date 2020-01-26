@@ -176,5 +176,29 @@ pub(crate) fn match_main_win(
                 .expect("unable to send changes");
             conductor.signal(MainWin::SaveVpinChanges.to_event());
         }
+
+        OMainWin::ChooseDistribution {
+            package,
+            version,
+            row,
+        } => {
+            let results = db
+                .find_all_distributions()
+                .package(package.as_str())
+                .query()
+                .expect("unable to unwrap query of distributions");
+            sender
+                .send(
+                    IMainWin::ChooseDistribution {
+                        distributions: results,
+                        package,
+                        version,
+                        row,
+                    }
+                    .to_imsg(),
+                )
+                .expect("unable to send changes");
+            conductor.signal(MainWin::ChooseDistribution.to_event());
+        }
     }
 }

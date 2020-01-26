@@ -517,7 +517,7 @@ impl<'a> MainWindow<'a> {
                 );
             } }),
 
-            choose_distribution_triggered: Slot::new(enclose! { (main) move || {
+            choose_distribution_triggered: Slot::new(enclose! { (main, to_thread_sender) move || {
                 let vpin_tablewidget_ptr = main.vpin_table();
                 if vpin_tablewidget_ptr.is_null() {
                     log::error!("Error: attempted to access null pointer in choose_distribution_tribbered");
@@ -532,7 +532,7 @@ impl<'a> MainWindow<'a> {
                     vpin_tablewidget_ptr,
                     main.main_widget(),
                     main.vpin_requested_changes_table(),
-                    main.cache(),
+                    to_thread_sender.clone()
                 );
             }}),
 

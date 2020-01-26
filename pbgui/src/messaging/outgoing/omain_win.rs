@@ -23,6 +23,11 @@ pub enum OMainWin {
         user: String,
         comments: String,
     },
+    ChooseDistribution {
+        package: String,
+        version: String,
+        row: i32,
+    },
 }
 
 impl ToOMsg for OMainWin {

@@ -7,6 +7,7 @@ pub enum MainWin {
     GetTransactionChanges,
     GetHistoryRevisions,
     SaveVpinChanges,
+    ChooseDistribution,
 }
 
 impl ToEvent for MainWin {
@@ -25,6 +26,7 @@ impl ToQString for MainWin {
             }
             &MainWin::GetHistoryRevisions => QString::from_std_str("MainWin::GetHistoryRevisions"),
             &MainWin::SaveVpinChanges => QString::from_std_str("MainWin::SaveVpinChanges"),
+            &MainWin::ChooseDistribution => QString::from_std_str("MainWin::ChooseDistribution"),
         }
     }
 }
@@ -37,6 +39,7 @@ impl FromQString for MainWin {
             "MainWin::GetTransactionChanges" => MainWin::GetTransactionChanges,
             "MainWin::GetHistoryRevisions" => MainWin::GetHistoryRevisions,
             "MainWin::SaveVpinChanges" => MainWin::SaveVpinChanges,
+            "MainWin::ChooseDistribution" => MainWin::ChooseDistribution,
             _ => panic!("Unable to convert to Event"),
         }
     }
