@@ -248,12 +248,13 @@ mod tests {
             new_dist_id: 2,
         };
         cache.cache_change(change2);
-        let keys = cache
+        let mut keys = cache
             .changes
             .borrow()
             .keys()
             .map(|x| x.clone())
             .collect::<Vec<i32>>();
+        keys.sort();
         assert_eq!(keys, vec![0, 1]);
     }
     #[test]
