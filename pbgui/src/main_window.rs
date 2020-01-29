@@ -741,6 +741,11 @@ impl<'a> MainWindow<'a> {
             .clone()
             .clicked()
             .connect(&main_win.save_withpackages);
+
+        // set initial state of with button to on
+        let mut button = main.left_toolbar_actions().view_withs;
+        button.toggle();
+
         main_win
     }
 
