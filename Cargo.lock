@@ -798,7 +798,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "pbgui"
-version = "0.44.0"
+version = "0.45.0"
 dependencies = [
  "crossbeam 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "crossbeam-channel 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -807,7 +807,7 @@ dependencies = [
  "log 0.4.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "num_enum 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "packybara 0.32.0 (git+https://github.com/jlgerber/packybara?tag=v0.32.0)",
- "pbgui-logger 0.1.0",
+ "pbgui-logger 0.2.0",
  "pbgui-toolbar 0.8.0",
  "pbgui-tree 0.11.1",
  "pbgui-vpin 0.8.0",
@@ -826,7 +826,7 @@ dependencies = [
 
 [[package]]
 name = "pbgui-logger"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "chrono 0.4.10 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.4.8 (registry+https://github.com/rust-lang/crates.io-index)",

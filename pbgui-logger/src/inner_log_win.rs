@@ -4,6 +4,7 @@ use qt_core::{GlobalColor, QString};
 use qt_gui::{QBrush, QStandardItem, QStandardItemModel};
 use qt_widgets::{
     cpp_core::{CastInto, CppBox, MutPtr, Ref as QRef},
+    q_abstract_item_view::SelectionBehavior,
     q_header_view::ResizeMode,
     QFrame, QTableView, QWidget,
 };
@@ -29,6 +30,7 @@ impl InnerLogWin {
         // create the view
         let mut view = QTableView::new_0a();
         view.set_object_name(&qs("LoggerTable"));
+
         //view.set_word_wrap(true);
         view.set_show_grid(false);
         let mut hheader = view.horizontal_header();
@@ -45,6 +47,9 @@ impl InnerLogWin {
         header.set_section_resize_mode_1a(ResizeMode::Fixed);
         header.set_default_section_size(1);
         view.horizontal_header().hide();
+
+        view.set_selection_behavior(SelectionBehavior::SelectRows);
+
         view.vertical_header().hide();
         view.set_column_width(0, COL_1_WIDTH);
         // add the view to the main layout
