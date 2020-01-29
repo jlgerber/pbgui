@@ -33,6 +33,9 @@ use packages_tree_eh::match_packages_tree;
 
 pub mod main_win_eh;
 use main_win_eh::match_main_win;
+
+pub mod ui_logger_eh;
+use ui_logger_eh::match_ui_logger;
 /// Generate a new event handler, which is of type `SlotOfQString`.
 /// The event handler is responsible for handling Signals of type Event
 ///
@@ -52,7 +55,7 @@ pub fn new_event_handler<'a>(
         let tree = main.tree();
         let withs = main.package_withs_list();
         let main_toolbar = main.main_toolbar();
-
+        let logger = main.logger();
         match Event::from_qstring(name) {
             Event::VpinDialog(vpin_dialog_event) => {
                 match_vpin_dialog(vpin_dialog_event, dialog.clone(), &receiver)
@@ -68,6 +71,9 @@ pub fn new_event_handler<'a>(
             }
             Event::MainWin(main_win_event) => {
                 match_main_win(main_win_event, main.clone(), &receiver)
+            }
+            Event::UiLogger(ui_logger_event) => {
+                match_ui_logger(ui_logger_event, logger.clone(), &receiver)
             }
             Event::Noop => {
                 // we do nothing. this is a quirk of qt. We need to overcome

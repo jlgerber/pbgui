@@ -19,4 +19,5 @@ pub mod main_window;
 pub mod traits;
 pub use traits::{RowSetterTrait, RowTrait};
 
+pub mod logger;
 pub mod messaging;

@@ -2,14 +2,17 @@ use super::bottom_context_widget;
 use super::revision_changes_table;
 use super::revisions_table;
 use super::versionpin_changes_table;
-
 use crate::utility::{create_hlayout, create_vlayout, qs};
+use pbgui_logger::LogWin;
 use qt_core::{Orientation, QString};
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr},
     q_size_policy::Policy,
-    QHBoxLayout, QPushButton, QSizePolicy, QSplitter, QStackedWidget, QTableWidget, QWidget,
+    QFrame, QHBoxLayout, QPushButton, QSizePolicy, QSplitter, QStackedWidget, QTableWidget,
+    QWidget,
 };
+use std::rc::Rc;
+
 //
 // Create pinchanges widget
 //
@@ -19,8 +22,10 @@ pub fn create_bottom_stacked_widget(
     MutPtr<QTableWidget>,
     MutPtr<QTableWidget>,
     MutPtr<QTableWidget>,
+    LogWin,
     MutPtr<QPushButton>,
     MutPtr<QStackedWidget>,
+    MutPtr<QPushButton>,
     MutPtr<QPushButton>,
     MutPtr<QPushButton>,
     MutPtr<QStackedWidget>,
@@ -48,6 +53,12 @@ pub fn create_bottom_stacked_widget(
         let history_button_ptr = history_button.as_mut_ptr();
         top_hlayout.add_widget(history_button.into_ptr());
         top_hlayout.add_stretch_0a();
+        // logger button
+        let mut log_button = create_check_button("Log", false);
+        let log_button_ptr = log_button.as_mut_ptr();
+        top_hlayout.add_widget(log_button.into_ptr());
+        top_hlayout.add_stretch_0a();
+
         pc_vlayout_ptr.add_layout_1a(top_hlayout.into_ptr());
         //
         //  stacked widget
@@ -119,6 +130,17 @@ pub fn create_bottom_stacked_widget(
         let changes_table_ptr = revision_changes_table.as_mut_ptr();
         rsplitter_ptr.add_widget(revisions_table.into_ptr());
         rsplitter_ptr.add_widget(revision_changes_table.into_ptr());
+        //
+        // add logging
+        //
+        let mut pg1_frame = QFrame::new_0a();
+        let pg1_frame_ptr = pg1_frame.as_mut_ptr();
+        let pg1_layout = create_vlayout();
+        //let pg1_layout_ptr = pg1_layout.as_mut_ptr();
+        pg1_frame.set_layout(pg1_layout.into_ptr());
+        stacked_ptr.add_widget(pg1_frame.into_ptr());
+        // now for the win
+        let log_win = LogWin::new(pg1_frame_ptr);
 
         // add the bottom_context_widget which gives us the ablitity
         // to add controls per page
@@ -127,10 +149,12 @@ pub fn create_bottom_stacked_widget(
             pinchanges_ptr,
             revisions_table_ptr,
             changes_table_ptr,
+            log_win,
             save_button_ptr,
             stacked_ptr,
             pinchanges_button_ptr,
             history_button_ptr,
+            log_button_ptr,
             controls_widget_ptr,
         )
     }

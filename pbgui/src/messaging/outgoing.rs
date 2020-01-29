@@ -10,6 +10,8 @@ pub use omain_toolbar::OMainToolbar;
 
 pub mod omain_win;
 pub use omain_win::OMainWin;
+pub mod oui_logger;
+pub use oui_logger::OUiLogger;
 ///
 pub trait ToOMsg {
     fn to_omsg(self) -> OMsg;
@@ -22,5 +24,6 @@ pub enum OMsg {
     PackageWiths(OPackageWiths),
     MainToolbar(OMainToolbar),
     MainWin(OMainWin),
+    UiLogger(OUiLogger),
     Quit,
 }

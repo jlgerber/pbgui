@@ -1,8 +1,8 @@
 #![windows_subsystem = "windows"]
+use crossbeam_channel::{unbounded as channel, Receiver, Sender};
 use env_logger;
 use env_logger::Env;
-//use log;
-use crossbeam_channel::{unbounded as channel, Receiver, Sender};
+use log;
 use pbgui::main_window;
 use pbgui::messaging::init;
 use pbgui::messaging::{
@@ -40,7 +40,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         env::set_var("RUST_LOG", level);
     }
-    env_logger::from_env(Env::default().default_filter_or("warn")).init();
+    //env_logger::from_env(Env::default().default_filter_or("warn")).init();
     // sender, receiver for communicating from secondary thread to primary ui thread
     let (sender, receiver): (Sender<IMsg>, Receiver<IMsg>) = channel();
     // sender and receiver for communicating from ui thread to secondary thread
@@ -97,6 +97,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let exec_dialog_slot = SlotOfQModelIndex::new(
             enclose! { (dialog, to_thread_sender) move |idx: Ref<QModelIndex>| {
                     println!("clicked slot called");
+                    log::info!("clicked slot called");
                 if let Some(dist) = distribution_from_idx(idx) {
                     dialog.set_distribution(dist.as_str());
                     let show = mtoolbar.show_string();
@@ -133,6 +134,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             my_conductor,
             sender,
             to_thread_receiver,
+            to_thread_sender,
         )
     });
 }

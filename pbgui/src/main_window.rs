@@ -17,6 +17,7 @@ use crate::{
     versionpin_table, versionpin_table_splitter, withs_splitter, LeftToolBarActions,
 };
 use log;
+use pbgui_logger::LogWin;
 use pbgui_toolbar::toolbar;
 use pbgui_tree::tree;
 use pbgui_withs::WithsList;
@@ -54,6 +55,8 @@ pub struct InnerMainWindow<'a> {
     revision_changes_table: MutPtr<QTableWidget>,
     history_button: MutPtr<QPushButton>,
     revisions_table: MutPtr<QTableWidget>,
+    log_win: Rc<LogWin>,
+    log_button: MutPtr<QPushButton>,
     dist_popup_menu: MutPtr<QMenu>,
     dist_popup_action: MutPtr<QAction>,
     left_toolbar_actions: LeftToolBarActions,
@@ -100,10 +103,12 @@ impl<'a> InnerMainWindow<'a> {
                 pinchanges_ptr,
                 revisions_ptr,
                 changes_table_ptr,
+                log_win,
                 save_button,
                 stacked_ptr,
                 pinchanges_button_ptr,
                 history_button_ptr,
+                log_button,
                 controls_ptr,
             ) = create_bottom_stacked_widget(&mut vpin_table_splitter);
 
@@ -161,6 +166,8 @@ impl<'a> InnerMainWindow<'a> {
                 revision_changes_table: changes_table_ptr,
                 history_button: history_button_ptr,
                 revisions_table: revisions_ptr,
+                log_win: Rc::new(log_win),
+                log_button,
                 left_toolbar_actions: left_toolbar_actions,
                 search_shortcut: search_shortcut.into_ptr(),
             };
@@ -174,6 +181,11 @@ impl<'a> InnerMainWindow<'a> {
 
             (main_window_inst, main_window, dist_popup_menu)
         }
+    }
+
+    /// Get a cloen fo the LogWin
+    pub unsafe fn logger(&self) -> Rc<LogWin> {
+        self.log_win.clone()
     }
 
     /// Returns a mutable pointer to the QMainWindow instance
@@ -369,7 +381,16 @@ impl<'a> InnerMainWindow<'a> {
     pub unsafe fn history_button(&self) -> MutPtr<QPushButton> {
         self.history_button
     }
-
+    /// Returns a mutable pointer to the log button
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// * MutPtr<QPushButton>
+    pub unsafe fn log_button(&self) -> MutPtr<QPushButton> {
+        self.log_button
+    }
     /// Returns a mutable pointer to the revisions table
     ///
     /// # Arguments
@@ -476,6 +497,7 @@ pub struct MainWindow<'a> {
     show_dist_menu: SlotOfQPoint<'a>,
     select_pin_changes: Slot<'a>,
     select_history: Slot<'a>,
+    select_log: Slot<'a>,
     toggle_packages_tree: SlotOfBool<'a>,
     toggle_withs: SlotOfBool<'a>,
     toggle_vpin_changes: SlotOfBool<'a>,
@@ -561,6 +583,11 @@ impl<'a> MainWindow<'a> {
                 let mut controls_ptr = main.bottom_ctrls_stacked_widget();
                 select_history(&mut revisions_ptr, &mut stacked_ptr, to_thread_sender.clone());
                 controls_ptr.set_current_index(1);
+            }}),
+
+            select_log: Slot::new(enclose! { (main) move || {
+                main.bottom_stacked_widget().set_current_index(2);
+                main.bottom_ctrls_stacked_widget().set_current_index(2);
             }}),
 
             toggle_packages_tree: SlotOfBool::new(enclose! { (main) move |state: bool| {
@@ -656,6 +683,8 @@ impl<'a> MainWindow<'a> {
         main.history_button()
             .clicked()
             .connect(&main_win.select_history);
+
+        main.log_button().clicked().connect(&main_win.select_log);
 
         main.left_toolbar_actions()
             .view_packages

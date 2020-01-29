@@ -1,10 +1,13 @@
 //! handle queries in a separate thread
-use crate::messaging::{
-    client_proxy::{ClientProxy, ConnectParams},
-    event::{MainToolbar, MainWin, PackageWiths, PackagesTree},
-    incoming::{IMainToolbar, IMainWin, IPackageWiths, IPackagesTree},
-    outgoing::{OMainToolbar, OMainWin, OPackageWiths, OPackagesTree},
-    Event, IMsg, IVpinDialog, OMsg, OVpinDialog, ToEvent, ToIMsg, VpinDialog,
+use crate::{
+    logger,
+    messaging::{
+        client_proxy::{ClientProxy, ConnectParams},
+        event::{MainToolbar, MainWin, PackageWiths, PackagesTree},
+        incoming::{IMainToolbar, IMainWin, IPackageWiths, IPackagesTree},
+        outgoing::{OMainToolbar, OMainWin, OPackageWiths, OPackagesTree},
+        Event, IMsg, IVpinDialog, OMsg, OVpinDialog, ToEvent, ToIMsg, VpinDialog,
+    },
 };
 use crossbeam_channel::{Receiver, Sender};
 use crossbeam_utils::thread;
@@ -30,6 +33,9 @@ use main_toolbar::match_main_toolbar;
 
 pub mod main_win;
 use main_win::match_main_win;
+
+pub mod ui_logger;
+pub use ui_logger::match_ui_logger;
 /// Create the thread that handles requests for data from the ui. The thread
 /// receives messages via the `receiver`, matches against them, and sends data
 /// back to the UI via the `sender`. Finally, triggering an appropriate update
@@ -51,6 +57,7 @@ pub fn create(
     mut conductor: Conductor<Event>,
     sender: Sender<IMsg>,
     receiver: Receiver<OMsg>,
+    to_thread_sender: Sender<OMsg>,
 ) -> i32 {
     let mut result = 0;
     thread::scope(|s| {
@@ -85,6 +92,9 @@ pub fn create(
                     OMsg::MainWin(msg) => {
                         match_main_win(msg, &mut db, &mut conductor, &sender);
                     }
+                    OMsg::UiLogger(msg) => {
+                        match_ui_logger(msg, &mut conductor, &sender);
+                    }
                     OMsg::Quit => {
                         log::info!("From secondary thread. Quitting after receiving OMsg::Quit");
                         // try break instead of return
@@ -97,6 +107,10 @@ pub fn create(
         // so that the scope lives longer than the application
         unsafe {
             main_window.show();
+            match logger::init(to_thread_sender) {
+                Ok(_) => (),
+                Err(e) => println!("{:?}", e),
+            }
             result = QApplication::exec();
         }
         let _res = handle.join().expect("problem joining scoped thread handle");

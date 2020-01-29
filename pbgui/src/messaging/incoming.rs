@@ -28,6 +28,7 @@ pub enum IMsg {
     PackageWiths(IPackageWiths),
     MainToolbar(IMainToolbar),
     MainWin(IMainWin),
+    UiLogger(IUiLogger),
     Error(String),
 }
 
@@ -45,3 +46,6 @@ pub use imain_toolbar::IMainToolbar;
 
 pub mod imain_win;
 pub use imain_win::IMainWin;
+
+pub mod iui_logger;
+pub use iui_logger::IUiLogger;

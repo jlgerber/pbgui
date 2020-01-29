@@ -1,0 +1,9 @@
+QTableView {
+    background: rgb(40,40,40);
+}
+
+QTableView::item {
+    margin: 0px;
+    padding: 0px;
+    height: 6px;
+}

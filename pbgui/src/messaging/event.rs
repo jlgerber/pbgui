@@ -27,6 +27,9 @@ pub use main_toolbar::MainToolbar;
 pub mod main_win;
 pub use main_win::MainWin;
 
+pub mod ui_logger;
+pub use ui_logger::UiLogger;
+
 /// ergonomics related trait. Convert a nested enum to an event
 pub trait ToEvent {
     fn to_event(self) -> Event;
@@ -39,6 +42,7 @@ pub enum Event {
     PackageWiths(PackageWiths),
     MainToolbar(MainToolbar),
     MainWin(MainWin),
+    UiLogger(UiLogger),
     Noop,
     Error,
 }
@@ -51,6 +55,7 @@ impl ToQString for Event {
             &Event::PackageWiths(package_withs) => package_withs.to_qstring(),
             &Event::MainToolbar(main_toolbar) => main_toolbar.to_qstring(),
             &Event::MainWin(main_win) => main_win.to_qstring(),
+            &Event::UiLogger(ui_logger) => ui_logger.to_qstring(),
             &Event::Noop => QString::from_std_str(RESET),
             &Event::Error => QString::from_std_str("Error"),
         }
@@ -76,6 +81,9 @@ impl FromQString for Event {
             }
             test_str if test_str.starts_with("MainWin::") => {
                 Event::MainWin(MainWin::from_qstring(qs))
+            }
+            test_str if test_str.starts_with("UiLogger::") => {
+                Event::UiLogger(UiLogger::from_qstring(qs))
             }
             RESET => Event::Noop,
             "Error" => Event::Error,
