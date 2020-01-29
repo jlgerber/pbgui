@@ -16,7 +16,6 @@ use qt_widgets::{
     QApplication, QMainWindow,
 };
 use rustqt_utils::enclose;
-use std::env;
 use std::rc::Rc;
 use structopt::StructOpt;
 
