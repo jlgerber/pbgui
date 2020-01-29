@@ -1,7 +1,7 @@
 use pbgui_logger::log_win::LogWin;
-use qt_core::QResource;
+//use qt_core::QResource;
 use qt_widgets::{QApplication, QFrame, QMainWindow};
-use rustqt_utils::{create_vlayout, qs};
+use rustqt_utils::create_vlayout;
 
 fn main() {
     QApplication::init(|_app| unsafe {

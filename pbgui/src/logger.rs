@@ -42,7 +42,16 @@ impl UiLogger {
     }
 }
 
-pub fn init(to_thread_sender: Sender<OMsg>) -> Result<(), SetLoggerError> {
-    let logger = UiLogger::new(to_thread_sender);
-    log::set_boxed_logger(Box::new(logger)).map(|()| log::set_max_level(LevelFilter::Info))
+pub fn init(to_thread_sender: Sender<OMsg>, default_level: &str) -> Result<(), SetLoggerError> {
+    let mut logger = UiLogger::new(to_thread_sender);
+    let level = match default_level {
+        "trace" => Level::Trace,
+        "debug" => Level::Debug,
+        "info" => Level::Info,
+        "warn" => Level::Warn,
+        "error" => Level::Error,
+        _ => Level::Warn,
+    };
+    logger.set_log_level(level);
+    log::set_boxed_logger(Box::new(logger)).map(|()| log::set_max_level(level.to_level_filter()))
 }

@@ -111,7 +111,7 @@ impl InnerLogWin {
             match &level {
                 &Some(Level::Trace) => {
                     item.set_text(&qs(msg));
-                    loglevel.set_text(&qs(format!("[{} TRACE ]", dt_str)));
+                    loglevel.set_text(&qs(format!("{} TRACE", dt_str)));
                     let brush = QBrush::from_global_color(GlobalColor::Cyan);
                     loglevel.set_foreground(brush.as_ref());
                     model.set_item_3a(rc, 0, loglevel.into_ptr());
@@ -119,7 +119,7 @@ impl InnerLogWin {
                 }
                 &Some(Level::Debug) => {
                     item.set_text(&qs(msg));
-                    loglevel.set_text(&qs(format!("[{} DEBUG ]", dt_str)));
+                    loglevel.set_text(&qs(format!("{} DEBUG", dt_str)));
                     let brush = QBrush::from_global_color(GlobalColor::Cyan);
                     loglevel.set_foreground(brush.as_ref());
                     model.set_item_3a(rc, 0, loglevel.into_ptr());
@@ -127,7 +127,7 @@ impl InnerLogWin {
                     //let index = model.index_2a(rc,0);
                 }
                 &Some(Level::Info) => {
-                    loglevel.set_text(&qs(format!("[{} INFO ]", dt_str)));
+                    loglevel.set_text(&qs(format!("{} INFO", dt_str)));
                     item.set_text(&qs(msg));
                     let brush = QBrush::from_global_color(GlobalColor::Green);
                     loglevel.set_foreground(brush.as_ref());
@@ -136,7 +136,7 @@ impl InnerLogWin {
                     model.set_item_3a(rc, 1, item.into_ptr());
                 }
                 &Some(Level::Warn) => {
-                    loglevel.set_text(&qs(format!("[{} WARN ]", dt_str)));
+                    loglevel.set_text(&qs(format!("{} WARN", dt_str)));
                     item.set_text(&qs(msg));
                     let brush = QBrush::from_global_color(GlobalColor::Yellow);
                     loglevel.set_foreground(brush.as_ref());
@@ -145,7 +145,7 @@ impl InnerLogWin {
                     model.set_item_3a(rc, 1, item.into_ptr());
                 }
                 &Some(Level::Error) => {
-                    loglevel.set_text(&qs(format!("[{} ERROR ]", dt_str)));
+                    loglevel.set_text(&qs(format!("{} ERROR", dt_str)));
                     item.set_text(&qs(msg));
                     let brush = QBrush::from_global_color(GlobalColor::Red);
                     loglevel.set_foreground(brush.as_ref());

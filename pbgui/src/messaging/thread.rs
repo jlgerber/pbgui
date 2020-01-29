@@ -58,6 +58,7 @@ pub fn create(
     sender: Sender<IMsg>,
     receiver: Receiver<OMsg>,
     to_thread_sender: Sender<OMsg>,
+    log_level: &str,
 ) -> i32 {
     let mut result = 0;
     thread::scope(|s| {
@@ -107,7 +108,7 @@ pub fn create(
         // so that the scope lives longer than the application
         unsafe {
             main_window.show();
-            match logger::init(to_thread_sender) {
+            match logger::init(to_thread_sender, log_level) {
                 Ok(_) => (),
                 Err(e) => println!("{:?}", e),
             }

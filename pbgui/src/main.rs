@@ -1,6 +1,6 @@
 #![windows_subsystem = "windows"]
 use crossbeam_channel::{unbounded as channel, Receiver, Sender};
-use env_logger;
+//use env_logger;
 use pbgui::main_window;
 use pbgui::messaging::init;
 use pbgui::messaging::{
@@ -31,13 +31,18 @@ pub struct PbGui {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let opt = PbGui::from_args();
-    if let PbGui {
+    let log_level = if let PbGui {
         loglevel: Some(ref level),
         ..
     } = opt
     {
-        env::set_var("RUST_LOG", level);
-    }
+        level
+    } else {
+        "warn"
+    };
+    // {
+    //     env::set_var("RUST_LOG", level);
+    // }
     //env_logger::from_env(Env::default().default_filter_or("warn")).init();
     // sender, receiver for communicating from secondary thread to primary ui thread
     let (sender, receiver): (Sender<IMsg>, Receiver<IMsg>) = channel();
@@ -99,7 +104,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     let show = mtoolbar.show_string();
                     dialog.set_show_name(show.as_str());
                     update_vpin_dialog(&to_thread_sender, show);
-                    let result = dialog.dialog_mut().exec();
+                    let _result = dialog.dialog_mut().exec();
                 }
             }},
         );
@@ -110,14 +115,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .clicked()
             .connect(&exec_dialog_slot);
 
-        let app_update = new_event_handler(
-            dialog.clone(),
-            pbgui_root.main_win(),
-            //pbgui_root.main_win().tree(),
-            //pbgui_root.main_win().package_withs_list(),
-            //pbgui_root.main_win().main_toolbar(),
-            receiver,
-        );
+        let app_update = new_event_handler(dialog.clone(), pbgui_root.main_win(), receiver);
 
         let my_conductor = Conductor::<Event>::new(&app_update);
 
@@ -130,6 +128,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             sender,
             to_thread_receiver,
             to_thread_sender,
+            log_level,
         )
     });
 }
