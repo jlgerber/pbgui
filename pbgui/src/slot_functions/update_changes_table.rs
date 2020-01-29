@@ -15,6 +15,7 @@ pub fn update_changes_table(
     unsafe {
         changes_table_ptr.clear_contents();
         let data = revisions_ptr.item(row, COL_REV_TXID).data(2).to_int_0a();
+        log::debug!("signaling GetTransactionChanges");
         to_thread_sender
             .send(OMsg::MainWin(OMainWin::GetTransactionChanges {
                 tx_id: data,

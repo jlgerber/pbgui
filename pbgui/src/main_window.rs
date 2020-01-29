@@ -607,7 +607,7 @@ impl<'a> MainWindow<'a> {
             }}),
 
             clear_log: Slot::new(enclose! { (main) move || {
-                main.logger().model().clear();
+               main.logger().clear_log();
             }}),
 
             toggle_packages_tree: SlotOfBool::new(enclose! { (main) move |state: bool| {

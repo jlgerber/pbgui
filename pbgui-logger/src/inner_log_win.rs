@@ -77,6 +77,17 @@ impl InnerLogWin {
         self.model
     }
 
+    pub fn clear_log(&self) {
+        unsafe {
+            let mut model = self.model;
+            model.clear();
+            // let mut view = self.table_view;
+            // let mut hheader = view.horizontal_header();
+            // hheader.set_stretch_last_section(true);
+            // hheader.set_section_resize_mode_1a(ResizeMode::Fixed);
+            // view.set_column_width(0, COL_1_WIDTH);
+        }
+    }
     pub fn set_default_stylesheet(&self) {
         set_stylesheet_from_str(STYLE_STR, self.main);
     }
@@ -163,6 +174,11 @@ impl InnerLogWin {
                     model.set_item_3a(rc, 0, loglevel.into_ptr());
                     model.set_item_3a(rc, 1, item.into_ptr())
                 }
+            }
+            // we have to reset the sizing once we have cleared the table so we
+            // might as well do this when we add our first item
+            if rc == 1 {
+                self.table_view().set_column_width(0, COL_1_WIDTH);
             }
             self.table_view().scroll_to_bottom();
         }

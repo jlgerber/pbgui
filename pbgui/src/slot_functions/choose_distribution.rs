@@ -31,7 +31,7 @@ pub fn choose_alternative_distribution(
         } else {
             panic!("unable to extract package and version from row");
         };
-
+        log::debug!("signaling ChooseDistribution");
         to_thread_sender
             .send(OMsg::MainWin(OMainWin::ChooseDistribution {
                 package: package.to_string(),

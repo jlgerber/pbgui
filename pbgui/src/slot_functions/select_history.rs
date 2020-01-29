@@ -14,6 +14,7 @@ pub fn select_history(
         log::debug!("clearing contents for revisions");
         revisions_ptr.clear_contents();
         log::debug!("contents cleared");
+        log::debug!("signaling SaveVpinChanges");
         to_thread_sender
             .send(OMsg::MainWin(OMainWin::GetHistoryRevisions))
             .expect("unable to get history revisions");

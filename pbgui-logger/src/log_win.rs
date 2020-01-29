@@ -25,6 +25,9 @@ impl LogWin {
         self.inner_log_win.clone()
     }
 
+    pub fn clear_log(&self) {
+        self.inner_log_win.clear_log();
+    }
     /// Retrieve a mutable pointer to the list_view's model
     pub unsafe fn model(&self) -> MutPtr<QStandardItemModel> {
         self.inner_log_win.model()

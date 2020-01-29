@@ -43,7 +43,7 @@ pub fn save_versionpin_changes(
 
         // reset book keeping
         pinchange_cache.reset();
-
+        log::debug!("signaling SaveVpinChanges");
         to_thread_sender
             .send(OMsg::MainWin(OMainWin::SaveVpinChanges {
                 changes: change_vec,

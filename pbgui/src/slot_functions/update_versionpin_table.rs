@@ -29,6 +29,8 @@ pub fn update_vpin_table(toolbar: Rc<toolbar::MainToolbar>, to_thread_sender: Se
         } else {
             None
         };
+        log::debug!("signaling GetVpins");
+
         to_thread_sender
             .send(OMsg::MainWin(OMainWin::GetVpins {
                 level: showtxt,

@@ -42,6 +42,7 @@ pub fn update_withpackages(
     } else {
         // clear item list
         item_list.borrow_mut().clear();
+        log::debug!("signaling GetWithsForVpin");
         to_thread_sender
             .send(OMsg::MainWin(OMainWin::GetWithsForVpin { vpin_id }))
             .expect("unable to get vpins");
