@@ -8,7 +8,6 @@ pub fn match_ui_logger<'a>(event: UiLogger, logger: Rc<LogWin>, receiver: &Recei
         UiLogger::SendLog => {
             if let Ok(IMsg::UiLogger(IUiLogger::Log(level, log))) = receiver.recv() {
                 unsafe {
-                    println!("setting log {}", log.as_str());
                     logger.log(level, log.as_str());
                 }
             } else {

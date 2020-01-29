@@ -11,7 +11,6 @@ use qt_widgets::{
     QFrame, QHBoxLayout, QPushButton, QSizePolicy, QSplitter, QStackedWidget, QTableWidget,
     QWidget,
 };
-use std::rc::Rc;
 
 //
 // Create pinchanges widget
@@ -25,6 +24,7 @@ pub fn create_bottom_stacked_widget(
     LogWin,
     MutPtr<QPushButton>,
     MutPtr<QStackedWidget>,
+    MutPtr<QPushButton>,
     MutPtr<QPushButton>,
     MutPtr<QPushButton>,
     MutPtr<QPushButton>,
@@ -52,7 +52,7 @@ pub fn create_bottom_stacked_widget(
         let mut history_button = create_check_button("History", false);
         let history_button_ptr = history_button.as_mut_ptr();
         top_hlayout.add_widget(history_button.into_ptr());
-        top_hlayout.add_stretch_0a();
+        // top_hlayout.add_stretch_0a();
         // logger button
         let mut log_button = create_check_button("Log", false);
         let log_button_ptr = log_button.as_mut_ptr();
@@ -142,6 +142,17 @@ pub fn create_bottom_stacked_widget(
         // now for the win
         let log_win = LogWin::new(pg1_frame_ptr);
 
+        // save button
+        let mut clear_widget = QWidget::new_0a();
+        let mut clear_layout = create_hlayout();
+        clear_layout.insert_stretch_2a(0, 1);
+        let mut clear_layout_ptr = clear_layout.as_mut_ptr();
+        clear_widget.set_layout(clear_layout.into_ptr());
+        let mut clear_button = QPushButton::from_q_string(&QString::from_std_str("Clear"));
+        let clear_button_ptr = clear_button.as_mut_ptr();
+        clear_layout_ptr.add_widget(clear_button.into_ptr());
+        controls.push(clear_widget);
+
         // add the bottom_context_widget which gives us the ablitity
         // to add controls per page
         let controls_widget_ptr = bottom_context_widget::create(&mut top_hlayout_ptr, controls);
@@ -155,6 +166,7 @@ pub fn create_bottom_stacked_widget(
             pinchanges_button_ptr,
             history_button_ptr,
             log_button_ptr,
+            clear_button_ptr,
             controls_widget_ptr,
         )
     }

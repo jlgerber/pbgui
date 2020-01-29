@@ -154,7 +154,7 @@ pub unsafe fn distribution_from_idx(idx: Ref<QModelIndex>) -> Option<String> {
             .to_std_string()
     };
     let dist = format!("{}-{}", package, version);
-    println!("found dist: {}", dist);
+    log::debug!("found dist: {}", dist);
     // only the distribution is allowed to have a dash in its name
     Some(dist)
 }

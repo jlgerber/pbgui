@@ -2,7 +2,7 @@ use super::*;
 use log::Level;
 
 pub enum IUiLogger {
-    Log(Level, String),
+    Log(Option<Level>, String),
 }
 
 impl ToIMsg for IUiLogger {

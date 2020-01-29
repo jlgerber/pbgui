@@ -1,3 +1,4 @@
+use chrono::{DateTime, Local, TimeZone};
 use log::Level;
 use qt_core::{GlobalColor, QString};
 use qt_gui::{QBrush, QStandardItem, QStandardItemModel};
@@ -12,7 +13,7 @@ const STYLE_STR: &'static str = include_str!("../resources/pbgui_logger.qss");
 
 pub struct InnerLogWin {
     main: MutPtr<QFrame>,
-    list_view: MutPtr<QTableView>,
+    table_view: MutPtr<QTableView>,
     model: MutPtr<QStandardItemModel>,
 }
 
@@ -29,6 +30,8 @@ impl InnerLogWin {
         //view.set_word_wrap(true);
         view.set_show_grid(false);
         view.horizontal_header().set_stretch_last_section(true);
+        view.horizontal_header()
+            .set_section_resize_mode_1a(ResizeMode::ResizeToContents);
         let view_ptr = view.as_mut_ptr();
 
         let mut model = QStandardItemModel::new_0a();
@@ -37,7 +40,7 @@ impl InnerLogWin {
         view.set_model(model.into_ptr());
 
         let mut header = view_ptr.vertical_header();
-        header.set_section_resize_mode_2a(1, ResizeMode::Fixed);
+        header.set_section_resize_mode_1a(ResizeMode::ResizeToContents);
         header.set_default_section_size(1);
         view.horizontal_header().hide();
         view.vertical_header().hide();
@@ -52,7 +55,7 @@ impl InnerLogWin {
 
         Self {
             main: main_frame_ptr,
-            list_view: view_ptr,
+            table_view: view_ptr,
             model: model_ptr,
         }
     }
@@ -63,8 +66,8 @@ impl InnerLogWin {
     }
 
     /// Retrieve a mutable pointer to the main view (qlistview)
-    pub fn list_view(&self) -> MutPtr<QTableView> {
-        self.list_view
+    pub fn table_view(&self) -> MutPtr<QTableView> {
+        self.table_view
     }
 
     /// Retrieve a mutable pointer to the model
@@ -77,52 +80,54 @@ impl InnerLogWin {
     }
 
     pub fn trace(&self, msg: &str) {
-        self.log(Level::Trace, msg);
+        self.log(Some(Level::Trace), msg);
     }
 
     pub fn debug(&self, msg: &str) {
-        self.log(Level::Debug, msg);
+        self.log(Some(Level::Debug), msg);
     }
 
     pub fn info(&self, msg: &str) {
-        self.log(Level::Info, msg);
+        self.log(Some(Level::Info), msg);
     }
 
     pub fn warn(&self, msg: &str) {
-        self.log(Level::Warn, msg);
+        self.log(Some(Level::Warn), msg);
     }
 
     pub fn error(&self, msg: &str) {
-        self.log(Level::Error, msg);
+        self.log(Some(Level::Error), msg);
     }
 
-    pub fn log(&self, level: Level, msg: &str) {
+    pub fn log(&self, level: Option<Level>, msg: &str) {
         unsafe {
             let mut item = QStandardItem::new();
             let mut loglevel = QStandardItem::new();
             let mut model = self.model();
             let rc = model.row_count_0a();
             model.set_row_count(rc + 1);
+            let dt: DateTime<Local> = Local::now();
+            let dt_str = dt.format("%a %b %e %T %Y");
             match &level {
-                &Level::Trace => {
+                &Some(Level::Trace) => {
                     item.set_text(&qs(msg));
-                    loglevel.set_text(&qs("[ TRACE ]"));
+                    loglevel.set_text(&qs(format!("[{} TRACE ]", dt_str)));
                     let brush = QBrush::from_global_color(GlobalColor::Cyan);
                     loglevel.set_foreground(brush.as_ref());
                     model.set_item_3a(rc, 0, loglevel.into_ptr());
                     model.set_item_3a(rc, 1, item.into_ptr());
                 }
-                &Level::Debug => {
+                &Some(Level::Debug) => {
                     item.set_text(&qs(msg));
-                    loglevel.set_text(&qs("[ DEBUG ]"));
+                    loglevel.set_text(&qs(format!("[{} DEBUG ]", dt_str)));
                     let brush = QBrush::from_global_color(GlobalColor::Cyan);
                     loglevel.set_foreground(brush.as_ref());
                     model.set_item_3a(rc, 0, loglevel.into_ptr());
                     model.set_item_3a(rc, 1, item.into_ptr());
                     //let index = model.index_2a(rc,0);
                 }
-                &Level::Info => {
-                    loglevel.set_text(&qs("[ INFO ]"));
+                &Some(Level::Info) => {
+                    loglevel.set_text(&qs(format!("[{} INFO ]", dt_str)));
                     item.set_text(&qs(msg));
                     let brush = QBrush::from_global_color(GlobalColor::Green);
                     loglevel.set_foreground(brush.as_ref());
@@ -130,8 +135,8 @@ impl InnerLogWin {
                     model.set_item_3a(rc, 0, loglevel.into_ptr());
                     model.set_item_3a(rc, 1, item.into_ptr());
                 }
-                &Level::Warn => {
-                    loglevel.set_text(&qs("[ WARN ]"));
+                &Some(Level::Warn) => {
+                    loglevel.set_text(&qs(format!("[{} WARN ]", dt_str)));
                     item.set_text(&qs(msg));
                     let brush = QBrush::from_global_color(GlobalColor::Yellow);
                     loglevel.set_foreground(brush.as_ref());
@@ -139,8 +144,8 @@ impl InnerLogWin {
                     model.set_item_3a(rc, 0, loglevel.into_ptr());
                     model.set_item_3a(rc, 1, item.into_ptr());
                 }
-                &Level::Error => {
-                    loglevel.set_text(&qs("[ ERROR ]"));
+                &Some(Level::Error) => {
+                    loglevel.set_text(&qs(format!("[{} ERROR ]", dt_str)));
                     item.set_text(&qs(msg));
                     let brush = QBrush::from_global_color(GlobalColor::Red);
                     loglevel.set_foreground(brush.as_ref());
@@ -148,7 +153,14 @@ impl InnerLogWin {
                     model.set_item_3a(rc, 0, loglevel.into_ptr());
                     model.set_item_3a(rc, 1, item.into_ptr())
                 }
+                &None => {
+                    loglevel.set_text(&qs(""));
+                    item.set_text(&qs(msg));
+                    model.set_item_3a(rc, 0, loglevel.into_ptr());
+                    model.set_item_3a(rc, 1, item.into_ptr())
+                }
             }
+            self.table_view().scroll_to_bottom();
         }
     }
 

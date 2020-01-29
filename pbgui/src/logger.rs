@@ -15,15 +15,13 @@ impl Log for UiLogger {
     }
 
     fn log(&self, record: &Record) {
-        println!("log called");
         if self.enabled(record.metadata()) {
+            let mut level = Some(record.metadata().level());
             for x in format!("{}", record.args()).split("\n") {
                 self.to_thread_sender
-                    .send(OMsg::UiLogger(OUiLogger::SendLog(
-                        record.metadata().level(),
-                        x.to_string(),
-                    )))
+                    .send(OMsg::UiLogger(OUiLogger::SendLog(level, x.to_string())))
                     .expect("unable to send log data");
+                level = None;
             }
         }
     }

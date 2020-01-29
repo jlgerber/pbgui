@@ -31,11 +31,11 @@ impl LogWin {
     }
 
     /// Retrieve a mutable pointer to the main list_view
-    pub unsafe fn list_view(&self) -> MutPtr<QTableView> {
-        self.inner_log_win.list_view()
+    pub unsafe fn table_view(&self) -> MutPtr<QTableView> {
+        self.inner_log_win.table_view()
     }
 
-    pub unsafe fn log(&self, level: Level, msg: &str) {
+    pub unsafe fn log(&self, level: Option<Level>, msg: &str) {
         self.inner_log_win.log(level, msg);
     }
 }

@@ -1,8 +1,6 @@
 #![windows_subsystem = "windows"]
 use crossbeam_channel::{unbounded as channel, Receiver, Sender};
 use env_logger;
-use env_logger::Env;
-use log;
 use pbgui::main_window;
 use pbgui::messaging::init;
 use pbgui::messaging::{
@@ -96,15 +94,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         let exec_dialog_slot = SlotOfQModelIndex::new(
             enclose! { (dialog, to_thread_sender) move |idx: Ref<QModelIndex>| {
-                    println!("clicked slot called");
-                    log::info!("clicked slot called");
                 if let Some(dist) = distribution_from_idx(idx) {
                     dialog.set_distribution(dist.as_str());
                     let show = mtoolbar.show_string();
                     dialog.set_show_name(show.as_str());
                     update_vpin_dialog(&to_thread_sender, show);
                     let result = dialog.dialog_mut().exec();
-                    println!("exec_dialog_slot triggered by button result -> {}", result);
                 }
             }},
         );

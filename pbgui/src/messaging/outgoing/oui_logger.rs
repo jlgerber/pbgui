@@ -3,7 +3,7 @@ use log::Level;
 
 #[derive(Debug, PartialEq)]
 pub enum OUiLogger {
-    SendLog(Level, String),
+    SendLog(Option<Level>, String),
 }
 
 impl ToOMsg for OUiLogger {
