@@ -1,4 +1,4 @@
-use chrono::{DateTime, Local, TimeZone};
+use chrono::{DateTime, Local};
 use log::Level;
 use qt_core::{GlobalColor, QString};
 use qt_gui::{QBrush, QStandardItem, QStandardItemModel};
@@ -10,6 +10,7 @@ use qt_widgets::{
 use rustqt_utils::{create_vlayout, qs, set_stylesheet_from_str};
 
 const STYLE_STR: &'static str = include_str!("../resources/pbgui_logger.qss");
+const COL_1_WIDTH: i32 = 240;
 
 pub struct InnerLogWin {
     main: MutPtr<QFrame>,
@@ -27,11 +28,12 @@ impl InnerLogWin {
 
         // create the view
         let mut view = QTableView::new_0a();
+        view.set_object_name(&qs("LoggerTable"));
         //view.set_word_wrap(true);
         view.set_show_grid(false);
-        view.horizontal_header().set_stretch_last_section(true);
-        view.horizontal_header()
-            .set_section_resize_mode_1a(ResizeMode::ResizeToContents);
+        let mut hheader = view.horizontal_header();
+        hheader.set_stretch_last_section(true);
+        hheader.set_section_resize_mode_1a(ResizeMode::Fixed);
         let view_ptr = view.as_mut_ptr();
 
         let mut model = QStandardItemModel::new_0a();
@@ -40,11 +42,11 @@ impl InnerLogWin {
         view.set_model(model.into_ptr());
 
         let mut header = view_ptr.vertical_header();
-        header.set_section_resize_mode_1a(ResizeMode::ResizeToContents);
+        header.set_section_resize_mode_1a(ResizeMode::Fixed);
         header.set_default_section_size(1);
         view.horizontal_header().hide();
         view.vertical_header().hide();
-
+        view.set_column_width(0, COL_1_WIDTH);
         // add the view to the main layout
         main_layout.add_widget(view.into_ptr());
         main_frame.set_layout(main_layout.into_ptr());
@@ -102,7 +104,9 @@ impl InnerLogWin {
     pub fn log(&self, level: Option<Level>, msg: &str) {
         unsafe {
             let mut item = QStandardItem::new();
+            item.set_editable(false);
             let mut loglevel = QStandardItem::new();
+            loglevel.set_editable(false);
             let mut model = self.model();
             let rc = model.row_count_0a();
             model.set_row_count(rc + 1);

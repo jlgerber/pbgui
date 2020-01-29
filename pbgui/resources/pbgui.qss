@@ -240,4 +240,8 @@ QComboBox#WithsComboBox::down-arrow {
     width: 10px;
     height: 10px;
 }
-
+/* 
+#LoggerTable::item {
+    padding: 0px;
+    margin: 0px;
+} */

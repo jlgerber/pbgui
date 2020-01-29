@@ -1,8 +1,8 @@
 use crate::messaging::outgoing::oui_logger::OUiLogger;
 use crate::messaging::OMsg;
 use crate::messaging::Sender;
+use log::SetLoggerError;
 use log::{Level, Log, Metadata, Record};
-use log::{LevelFilter, SetLoggerError};
 
 pub struct UiLogger {
     min_level: Level,
@@ -16,13 +16,12 @@ impl Log for UiLogger {
 
     fn log(&self, record: &Record) {
         if self.enabled(record.metadata()) {
-            let mut level = Some(record.metadata().level());
-            for x in format!("{}", record.args()).split("\n") {
-                self.to_thread_sender
-                    .send(OMsg::UiLogger(OUiLogger::SendLog(level, x.to_string())))
-                    .expect("unable to send log data");
-                level = None;
-            }
+            self.to_thread_sender
+                .send(OMsg::UiLogger(OUiLogger::SendLog(
+                    record.level(),
+                    format!("{}", record.args()),
+                )))
+                .expect("unable to send log data");
         }
     }
 
