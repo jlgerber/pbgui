@@ -15,7 +15,7 @@ const COL_0_WIDTH: i32 = 60;
 const COL_1_WIDTH: i32 = 180;
 const COL_2_WIDTH: i32 = 120;
 const COL_3_WIDTH: i32 = 260;
-const COL_4_WIDTH: i32 = 160;
+const COL_4_WIDTH: i32 = 60;
 
 pub struct LogData<'a> {
     pub level: Level,
@@ -74,7 +74,7 @@ impl InnerLogWin {
         let view_ptr = view.as_mut_ptr();
 
         let mut model = QStandardItemModel::new_0a();
-        model.set_column_count(5);
+        model.set_column_count(6);
         let model_ptr = model.as_mut_ptr();
         view.set_model(model.into_ptr());
 
@@ -90,7 +90,7 @@ impl InnerLogWin {
         view.set_column_width(1, COL_1_WIDTH);
         view.set_column_width(2, COL_2_WIDTH);
         view.set_column_width(3, COL_3_WIDTH);
-        //view.set_column_width(4, COL_4_WIDTH);
+        view.set_column_width(4, COL_4_WIDTH);
 
         // add the view to the main layout
         main_layout.add_widget(view.into_ptr());
@@ -155,6 +155,9 @@ impl InnerLogWin {
             let mut file_item = QStandardItem::new();
             file_item.set_editable(false);
 
+            let mut line_item = QStandardItem::new();
+            line_item.set_editable(false);
+
             let mut model = self.model();
             let rc = model.row_count_0a();
             model.set_row_count(rc + 1);
@@ -169,21 +172,23 @@ impl InnerLogWin {
                 }) => {
                     item.set_text(&qs(msg));
                     loglevel.set_text(&qs("TRACE"));
-
                     target_item.set_text(&qs(target));
                     file_item.set_text(&qs(file.unwrap_or("").split("/").last().unwrap_or("")));
+                    line_item.set_text(&qs(line.unwrap_or(0).to_string().as_str()));
 
                     let brush = QBrush::from_global_color(GlobalColor::Cyan);
                     loglevel.set_foreground(brush.as_ref());
                     datetime.set_foreground(brush.as_ref());
                     target_item.set_foreground(brush.as_ref());
                     file_item.set_foreground(brush.as_ref());
+                    line_item.set_foreground(brush.as_ref());
 
                     model.set_item_3a(rc, 0, loglevel.into_ptr());
                     model.set_item_3a(rc, 1, datetime.into_ptr());
                     model.set_item_3a(rc, 2, file_item.into_ptr());
                     model.set_item_3a(rc, 3, target_item.into_ptr());
-                    model.set_item_3a(rc, 4, item.into_ptr());
+                    model.set_item_3a(rc, 4, line_item.into_ptr());
+                    model.set_item_3a(rc, 5, item.into_ptr());
                 }
 
                 &Some(LogData {
@@ -197,18 +202,21 @@ impl InnerLogWin {
                     loglevel.set_text(&qs("DEBUG"));
                     target_item.set_text(&qs(target));
                     file_item.set_text(&qs(file.unwrap_or("").split("/").last().unwrap_or("")));
+                    line_item.set_text(&qs(line.unwrap_or(0).to_string().as_str()));
 
                     let brush = QBrush::from_global_color(GlobalColor::Cyan);
                     loglevel.set_foreground(brush.as_ref());
                     datetime.set_foreground(brush.as_ref());
                     target_item.set_foreground(brush.as_ref());
                     file_item.set_foreground(brush.as_ref());
+                    line_item.set_foreground(brush.as_ref());
 
                     model.set_item_3a(rc, 0, loglevel.into_ptr());
                     model.set_item_3a(rc, 1, datetime.into_ptr());
                     model.set_item_3a(rc, 2, file_item.into_ptr());
                     model.set_item_3a(rc, 3, target_item.into_ptr());
-                    model.set_item_3a(rc, 4, item.into_ptr());
+                    model.set_item_3a(rc, 4, line_item.into_ptr());
+                    model.set_item_3a(rc, 5, item.into_ptr());
                 }
                 &Some(LogData {
                     level: Level::Info,
@@ -221,19 +229,21 @@ impl InnerLogWin {
                     item.set_text(&qs(msg));
                     target_item.set_text(&qs(target));
                     file_item.set_text(&qs(file.unwrap_or("").split("/").last().unwrap_or("")));
+                    line_item.set_text(&qs(line.unwrap_or(0).to_string().as_str()));
 
                     let brush = QBrush::from_global_color(GlobalColor::Green);
                     loglevel.set_foreground(brush.as_ref());
                     datetime.set_foreground(brush.as_ref());
                     target_item.set_foreground(brush.as_ref());
                     file_item.set_foreground(brush.as_ref());
+                    line_item.set_foreground(brush.as_ref());
 
                     model.set_item_3a(rc, 0, loglevel.into_ptr());
                     model.set_item_3a(rc, 1, datetime.into_ptr());
                     model.set_item_3a(rc, 2, file_item.into_ptr());
                     model.set_item_3a(rc, 3, target_item.into_ptr());
-                    //model.set_item_3a(rc, 4, mp_item.into_ptr());
-                    model.set_item_3a(rc, 4, item.into_ptr());
+                    model.set_item_3a(rc, 4, line_item.into_ptr());
+                    model.set_item_3a(rc, 5, item.into_ptr());
                 }
                 &Some(LogData {
                     level: Level::Warn,
@@ -246,18 +256,21 @@ impl InnerLogWin {
                     item.set_text(&qs(msg));
                     target_item.set_text(&qs(target));
                     file_item.set_text(&qs(file.unwrap_or("").split("/").last().unwrap_or("")));
+                    line_item.set_text(&qs(line.unwrap_or(0).to_string().as_str()));
 
                     let brush = QBrush::from_global_color(GlobalColor::Yellow);
                     loglevel.set_foreground(brush.as_ref());
                     datetime.set_foreground(brush.as_ref());
                     target_item.set_foreground(brush.as_ref());
                     file_item.set_foreground(brush.as_ref());
+                    line_item.set_foreground(brush.as_ref());
 
                     model.set_item_3a(rc, 0, loglevel.into_ptr());
                     model.set_item_3a(rc, 1, datetime.into_ptr());
                     model.set_item_3a(rc, 2, file_item.into_ptr());
                     model.set_item_3a(rc, 3, target_item.into_ptr());
-                    model.set_item_3a(rc, 4, item.into_ptr());
+                    model.set_item_3a(rc, 4, line_item.into_ptr());
+                    model.set_item_3a(rc, 5, item.into_ptr());
                 }
                 &Some(LogData {
                     level: Level::Error,
@@ -270,35 +283,36 @@ impl InnerLogWin {
                     item.set_text(&qs(msg));
                     target_item.set_text(&qs(target));
                     file_item.set_text(&qs(file.unwrap_or("").split("/").last().unwrap_or("")));
+                    line_item.set_text(&qs(line.unwrap_or(0).to_string().as_str()));
 
                     let brush = QBrush::from_global_color(GlobalColor::Red);
                     loglevel.set_foreground(brush.as_ref());
                     datetime.set_foreground(brush.as_ref());
                     target_item.set_foreground(brush.as_ref());
-                    //mp_item.set_foreground(brush.as_ref());
                     file_item.set_foreground(brush.as_ref());
+                    line_item.set_foreground(brush.as_ref());
 
                     model.set_item_3a(rc, 0, loglevel.into_ptr());
                     model.set_item_3a(rc, 1, datetime.into_ptr());
                     model.set_item_3a(rc, 2, file_item.into_ptr());
                     model.set_item_3a(rc, 3, target_item.into_ptr());
-                    //model.set_item_3a(rc, 4, mp_item.into_ptr());
-                    model.set_item_3a(rc, 4, item.into_ptr());
+                    model.set_item_3a(rc, 4, line_item.into_ptr());
+                    model.set_item_3a(rc, 5, item.into_ptr());
                 }
                 &None => {
                     loglevel.set_text(&qs(""));
                     datetime.set_text(&qs(""));
                     target_item.set_text(&qs(""));
-                    //mp_item.set_text(&qs(""));
                     file_item.set_text(&qs(""));
+                    line_item.set_text(&qs(""));
 
                     item.set_text(&qs(msg));
                     model.set_item_3a(rc, 0, loglevel.into_ptr());
                     model.set_item_3a(rc, 1, datetime.into_ptr());
                     model.set_item_3a(rc, 2, file_item.into_ptr());
                     model.set_item_3a(rc, 3, target_item.into_ptr());
-                    // model.set_item_3a(rc, 4, mp_item.into_ptr());
-                    model.set_item_3a(rc, 4, item.into_ptr());
+                    model.set_item_3a(rc, 4, line_item.into_ptr());
+                    model.set_item_3a(rc, 5, item.into_ptr());
                 }
             }
             // we have to reset the sizing once we have cleared the table so we
@@ -309,7 +323,7 @@ impl InnerLogWin {
                 view.set_column_width(1, COL_1_WIDTH);
                 view.set_column_width(2, COL_2_WIDTH);
                 view.set_column_width(3, COL_3_WIDTH);
-                // view.set_column_width(4, COL_4_WIDTH);
+                view.set_column_width(4, COL_4_WIDTH);
             }
             self.table_view().scroll_to_bottom();
         }
@@ -339,9 +353,6 @@ impl InnerLogWin {
         let mut model = self.model();
         let rc = model.row_count_0a();
         model.set_row_count(rc + 1);
-        //let brush = QBrush::from_global_color(GlobalColor::Yellow);
-        //loglevel.set_foreground(brush.as_ref());
-
         model.set_item_3a(rc, 0, loglevel.into_ptr());
         model.set_item_3a(rc, 1, item.into_ptr());
     }
