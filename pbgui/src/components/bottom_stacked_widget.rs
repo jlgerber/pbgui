@@ -15,15 +15,16 @@ use qt_widgets::{
 //
 // Create pinchanges widget
 //
-pub fn create_bottom_stacked_widget(
-    splitter: &mut MutPtr<QSplitter>,
+pub fn create_bottom_stacked_widget<'a>(
+    mut splitter: MutPtr<QSplitter>,
 ) -> (
     MutPtr<QTableWidget>,
     MutPtr<QTableWidget>,
     MutPtr<QTableWidget>,
-    LogWin,
+    LogWin<'a>,
     MutPtr<QPushButton>,
     MutPtr<QStackedWidget>,
+    MutPtr<QPushButton>,
     MutPtr<QPushButton>,
     MutPtr<QPushButton>,
     MutPtr<QPushButton>,
@@ -142,16 +143,22 @@ pub fn create_bottom_stacked_widget(
         // now for the win
         let log_win = LogWin::new(pg1_frame_ptr);
 
-        // save button
-        let mut clear_widget = QWidget::new_0a();
-        let mut clear_layout = create_hlayout();
-        clear_layout.insert_stretch_2a(0, 1);
-        let mut clear_layout_ptr = clear_layout.as_mut_ptr();
-        clear_widget.set_layout(clear_layout.into_ptr());
+        // log widget
+        let mut log_widget = QWidget::new_0a();
+        let mut log_layout = create_hlayout();
+        log_layout.insert_stretch_2a(0, 1);
+        let mut log_layout_ptr = log_layout.as_mut_ptr();
+        log_widget.set_layout(log_layout.into_ptr());
+        // add clear button
         let mut clear_button = QPushButton::from_q_string(&QString::from_std_str("Clear"));
         let clear_button_ptr = clear_button.as_mut_ptr();
-        clear_layout_ptr.add_widget(clear_button.into_ptr());
-        controls.push(clear_widget);
+        log_layout_ptr.add_widget(clear_button.into_ptr());
+        // add controls button
+        let mut log_ctrls_button = QPushButton::from_q_string(&QString::from_std_str("Ctrls"));
+        let log_ctrls_button_ptr = log_ctrls_button.as_mut_ptr();
+        log_ctrls_button.set_checkable(true);
+        log_layout_ptr.add_widget(log_ctrls_button.into_ptr());
+        controls.push(log_widget);
 
         // add the bottom_context_widget which gives us the ablitity
         // to add controls per page
@@ -167,6 +174,7 @@ pub fn create_bottom_stacked_widget(
             history_button_ptr,
             log_button_ptr,
             clear_button_ptr,
+            log_ctrls_button_ptr,
             controls_widget_ptr,
         )
     }

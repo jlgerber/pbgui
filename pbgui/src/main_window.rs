@@ -55,9 +55,10 @@ pub struct InnerMainWindow<'a> {
     revision_changes_table: MutPtr<QTableWidget>,
     history_button: MutPtr<QPushButton>,
     revisions_table: MutPtr<QTableWidget>,
-    log_win: Rc<LogWin>,
+    log_win: Rc<LogWin<'a>>,
     log_button: MutPtr<QPushButton>,
     clear_log_button: MutPtr<QPushButton>,
+    toggle_log_ctrls_button: MutPtr<QPushButton>,
     dist_popup_menu: MutPtr<QMenu>,
     dist_popup_action: MutPtr<QAction>,
     left_toolbar_actions: LeftToolBarActions,
@@ -96,7 +97,6 @@ impl<'a> InnerMainWindow<'a> {
 
             // create the versionpin table splitter
             let mut vpin_table_splitter = versionpin_table_splitter::create(&mut center_layout_ptr);
-
             // create the versionpin table
             let vpin_tablewidget_ptr = versionpin_table::create(&mut vpin_table_splitter);
 
@@ -111,8 +111,9 @@ impl<'a> InnerMainWindow<'a> {
                 history_button_ptr,
                 log_button,
                 clear_log_button,
+                toggle_log_ctrls_button,
                 controls_ptr,
-            ) = create_bottom_stacked_widget(&mut vpin_table_splitter);
+            ) = create_bottom_stacked_widget(vpin_table_splitter.clone());
 
             // setup popup menu for versionpin table
             let mut dist_popup_menu = QMenu::new();
@@ -137,8 +138,8 @@ impl<'a> InnerMainWindow<'a> {
             // persist data
             let pinchanges_cache = Rc::new(PinChangesCache::new());
             // final housekeeping before showing main window
-            //
-            versionpin_table_splitter::set_sizes(&mut vpin_table_splitter);
+
+            versionpin_table_splitter::set_sizes(vpin_table_splitter.clone());
             withs_splitter::set_sizes(&mut with_splitter_ptr);
 
             resize_window_to_screen(&mut main_window_ptr, 0.8);
@@ -171,6 +172,7 @@ impl<'a> InnerMainWindow<'a> {
                 log_win: Rc::new(log_win),
                 log_button,
                 clear_log_button,
+                toggle_log_ctrls_button,
                 left_toolbar_actions: left_toolbar_actions,
                 search_shortcut: search_shortcut.into_ptr(),
             };
@@ -406,6 +408,16 @@ impl<'a> InnerMainWindow<'a> {
         self.clear_log_button
     }
 
+    /// Returns a mutable pointer to the toggle log controls button
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// * MutPtr<QPushButton>
+    pub unsafe fn toggle_log_ctrls_button(&self) -> MutPtr<QPushButton> {
+        self.toggle_log_ctrls_button
+    }
     /// Returns a mutable pointer to the revisions table
     ///
     /// # Arguments
@@ -514,6 +526,7 @@ pub struct MainWindow<'a> {
     select_history: Slot<'a>,
     select_log: Slot<'a>,
     clear_log: Slot<'a>,
+    toggle_log_ctrls: SlotOfBool<'a>,
     toggle_packages_tree: SlotOfBool<'a>,
     toggle_withs: SlotOfBool<'a>,
     toggle_vpin_changes: SlotOfBool<'a>,
@@ -608,6 +621,10 @@ impl<'a> MainWindow<'a> {
 
             clear_log: Slot::new(enclose! { (main) move || {
                main.logger().clear_log();
+            }}),
+
+            toggle_log_ctrls: SlotOfBool::new(enclose! { (main) move |state: bool| {
+                main.logger().inner().set_ctrls_visible(state);
             }}),
 
             toggle_packages_tree: SlotOfBool::new(enclose! { (main) move |state: bool| {
@@ -709,6 +726,9 @@ impl<'a> MainWindow<'a> {
         main.clear_log_button()
             .clicked()
             .connect(&main_win.clear_log);
+        main.toggle_log_ctrls_button()
+            .clicked()
+            .connect(&main_win.toggle_log_ctrls);
 
         main.left_toolbar_actions()
             .view_packages

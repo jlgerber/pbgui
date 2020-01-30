@@ -27,7 +27,7 @@ pub fn create(center_layout_ptr: &mut MutPtr<QVBoxLayout>) -> MutPtr<QSplitter> 
 }
 
 /// Set the sizes of the splitter
-pub fn set_sizes(splitter: &mut MutPtr<QSplitter>) {
+pub fn set_sizes(mut splitter: MutPtr<QSplitter>) {
     unsafe {
         let mut splitter_sizes = QListOfInt::new();
         splitter_sizes.append_int(Ref::from_raw_ref(&(1000 as i32)));

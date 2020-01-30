@@ -6,9 +6,9 @@ use qt_widgets::{
     cpp_core::{CastInto, CppBox, MutPtr, Ref as QRef},
     q_abstract_item_view::SelectionBehavior,
     q_header_view::ResizeMode,
-    QFrame, QTableView, QWidget,
+    QFrame, QGroupBox, QLabel, QPushButton, QTableView, QWidget,
 };
-use rustqt_utils::{create_vlayout, qs, set_stylesheet_from_str};
+use rustqt_utils::{create_hlayout, create_vlayout, qs, set_stylesheet_from_str};
 
 const STYLE_STR: &'static str = include_str!("../resources/pbgui_logger.qss");
 const COL_0_WIDTH: i32 = 60;
@@ -51,6 +51,8 @@ impl<'a> LogData<'a> {
 pub struct InnerLogWin {
     main: MutPtr<QFrame>,
     table_view: MutPtr<QTableView>,
+    view_ctrls: MutPtr<QFrame>,
+    clear_button: MutPtr<QPushButton>,
     model: MutPtr<QStandardItemModel>,
 }
 
@@ -59,8 +61,9 @@ impl InnerLogWin {
         let mut main_frame = QFrame::new_0a();
         let main_frame_ptr = main_frame.as_mut_ptr();
         main_frame.set_object_name(&qs("LoggerMainFrame"));
+
         // create main layout
-        let mut main_layout = create_vlayout();
+        let mut main_layout = create_hlayout();
 
         // create the view
         let mut view = QTableView::new_0a();
@@ -94,15 +97,35 @@ impl InnerLogWin {
 
         // add the view to the main layout
         main_layout.add_widget(view.into_ptr());
+
+        // create view controls
+        let mut view_ctrls = QFrame::new_0a();
+        let view_ctrls_ptr = view_ctrls.as_mut_ptr();
+        let mut ctrls_layout = create_vlayout();
+
+        // add clear button
+        let mut clear_button = QPushButton::from_q_string(&QString::from_std_str("Clear"));
+        let clear_button_ptr = clear_button.as_mut_ptr();
+        ctrls_layout.add_widget(clear_button.into_ptr());
+
+        let label = QLabel::from_q_string(&qs("Controls"));
+        ctrls_layout.add_widget(label.into_ptr());
+        view_ctrls.set_layout(ctrls_layout.into_ptr());
+        main_layout.add_widget(view_ctrls.into_ptr());
+
+        // set the main layout
         main_frame.set_layout(main_layout.into_ptr());
+
         // add the main frame to the parent's layout
         let parent = parent.cast_into();
-        let mut layout = parent.layout();
-        layout.add_widget(main_frame.into_ptr());
+        let mut parent_layout = parent.layout();
+        parent_layout.add_widget(main_frame.into_ptr());
 
         Self {
             main: main_frame_ptr,
             table_view: view_ptr,
+            view_ctrls: view_ctrls_ptr,
+            clear_button: clear_button_ptr,
             model: model_ptr,
         }
     }
@@ -117,17 +140,36 @@ impl InnerLogWin {
         self.table_view
     }
 
+    /// Return a mutable pointer to the view control frame
+    pub fn ctrls(&self) -> MutPtr<QFrame> {
+        self.view_ctrls
+    }
+    /// Return a mutable pointer to the clear button
+    pub fn clear_button(&self) -> MutPtr<QPushButton> {
+        self.clear_button
+    }
     /// Retrieve a mutable pointer to the model
     pub fn model(&self) -> MutPtr<QStandardItemModel> {
         self.model
     }
 
+    /// perminantly clear the contents of the log
     pub fn clear_log(&self) {
         unsafe {
             let mut model = self.model;
             model.clear();
         }
     }
+
+    /// Turn the controls on and off
+    pub fn set_ctrls_visible(&self, visible: bool) {
+        unsafe {
+            let mut ctrls = self.view_ctrls;
+            ctrls.set_visible(visible)
+        };
+    }
+
+    /// set the default stylesheet for the child components
     pub fn set_default_stylesheet(&self) {
         set_stylesheet_from_str(STYLE_STR, self.main);
     }

@@ -1,6 +1,6 @@
 [package]
 name = "pbgui"
-version = "0.46.0"
+version = "0.47.0"
 authors = ["jgerber <jlgerber@gmail.com>"]
 edition = "2018"
 

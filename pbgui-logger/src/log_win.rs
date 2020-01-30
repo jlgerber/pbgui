@@ -1,24 +1,38 @@
 use crate::inner_log_win::LogData;
 use crate::InnerLogWin;
+use qt_core::Slot;
 use qt_gui::QStandardItemModel;
 use qt_widgets::{
     cpp_core::{CastInto, MutPtr},
     QTableView, QWidget,
 };
+use rustqt_utils::enclose;
 use std::rc::Rc;
 
-pub struct LogWin {
+pub struct LogWin<'a> {
     inner_log_win: Rc<InnerLogWin>,
+    clear_log: Slot<'a>,
 }
 
-impl LogWin {
+impl<'a> LogWin<'a> {
     /// New up a LogWin instance
     pub unsafe fn new(parent: impl CastInto<MutPtr<QWidget>>) -> Self {
         let inner = Rc::new(InnerLogWin::new(parent));
         inner.set_default_stylesheet();
-        Self {
-            inner_log_win: inner,
-        }
+        let log_win = Self {
+            inner_log_win: inner.clone(),
+            clear_log: Slot::new(enclose! { (inner) move || {
+               inner.clear_log();
+            }}),
+        };
+        log_win
+            .inner()
+            .clear_button()
+            .clicked()
+            .connect(&log_win.clear_log);
+        //configure
+        log_win.inner().set_ctrls_visible(false);
+        log_win
     }
     /// Retrieve the reference counted pointer to the InnerLogWin
     pub unsafe fn inner(&self) -> Rc<InnerLogWin> {
