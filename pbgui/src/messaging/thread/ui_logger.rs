@@ -10,10 +10,27 @@ pub fn match_ui_logger(
     sender: &Sender<IMsg>,
 ) {
     match msg {
-        OUiLogger::SendLog(level, log) => {
+        OUiLogger::SendLog {
+            level,
+            target,
+            module_path,
+            file,
+            line,
+            msg,
+        } => {
             // construct
             sender
-                .send(IUiLogger::Log(level, log).to_imsg())
+                .send(
+                    IUiLogger::Log {
+                        level,
+                        target,
+                        module_path,
+                        file,
+                        line,
+                        msg,
+                    }
+                    .to_imsg(),
+                )
                 .expect("unable to send logs");
             conductor.signal(UiLogger::SendLog.to_event());
         }
