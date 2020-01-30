@@ -6,7 +6,6 @@ pub enum OUiLogger {
     SendLog {
         level: Level,
         target: String,
-        module_path: Option<String>,
         file: Option<String>,
         line: Option<u32>,
         msg: String,

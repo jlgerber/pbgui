@@ -8,7 +8,6 @@ pub fn match_ui_logger<'a>(event: UiLogger, logger: Rc<LogWin>, receiver: &Recei
             if let Ok(IMsg::UiLogger(IUiLogger::Log {
                 level,
                 target,
-                module_path,
                 file,
                 line,
                 msg,
@@ -19,7 +18,6 @@ pub fn match_ui_logger<'a>(event: UiLogger, logger: Rc<LogWin>, receiver: &Recei
                     target: target.as_str(),
                     file: file.as_deref(),
                     line,
-                    module_path: module_path.as_deref(),
                 };
                 unsafe {
                     let mut log_data = Some(log_data);

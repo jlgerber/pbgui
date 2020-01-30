@@ -1,6 +1,5 @@
 use crate::inner_log_win::LogData;
 use crate::InnerLogWin;
-use log::Level;
 use qt_gui::QStandardItemModel;
 use qt_widgets::{
     cpp_core::{CastInto, MutPtr},

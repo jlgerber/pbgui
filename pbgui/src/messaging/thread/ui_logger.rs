@@ -13,7 +13,6 @@ pub fn match_ui_logger(
         OUiLogger::SendLog {
             level,
             target,
-            module_path,
             file,
             line,
             msg,
@@ -24,7 +23,6 @@ pub fn match_ui_logger(
                     IUiLogger::Log {
                         level,
                         target,
-                        module_path,
                         file,
                         line,
                         msg,

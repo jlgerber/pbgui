@@ -3,34 +3,30 @@ use crate::messaging::OMsg;
 use crate::messaging::Sender;
 use log::SetLoggerError;
 use log::{Level, Log, Metadata, Record};
-use std::cell::RefCell;
 
-#[derive(Debug, PartialEq)]
-pub struct LogMsgConfig {
-    level: bool,
-    datetime: bool,
-    target: bool,
-    module_path: bool,
-    file: bool,
-    line: bool,
-}
+// #[derive(Debug, PartialEq)]
+// pub struct LogMsgConfig {
+//     level: bool,
+//     datetime: bool,
+//     target: bool,
+//     file: bool,
+//     line: bool,
+// }
 
-impl Default for LogMsgConfig {
-    fn default() -> Self {
-        Self {
-            level: true,
-            datetime: true,
-            target: false,
-            module_path: false,
-            file: false,
-            line: false,
-        }
-    }
-}
+// impl Default for LogMsgConfig {
+//     fn default() -> Self {
+//         Self {
+//             level: true,
+//             datetime: true,
+//             target: false,
+//             file: false,
+//             line: false,
+//         }
+//     }
+// }
 pub struct UiLogger {
     min_level: Level,
     to_thread_sender: Sender<OMsg>,
-    msg_config: LogMsgConfig,
 }
 
 fn cs(input: Option<&str>) -> Option<String> {
@@ -50,7 +46,6 @@ impl Log for UiLogger {
             let level = record.level();
 
             let target = record.target().to_string();
-            let module_path = cs(record.module_path());
             let file = cs(record.file());
             let line = record.line();
 
@@ -59,7 +54,6 @@ impl Log for UiLogger {
                 .send(OMsg::UiLogger(OUiLogger::SendLog {
                     level,
                     target,
-                    module_path,
                     file,
                     line,
                     msg,
@@ -76,7 +70,6 @@ impl UiLogger {
         Self {
             min_level: Level::Debug,
             to_thread_sender,
-            msg_config: LogMsgConfig::default(),
         }
     }
 
