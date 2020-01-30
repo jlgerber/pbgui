@@ -28,7 +28,6 @@ pub fn create_bottom_stacked_widget<'a>(
     MutPtr<QPushButton>,
     MutPtr<QPushButton>,
     MutPtr<QPushButton>,
-    MutPtr<QPushButton>,
     MutPtr<QStackedWidget>,
 ) {
     unsafe {
@@ -149,10 +148,6 @@ pub fn create_bottom_stacked_widget<'a>(
         log_layout.insert_stretch_2a(0, 1);
         let mut log_layout_ptr = log_layout.as_mut_ptr();
         log_widget.set_layout(log_layout.into_ptr());
-        // add clear button
-        let mut clear_button = QPushButton::from_q_string(&QString::from_std_str("Clear"));
-        let clear_button_ptr = clear_button.as_mut_ptr();
-        log_layout_ptr.add_widget(clear_button.into_ptr());
         // add controls button
         let mut log_ctrls_button = QPushButton::from_q_string(&QString::from_std_str("Ctrls"));
         let log_ctrls_button_ptr = log_ctrls_button.as_mut_ptr();
@@ -173,7 +168,6 @@ pub fn create_bottom_stacked_widget<'a>(
             pinchanges_button_ptr,
             history_button_ptr,
             log_button_ptr,
-            clear_button_ptr,
             log_ctrls_button_ptr,
             controls_widget_ptr,
         )

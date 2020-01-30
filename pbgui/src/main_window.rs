@@ -57,7 +57,6 @@ pub struct InnerMainWindow<'a> {
     revisions_table: MutPtr<QTableWidget>,
     log_win: Rc<LogWin<'a>>,
     log_button: MutPtr<QPushButton>,
-    clear_log_button: MutPtr<QPushButton>,
     toggle_log_ctrls_button: MutPtr<QPushButton>,
     dist_popup_menu: MutPtr<QMenu>,
     dist_popup_action: MutPtr<QAction>,
@@ -110,7 +109,6 @@ impl<'a> InnerMainWindow<'a> {
                 pinchanges_button_ptr,
                 history_button_ptr,
                 log_button,
-                clear_log_button,
                 toggle_log_ctrls_button,
                 controls_ptr,
             ) = create_bottom_stacked_widget(vpin_table_splitter.clone());
@@ -171,7 +169,6 @@ impl<'a> InnerMainWindow<'a> {
                 revisions_table: revisions_ptr,
                 log_win: Rc::new(log_win),
                 log_button,
-                clear_log_button,
                 toggle_log_ctrls_button,
                 left_toolbar_actions: left_toolbar_actions,
                 search_shortcut: search_shortcut.into_ptr(),
@@ -397,17 +394,6 @@ impl<'a> InnerMainWindow<'a> {
         self.log_button
     }
 
-    /// Returns a mutable pointer to the clearlog button
-    ///
-    /// # Arguments
-    /// * None
-    ///
-    /// # Returns
-    /// * MutPtr<QPushButton>
-    pub unsafe fn clear_log_button(&self) -> MutPtr<QPushButton> {
-        self.clear_log_button
-    }
-
     /// Returns a mutable pointer to the toggle log controls button
     ///
     /// # Arguments
@@ -525,7 +511,6 @@ pub struct MainWindow<'a> {
     select_pin_changes: Slot<'a>,
     select_history: Slot<'a>,
     select_log: Slot<'a>,
-    clear_log: Slot<'a>,
     toggle_log_ctrls: SlotOfBool<'a>,
     toggle_packages_tree: SlotOfBool<'a>,
     toggle_withs: SlotOfBool<'a>,
@@ -617,10 +602,6 @@ impl<'a> MainWindow<'a> {
             select_log: Slot::new(enclose! { (main) move || {
                 main.bottom_stacked_widget().set_current_index(2);
                 main.bottom_ctrls_stacked_widget().set_current_index(2);
-            }}),
-
-            clear_log: Slot::new(enclose! { (main) move || {
-               main.logger().clear_log();
             }}),
 
             toggle_log_ctrls: SlotOfBool::new(enclose! { (main) move |state: bool| {
@@ -723,9 +704,6 @@ impl<'a> MainWindow<'a> {
 
         main.log_button().clicked().connect(&main_win.select_log);
 
-        main.clear_log_button()
-            .clicked()
-            .connect(&main_win.clear_log);
         main.toggle_log_ctrls_button()
             .clicked()
             .connect(&main_win.toggle_log_ctrls);
