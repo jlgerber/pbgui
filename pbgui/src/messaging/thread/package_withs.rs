@@ -1,7 +1,7 @@
 use super::*;
 
 /// perform a submatch against the OVpinDialog msg
-pub(crate) fn match_package_withs(
+pub fn match_package_withs(
     msg: OPackageWiths,
     db: &mut packybara::db::packrat::PackratDb,
     conductor: &mut qt_thread_conductor::conductor::Conductor<Event>,

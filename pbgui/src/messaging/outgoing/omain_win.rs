@@ -30,8 +30,8 @@ pub enum OMainWin {
     },
 }
 
-impl ToOMsg for OMainWin {
-    fn to_omsg(self) -> OMsg {
+impl<'a> ToOMsg<'a> for OMainWin {
+    fn to_omsg(self) -> OMsg<'a> {
         OMsg::MainWin(self)
     }
 }

@@ -18,17 +18,17 @@ use pbgui_vpin::vpin_dialog::LevelMap;
 ///  sender
 ///    .send(IVpinDialog::Roles(roles).to_imsg())
 ///    .expect("unable to send roles");
-pub trait ToIMsg {
-    fn to_imsg(self) -> IMsg;
+pub trait ToIMsg<'a> {
+    fn to_imsg(self) -> IMsg<'a>;
 }
 
-pub enum IMsg {
+pub enum IMsg<'a> {
     VpinDialog(IVpinDialog),
     PackagesTree(IPackagesTree),
     PackageWiths(IPackageWiths),
     MainToolbar(IMainToolbar),
     MainWin(IMainWin),
-    UiLogger(IUiLogger),
+    UiLogger(IUiLogger<'a>),
     Error(String),
 }
 

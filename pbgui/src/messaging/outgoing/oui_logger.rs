@@ -1,20 +1,13 @@
 use super::*;
-use log::Level;
+use log::Record;
 
-#[derive(Debug, PartialEq)]
-pub enum OUiLogger {
-    SendLog {
-        level: Level,
-        target: String,
-        module_path: Option<String>,
-        file: Option<String>,
-        line: Option<u32>,
-        msg: String,
-    },
+#[derive(Debug)]
+pub enum OUiLogger<'a> {
+    SendLog(Record<'a>),
 }
 
-impl ToOMsg for OUiLogger {
-    fn to_omsg(self) -> OMsg {
+impl<'a> ToOMsg<'a> for OUiLogger<'a> {
+    fn to_omsg(self) -> OMsg<'a> {
         OMsg::UiLogger(self)
     }
 }

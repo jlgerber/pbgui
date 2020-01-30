@@ -1,6 +1,6 @@
 use super::*;
 
-pub(crate) fn match_main_toolbar(
+pub fn match_main_toolbar(
     msg: OMainToolbar,
     db: &mut packybara::db::packrat::PackratDb,
     conductor: &mut qt_thread_conductor::conductor::Conductor<Event>,

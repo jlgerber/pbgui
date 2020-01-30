@@ -6,8 +6,8 @@ pub enum OPackagesTree {
     GetSites,
 }
 
-impl ToOMsg for OPackagesTree {
-    fn to_omsg(self) -> OMsg {
+impl<'a> ToOMsg<'a> for OPackagesTree {
+    fn to_omsg(self) -> OMsg<'a> {
         OMsg::PackagesTree(self)
     }
 }

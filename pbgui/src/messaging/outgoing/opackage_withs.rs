@@ -5,8 +5,8 @@ pub enum OPackageWiths {
     GetPackages,
 }
 
-impl ToOMsg for OPackageWiths {
-    fn to_omsg(self) -> OMsg {
+impl<'a> ToOMsg<'a> for OPackageWiths {
+    fn to_omsg(self) -> OMsg<'a> {
         OMsg::PackageWiths(self)
     }
 }

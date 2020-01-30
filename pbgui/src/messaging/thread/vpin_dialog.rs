@@ -1,7 +1,7 @@
 use super::*;
 
 /// perform a submatch against the OVpinDialog msg
-pub(crate) fn match_vpin_dialog(
+pub fn match_vpin_dialog(
     msg: OVpinDialog,
     db: &mut packybara::db::packrat::PackratDb,
     conductor: &mut qt_thread_conductor::conductor::Conductor<Event>,

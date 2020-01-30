@@ -7,8 +7,8 @@ pub enum OVpinDialog {
     GetLevels(String),
 }
 
-impl ToOMsg for OVpinDialog {
-    fn to_omsg(self) -> OMsg {
+impl<'a> ToOMsg<'a> for OVpinDialog {
+    fn to_omsg(self) -> OMsg<'a> {
         OMsg::VpinDialog(self)
     }
 }

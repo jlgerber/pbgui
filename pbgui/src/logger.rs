@@ -3,7 +3,6 @@ use crate::messaging::OMsg;
 use crate::messaging::Sender;
 use log::SetLoggerError;
 use log::{Level, Log, Metadata, Record};
-use std::cell::RefCell;
 
 #[derive(Debug, PartialEq)]
 pub struct LogMsgConfig {
@@ -27,9 +26,9 @@ impl Default for LogMsgConfig {
         }
     }
 }
-pub struct UiLogger {
+pub struct UiLogger<'a> {
     min_level: Level,
-    to_thread_sender: Sender<OMsg>,
+    to_thread_sender: Sender<OMsg<'a>>,
     msg_config: LogMsgConfig,
 }
 
@@ -40,39 +39,27 @@ fn cs(input: Option<&str>) -> Option<String> {
     }
 }
 
-impl Log for UiLogger {
-    fn enabled(&self, metadata: &Metadata) -> bool {
+impl<'a> Log for UiLogger<'a> {
+    fn enabled(&self, metadata: &Metadata<'a>) -> bool {
         metadata.level() <= self.min_level
     }
 
-    fn log(&self, record: &Record) {
+    fn log(&self, record: &Record<'a>) {
         if self.enabled(record.metadata()) {
             let level = record.level();
 
-            let target = record.target().to_string();
-            let module_path = cs(record.module_path());
-            let file = cs(record.file());
-            let line = record.line();
-
-            let msg = format!("{}", record.args());
-            self.to_thread_sender
-                .send(OMsg::UiLogger(OUiLogger::SendLog {
-                    level,
-                    target,
-                    module_path,
-                    file,
-                    line,
-                    msg,
-                }))
-                .expect("unable to send log data");
+            // let msg = format!("{}", record.args());
+            // self.to_thread_sender
+            //     .send(OMsg::UiLogger(OUiLogger::SendLog(record)))
+            //     .expect("unable to send log data");
         }
     }
 
     fn flush(&self) {}
 }
 
-impl UiLogger {
-    pub fn new(to_thread_sender: Sender<OMsg>) -> Self {
+impl<'a> UiLogger<'a> {
+    pub fn new(to_thread_sender: Sender<OMsg<'a>>) -> Self {
         Self {
             min_level: Level::Debug,
             to_thread_sender,
@@ -85,7 +72,10 @@ impl UiLogger {
     }
 }
 
-pub fn init(to_thread_sender: Sender<OMsg>, default_level: &str) -> Result<(), SetLoggerError> {
+pub fn init<'a>(
+    to_thread_sender: Sender<OMsg<'a>>,
+    default_level: &str,
+) -> Result<(), SetLoggerError> {
     let mut logger = UiLogger::new(to_thread_sender);
     let level = match default_level {
         "trace" => Level::Trace,
@@ -96,5 +86,6 @@ pub fn init(to_thread_sender: Sender<OMsg>, default_level: &str) -> Result<(), S
         _ => Level::Warn,
     };
     logger.set_log_level(level);
-    log::set_boxed_logger(Box::new(logger)).map(|()| log::set_max_level(level.to_level_filter()))
+    let boxlog = Box::new(logger);
+    log::set_boxed_logger(boxlog).map(|()| log::set_max_level(level.to_level_filter()))
 }

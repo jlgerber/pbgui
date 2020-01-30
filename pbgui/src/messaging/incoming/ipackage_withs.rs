@@ -4,8 +4,8 @@ pub enum IPackageWiths {
     Packages(Vec<String>),
 }
 
-impl ToIMsg for IPackageWiths {
-    fn to_imsg(self) -> IMsg {
+impl<'a> ToIMsg<'a> for IPackageWiths {
+    fn to_imsg(self) -> IMsg<'a> {
         IMsg::PackageWiths(self)
     }
 }

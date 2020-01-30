@@ -13,17 +13,17 @@ pub use omain_win::OMainWin;
 pub mod oui_logger;
 pub use oui_logger::OUiLogger;
 ///
-pub trait ToOMsg {
-    fn to_omsg(self) -> OMsg;
+pub trait ToOMsg<'a> {
+    fn to_omsg(self) -> OMsg<'a>;
 }
 
-#[derive(Debug, PartialEq)]
-pub enum OMsg {
+#[derive(Debug)]
+pub enum OMsg<'a> {
     VpinDialog(OVpinDialog),
     PackagesTree(OPackagesTree),
     PackageWiths(OPackageWiths),
     MainToolbar(OMainToolbar),
     MainWin(OMainWin),
-    UiLogger(OUiLogger),
+    UiLogger(OUiLogger<'a>),
     Quit,
 }

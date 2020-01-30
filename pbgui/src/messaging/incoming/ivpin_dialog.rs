@@ -6,8 +6,8 @@ pub enum IVpinDialog {
     Levels(LevelMap),
 }
 
-impl ToIMsg for IVpinDialog {
-    fn to_imsg(self) -> IMsg {
+impl<'a> ToIMsg<'a> for IVpinDialog {
+    fn to_imsg(self) -> IMsg<'a> {
         IMsg::VpinDialog(self)
     }
 }

@@ -1,19 +1,12 @@
 use super::*;
-use log::Level;
+use log::Record;
 
-pub enum IUiLogger {
-    Log {
-        level: Level,
-        target: String,
-        module_path: Option<String>,
-        file: Option<String>,
-        line: Option<u32>,
-        msg: String,
-    },
+pub enum IUiLogger<'a> {
+    Log(Record<'a>),
 }
 
-impl ToIMsg for IUiLogger {
-    fn to_imsg(self) -> IMsg {
+impl<'a> ToIMsg<'a> for IUiLogger<'a> {
+    fn to_imsg(self) -> IMsg<'a> {
         IMsg::UiLogger(self)
     }
 }

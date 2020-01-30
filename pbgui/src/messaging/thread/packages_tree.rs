@@ -1,7 +1,7 @@
 use super::*;
 
 /// perform a submatch against the OVpinDialog msg
-pub(crate) fn match_packages_tree(
+pub fn match_packages_tree(
     msg: OPackagesTree,
     db: &mut packybara::db::packrat::PackratDb,
     conductor: &mut qt_thread_conductor::conductor::Conductor<Event>,

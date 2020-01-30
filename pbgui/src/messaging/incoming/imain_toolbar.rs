@@ -7,8 +7,8 @@ pub enum IMainToolbar {
     Sites(Vec<String>),
 }
 
-impl ToIMsg for IMainToolbar {
-    fn to_imsg(self) -> IMsg {
+impl<'a> ToIMsg<'a> for IMainToolbar {
+    fn to_imsg(self) -> IMsg<'a> {
         IMsg::MainToolbar(self)
     }
 }

@@ -6,7 +6,7 @@ use packybara::OrderDirection;
 use packybara::OrderRevisionBy;
 use std::str::FromStr;
 
-pub(crate) fn match_main_win(
+pub fn match_main_win(
     msg: OMainWin,
     db: &mut packybara::db::packrat::PackratDb,
     conductor: &mut qt_thread_conductor::conductor::Conductor<Event>,

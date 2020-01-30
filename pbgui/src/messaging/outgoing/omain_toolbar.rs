@@ -8,8 +8,8 @@ pub enum OMainToolbar {
     GetSites,
 }
 
-impl ToOMsg for OMainToolbar {
-    fn to_omsg(self) -> OMsg {
+impl<'a> ToOMsg<'a> for OMainToolbar {
+    fn to_omsg(self) -> OMsg<'a> {
         OMsg::MainToolbar(self)
     }
 }

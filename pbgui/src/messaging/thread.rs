@@ -20,22 +20,23 @@ use qt_thread_conductor::conductor::Conductor;
 use qt_widgets::{cpp_core::MutPtr, QApplication, QMainWindow};
 
 pub mod vpin_dialog;
-use vpin_dialog::match_vpin_dialog;
+pub use vpin_dialog::*;
 
 pub mod package_withs;
-use package_withs::match_package_withs;
+pub use package_withs::*;
 
 pub mod packages_tree;
-use packages_tree::match_packages_tree;
+pub use packages_tree::*;
 
 pub mod main_toolbar;
-use main_toolbar::match_main_toolbar;
+pub use main_toolbar::*;
 
 pub mod main_win;
-use main_win::match_main_win;
+pub use main_win::*;
 
 pub mod ui_logger;
-pub use ui_logger::match_ui_logger;
+pub use ui_logger::*;
+
 /// Create the thread that handles requests for data from the ui. The thread
 /// receives messages via the `receiver`, matches against them, and sends data
 /// back to the UI via the `sender`. Finally, triggering an appropriate update
@@ -51,74 +52,61 @@ pub use ui_logger::match_ui_logger;
 ///
 /// # Returns
 /// * i32 - The status
-pub fn create(
-    connect_params: ConnectParams,
-    mut main_window: MutPtr<QMainWindow>,
-    mut conductor: Conductor<Event>,
-    sender: Sender<IMsg>,
-    receiver: Receiver<OMsg>,
-    to_thread_sender: Sender<OMsg>,
-    log_level: &str,
-) -> i32 {
-    let mut result = 0;
-    thread::scope(|s| {
-        let handle = s.spawn(|_| {
-            let client = match ClientProxy::connect(connect_params) {
-                Ok(client) => client,
-                Err(err) => {
-                    sender
-                        .send(IMsg::Error(err.to_string()))
-                        .expect("unable to send roles");
-                    conductor.signal(Event::Error);
-                    panic!("unable to connect to database");
-                }
-            };
-            let mut db = PackratDb::new(client);
-            //let mut show: Option<String> = None;
-            loop {
-                let msg = receiver.recv().expect("Unable to unwrap received msg");
-                match msg {
-                    OMsg::VpinDialog(msg) => {
-                        match_vpin_dialog(msg, &mut db, &mut conductor, &sender);
-                    }
-                    OMsg::PackagesTree(msg) => {
-                        match_packages_tree(msg, &mut db, &mut conductor, &sender);
-                    }
-                    OMsg::PackageWiths(msg) => {
-                        match_package_withs(msg, &mut db, &mut conductor, &sender);
-                    }
-                    OMsg::MainToolbar(msg) => {
-                        match_main_toolbar(msg, &mut db, &mut conductor, &sender);
-                    }
-                    OMsg::MainWin(msg) => {
-                        match_main_win(msg, &mut db, &mut conductor, &sender);
-                    }
-                    OMsg::UiLogger(msg) => {
-                        match_ui_logger(msg, &mut conductor, &sender);
-                    }
-                    OMsg::Quit => {
-                        log::info!("From secondary thread. Quitting after receiving OMsg::Quit");
-                        // try break instead of return
-                        break;
-                    }
-                }
-            }
-        });
-        // the application needs to show and execute before the thread handle is joined
-        // so that the scope lives longer than the application
-        unsafe {
-            main_window.show();
-            match logger::init(to_thread_sender, log_level) {
-                Ok(_) => (),
-                Err(e) => println!("{:?}", e),
-            }
-            result = QApplication::exec();
-        }
-        let _res = handle.join().expect("problem joining scoped thread handle");
-    })
-    .expect("problem with scoped channel");
-    result
-}
+// pub fn create<'a>(
+//     connect_params: ConnectParams<'a>,
+//     mut conductor: Conductor<Event>,
+//     sender: Sender<IMsg<'a>>,
+//     receiver: Receiver<OMsg<'a>>,
+//     to_thread_sender: Sender<OMsg<'a>>,
+//     log_level: &'a str,
+//     s: &crossbeam_utils::thread::Scope<'a>,
+// ) -> crossbeam_utils::thread::ScopedJoinHandle<'a, ()> {
+//     //thread::scope(|s| {
+//     let handle = s.spawn(|_| {
+//         let client = match ClientProxy::connect(connect_params) {
+//             Ok(client) => client,
+//             Err(err) => {
+//                 sender
+//                     .send(IMsg::Error(err.to_string()))
+//                     .expect("unable to send roles");
+//                 conductor.signal(Event::Error);
+//                 panic!("unable to connect to database");
+//             }
+//         };
+//         let mut db = PackratDb::new(client);
+//         loop {
+//             let msg = receiver.recv().expect("Unable to unwrap received msg");
+//             match msg {
+//                 OMsg::VpinDialog(msg) => {
+//                     match_vpin_dialog(msg, &mut db, &mut conductor, &sender);
+//                 }
+//                 OMsg::PackagesTree(msg) => {
+//                     match_packages_tree(msg, &mut db, &mut conductor, &sender);
+//                 }
+//                 OMsg::PackageWiths(msg) => {
+//                     match_package_withs(msg, &mut db, &mut conductor, &sender);
+//                 }
+//                 OMsg::MainToolbar(msg) => {
+//                     match_main_toolbar(msg, &mut db, &mut conductor, &sender);
+//                 }
+//                 OMsg::MainWin(msg) => {
+//                     match_main_win(msg, &mut db, &mut conductor, &sender);
+//                 }
+//                 OMsg::UiLogger(msg) => {
+//                     match_ui_logger(msg, &mut conductor, &sender);
+//                 }
+//                 OMsg::Quit => {
+//                     log::info!("From secondary thread. Quitting after receiving OMsg::Quit");
+//                     // try break instead of return
+//                     break;
+//                 }
+//             }
+//         }
+//     });
+//     // the application needs to show and execute before the thread handle is joined
+//     // so that the scope lives longer than the application
+//     handle
+// }
 /// Create the slot that handles terminating the secondary thread when
 /// the application is about to quit. This function will also wire up
 /// the appropriate signal & slot to handle this.
@@ -129,7 +117,10 @@ pub fn create(
 ///
 /// # Returns
 /// * the slot designed to terminate the secondary thread
-pub fn create_quit_slot<'a>(to_thread_sender: Sender<OMsg>, app: MutPtr<QApplication>) -> Slot<'a> {
+pub fn create_quit_slot<'a>(
+    to_thread_sender: Sender<OMsg<'a>>,
+    app: MutPtr<QApplication>,
+) -> Slot<'a> {
     let quit_slot = Slot::new(move || {
         log::info!("Sending secondary thread termination request ");
         to_thread_sender.send(OMsg::Quit).expect("couldn't send");

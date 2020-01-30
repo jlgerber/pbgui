@@ -19,8 +19,8 @@ pub enum IMainWin {
     },
 }
 
-impl ToIMsg for IMainWin {
-    fn to_imsg(self) -> IMsg {
+impl<'a> ToIMsg<'a> for IMainWin {
+    fn to_imsg(self) -> IMsg<'a> {
         IMsg::MainWin(self)
     }
 }

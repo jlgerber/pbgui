@@ -5,8 +5,8 @@ pub enum IPackagesTree {
     Sites(Vec<String>),
 }
 
-impl ToIMsg for IPackagesTree {
-    fn to_imsg(self) -> IMsg {
+impl<'a> ToIMsg<'a> for IPackagesTree {
+    fn to_imsg(self) -> IMsg<'a> {
         IMsg::PackagesTree(self)
     }
 }

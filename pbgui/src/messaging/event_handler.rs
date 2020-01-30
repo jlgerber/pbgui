@@ -49,7 +49,7 @@ use ui_logger_eh::match_ui_logger;
 pub fn new_event_handler<'a>(
     dialog: Rc<vpin_dialog::VpinDialog<'a>>,
     main: Rc<InnerMainWindow<'a>>,
-    receiver: Receiver<IMsg>,
+    receiver: Receiver<IMsg<'a>>,
 ) -> SlotOfQString<'a> {
     SlotOfQString::new(move |name: Ref<QString>| unsafe {
         let tree = main.tree();

@@ -5,17 +5,10 @@ use std::rc::Rc;
 pub fn match_ui_logger<'a>(event: UiLogger, logger: Rc<LogWin>, receiver: &Receiver<IMsg>) {
     match event {
         UiLogger::SendLog => {
-            if let Ok(IMsg::UiLogger(IUiLogger::Log {
-                level,
-                target,
-                module_path,
-                file,
-                line,
-                msg,
-            })) = receiver.recv()
-            {
+            if let Ok(IMsg::UiLogger(IUiLogger::Log(record))) = receiver.recv() {
                 unsafe {
-                    let mut level = Some(level);
+                    let msg = format!("{}", record.args());
+                    let mut level = Some(record.level());
                     for log in msg.split("\n") {
                         logger.log(level, log);
                         level = None
