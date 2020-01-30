@@ -1,6 +1,6 @@
 use super::*;
 use crate::messaging::{event::ui_logger::UiLogger, incoming::IUiLogger};
-use pbgui_logger::log_win::LogWin;
+use pbgui_logger::{inner_log_win::LogData, log_win::LogWin};
 use std::rc::Rc;
 pub fn match_ui_logger<'a>(event: UiLogger, logger: Rc<LogWin>, receiver: &Receiver<IMsg>) {
     match event {
@@ -14,11 +14,18 @@ pub fn match_ui_logger<'a>(event: UiLogger, logger: Rc<LogWin>, receiver: &Recei
                 msg,
             })) = receiver.recv()
             {
+                let log_data = LogData {
+                    level,
+                    target: target.as_str(),
+                    file: file.as_deref(),
+                    line,
+                    module_path: module_path.as_deref(),
+                };
                 unsafe {
-                    let mut level = Some(level);
+                    let mut log_data = Some(log_data);
                     for log in msg.split("\n") {
-                        logger.log(level, log);
-                        level = None
+                        logger.log(log_data, log);
+                        log_data = None
                     }
                 }
             } else {

@@ -1,3 +1,4 @@
+use crate::inner_log_win::LogData;
 use crate::InnerLogWin;
 use log::Level;
 use qt_gui::QStandardItemModel;
@@ -38,7 +39,7 @@ impl LogWin {
         self.inner_log_win.table_view()
     }
 
-    pub unsafe fn log(&self, level: Option<Level>, msg: &str) {
-        self.inner_log_win.log(level, msg);
+    pub unsafe fn log(&self, log_data: Option<LogData>, msg: &str) {
+        self.inner_log_win.log(log_data, msg);
     }
 }
