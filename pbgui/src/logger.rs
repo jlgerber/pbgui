@@ -44,7 +44,6 @@ impl Log for UiLogger {
     fn log(&self, record: &Record) {
         if self.enabled(record.metadata()) {
             let level = record.level();
-
             let target = record.target().to_string();
             let file = cs(record.file());
             let line = record.line();

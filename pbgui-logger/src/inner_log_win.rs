@@ -14,8 +14,8 @@ use rustqt_utils::{create_hlayout, create_vlayout, qs, set_stylesheet_from_str};
 const STYLE_STR: &'static str = include_str!("../resources/pbgui_logger.qss");
 const COL_0_WIDTH: i32 = 60;
 const COL_1_WIDTH: i32 = 180;
-const COL_2_WIDTH: i32 = 120;
-const COL_3_WIDTH: i32 = 260;
+const COL_2_WIDTH: i32 = 270;
+const COL_3_WIDTH: i32 = 120;
 const COL_4_WIDTH: i32 = 60;
 
 pub struct LogData<'a> {
@@ -518,8 +518,8 @@ impl InnerLogWin {
 
                     model.set_item_3a(rc, 0, loglevel.into_ptr());
                     model.set_item_3a(rc, 1, datetime.into_ptr());
-                    model.set_item_3a(rc, 2, file_item.into_ptr());
-                    model.set_item_3a(rc, 3, target_item.into_ptr());
+                    model.set_item_3a(rc, 2, target_item.into_ptr());
+                    model.set_item_3a(rc, 3, file_item.into_ptr());
                     model.set_item_3a(rc, 4, line_item.into_ptr());
                     model.set_item_3a(rc, 5, item.into_ptr());
                 }
@@ -546,8 +546,8 @@ impl InnerLogWin {
 
                     model.set_item_3a(rc, 0, loglevel.into_ptr());
                     model.set_item_3a(rc, 1, datetime.into_ptr());
-                    model.set_item_3a(rc, 2, file_item.into_ptr());
-                    model.set_item_3a(rc, 3, target_item.into_ptr());
+                    model.set_item_3a(rc, 2, target_item.into_ptr());
+                    model.set_item_3a(rc, 3, file_item.into_ptr());
                     model.set_item_3a(rc, 4, line_item.into_ptr());
                     model.set_item_3a(rc, 5, item.into_ptr());
                 }
@@ -573,8 +573,8 @@ impl InnerLogWin {
 
                     model.set_item_3a(rc, 0, loglevel.into_ptr());
                     model.set_item_3a(rc, 1, datetime.into_ptr());
-                    model.set_item_3a(rc, 2, file_item.into_ptr());
-                    model.set_item_3a(rc, 3, target_item.into_ptr());
+                    model.set_item_3a(rc, 2, target_item.into_ptr());
+                    model.set_item_3a(rc, 3, file_item.into_ptr());
                     model.set_item_3a(rc, 4, line_item.into_ptr());
                     model.set_item_3a(rc, 5, item.into_ptr());
                 }
@@ -600,8 +600,8 @@ impl InnerLogWin {
 
                     model.set_item_3a(rc, 0, loglevel.into_ptr());
                     model.set_item_3a(rc, 1, datetime.into_ptr());
-                    model.set_item_3a(rc, 2, file_item.into_ptr());
-                    model.set_item_3a(rc, 3, target_item.into_ptr());
+                    model.set_item_3a(rc, 2, target_item.into_ptr());
+                    model.set_item_3a(rc, 3, file_item.into_ptr());
                     model.set_item_3a(rc, 4, line_item.into_ptr());
                     model.set_item_3a(rc, 5, item.into_ptr());
                 }
@@ -627,8 +627,8 @@ impl InnerLogWin {
 
                     model.set_item_3a(rc, 0, loglevel.into_ptr());
                     model.set_item_3a(rc, 1, datetime.into_ptr());
-                    model.set_item_3a(rc, 2, file_item.into_ptr());
-                    model.set_item_3a(rc, 3, target_item.into_ptr());
+                    model.set_item_3a(rc, 2, target_item.into_ptr());
+                    model.set_item_3a(rc, 3, file_item.into_ptr());
                     model.set_item_3a(rc, 4, line_item.into_ptr());
                     model.set_item_3a(rc, 5, item.into_ptr());
                 }
@@ -642,8 +642,8 @@ impl InnerLogWin {
                     item.set_text(&qs(msg));
                     model.set_item_3a(rc, 0, loglevel.into_ptr());
                     model.set_item_3a(rc, 1, datetime.into_ptr());
-                    model.set_item_3a(rc, 2, file_item.into_ptr());
-                    model.set_item_3a(rc, 3, target_item.into_ptr());
+                    model.set_item_3a(rc, 2, target_item.into_ptr());
+                    model.set_item_3a(rc, 3, file_item.into_ptr());
                     model.set_item_3a(rc, 4, line_item.into_ptr());
                     model.set_item_3a(rc, 5, item.into_ptr());
                 }
