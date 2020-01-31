@@ -648,19 +648,6 @@ impl InnerLogWin {
                     model.set_item_3a(rc, 5, item.into_ptr());
                 }
             }
-            // the following was a result of using model.clear instead of model.remove_rows
-            /*
-            // we have to reset the sizing once we have cleared the table so we
-            // might as well do this when we add our first item
-            if rc == 1 {
-                let mut view = self.table_view();
-                view.set_column_width(0, COL_0_WIDTH);
-                view.set_column_width(1, COL_1_WIDTH);
-                view.set_column_width(2, COL_2_WIDTH);
-                view.set_column_width(3, COL_3_WIDTH);
-                view.set_column_width(4, COL_4_WIDTH);
-            }
-            */
             self.table_view().scroll_to_bottom();
         }
     }
