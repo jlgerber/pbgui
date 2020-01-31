@@ -442,11 +442,12 @@ impl InnerLogWin {
         self.hide_file_md_cb(!config.file);
         self.hide_line_md_cb(!config.line);
     }
-    /// perminantly clear the contents of the log
+    /// perminently clear the contents of the log
     pub fn clear_log(&self) {
         unsafe {
+            let cnt = self.model.row_count_0a();
             let mut model = self.model;
-            model.clear();
+            model.remove_rows_2a(0, cnt);
         }
     }
 
@@ -647,6 +648,8 @@ impl InnerLogWin {
                     model.set_item_3a(rc, 5, item.into_ptr());
                 }
             }
+            // the following was a result of using model.clear instead of model.remove_rows
+            /*
             // we have to reset the sizing once we have cleared the table so we
             // might as well do this when we add our first item
             if rc == 1 {
@@ -657,6 +660,7 @@ impl InnerLogWin {
                 view.set_column_width(3, COL_3_WIDTH);
                 view.set_column_width(4, COL_4_WIDTH);
             }
+            */
             self.table_view().scroll_to_bottom();
         }
     }
