@@ -1,7 +1,7 @@
 use chrono::{DateTime, Local};
 use log::Level;
 use qt_core::{GlobalColor, QString};
-use qt_gui::{QBrush, QStandardItem, QStandardItemModel};
+use qt_gui::{QBrush, QColor, QStandardItem, QStandardItemModel};
 use qt_widgets::{
     cpp_core::{CastInto, CppBox, MutPtr, Ref as QRef},
     q_abstract_item_view::SelectionBehavior,
@@ -67,6 +67,55 @@ impl Default for LogLevelCtrlsConfig {
     }
 }
 
+pub enum LogColor {
+    GlobalColor(GlobalColor),
+    QColor(CppBox<QColor>),
+}
+
+impl LogColor {
+    pub fn get_brush(&self) -> CppBox<QBrush> {
+        unsafe {
+            match self {
+                Self::GlobalColor(gc) => QBrush::from_global_color(*gc),
+                Self::QColor(color) => QBrush::from_q_color(color),
+            }
+        }
+    }
+}
+
+pub struct LogLevelColorsConfig {
+    pub trace: LogColor,
+    pub debug: LogColor,
+    pub info: LogColor,
+    pub warn: LogColor,
+    pub error: LogColor,
+}
+
+impl Default for LogLevelColorsConfig {
+    fn default() -> Self {
+        unsafe {
+            Self {
+                trace: LogColor::GlobalColor(GlobalColor::DarkCyan),
+                debug: LogColor::GlobalColor(GlobalColor::Cyan),
+                info: LogColor::QColor(QColor::from_rgb_3a(80, 210, 255)),
+                warn: LogColor::GlobalColor(GlobalColor::Yellow),
+                error: LogColor::GlobalColor(GlobalColor::Red),
+            }
+        }
+    }
+}
+
+impl LogLevelColorsConfig {
+    pub fn get(&self, level: &Level) -> &LogColor {
+        match level {
+            Level::Trace => &self.trace,
+            Level::Debug => &self.debug,
+            Level::Info => &self.info,
+            Level::Warn => &self.warn,
+            Level::Error => &self.error,
+        }
+    }
+}
 /// Configuration for the log metadata in the log ui's controls, dictating
 /// the state of the checkboxes for log metadata
 pub struct LogMetadataCtrlsConfig {
@@ -136,6 +185,7 @@ pub struct InnerLogWin {
     line_md_cb: MutPtr<QCheckBox>,
     model: MutPtr<QStandardItemModel>,
     visible_levels: LogLevelState,
+    level_colors: LogLevelColorsConfig,
 }
 
 impl InnerLogWin {
@@ -143,6 +193,7 @@ impl InnerLogWin {
         parent: impl CastInto<MutPtr<QWidget>>,
         levelconfig: &LogLevelCtrlsConfig,
         metadataconfig: &LogMetadataCtrlsConfig,
+        level_colors_config: LogLevelColorsConfig,
     ) -> Self {
         let mut main_frame = QFrame::new_0a();
         let main_frame_ptr = main_frame.as_mut_ptr();
@@ -222,6 +273,7 @@ impl InnerLogWin {
             line_md_cb,
             model: model_ptr,
             visible_levels: LogLevelState::new(levelconfig),
+            level_colors: level_colors_config,
         }
     }
 
@@ -659,7 +711,7 @@ impl InnerLogWin {
                     file_item.set_text(&qs(file.unwrap_or("").split("/").last().unwrap_or("")));
                     line_item.set_text(&qs(line.unwrap_or(0).to_string().as_str()));
 
-                    let brush = QBrush::from_global_color(GlobalColor::Cyan);
+                    let brush = self.level_colors.get(&level).get_brush(); //QBrush::from_global_color(self.level_colors.get(&level));
                     loglevel.set_foreground(brush.as_ref());
                     datetime.set_foreground(brush.as_ref());
                     target_item.set_foreground(brush.as_ref());

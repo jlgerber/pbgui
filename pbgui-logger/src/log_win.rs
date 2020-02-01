@@ -1,4 +1,6 @@
-use crate::inner_log_win::{LogData, LogLevelCtrlsConfig, LogMetadataCtrlsConfig};
+use crate::inner_log_win::{
+    LogData, LogLevelColorsConfig, LogLevelCtrlsConfig, LogMetadataCtrlsConfig,
+};
 use crate::InnerLogWin;
 use log::Level;
 use qt_core::{Slot, SlotOfInt};
@@ -35,6 +37,7 @@ impl<'a> LogWin<'a> {
             parent,
             &log_level_ctrls_config,
             &log_metadata_ctrls_config,
+            LogLevelColorsConfig::default(),
         ));
         inner.set_default_stylesheet();
         let log_win = Self {
