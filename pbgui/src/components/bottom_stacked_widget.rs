@@ -169,7 +169,6 @@ pub fn create_bottom_stacked_widget<'a>(
             Mode::Normal,
             State::On,
         );
-
         let mut log_ctrls_button =
             QPushButton::from_q_icon_q_string(&mode_icon, &QString::from_std_str(""));
         log_ctrls_button.set_object_name(&qs("LogCtrlsBtn"));

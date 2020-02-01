@@ -105,39 +105,7 @@ QHeaderView::section#RevisionsHeader, QHeaderView::section#ChangesHeader {
 QFrame > QLabel {
     margin-right: 10px;
 }
-/*  
- QComboBox {
-    border: 1px solid gray;
-    border-radius: 3px;
-    padding: 1px 18px 1px 3px;
-    min-width: 6em;
-    background: rgb(80,80,80);
-} 
 
-QComboBox:on { 
-    padding-top: 3px;
-    padding-left: 4px;
-}
-
-QComboBox::drop-down {
-    subcontrol-origin: padding;
-    subcontrol-position: top right;
-    width: 15px;
-
-    border-left-width: 1px;
-    border-left-color: darkgray;
-    border-left-style: solid; 
-    border-top-right-radius: 3px; 
-    border-bottom-right-radius: 3px;
-}
-
-QComboBox::down-arrow {
-    color: darkgray;
-    image: url(:/images/dropdown.png);
-    width: 10px;
-    height: 10px;
-   
-} */
 
 QToolBar#LeftToolBar {
     border: none; 
@@ -146,16 +114,9 @@ QToolBar#LeftToolBar {
     padding-left: 10px;
 }
 
-QToolButton {
-    /* margin-left: 10px; */
-}
 
 QToolButton:checked {
     background:transparent;
-    /* background: rgb(0,50,100);  */
-    /*0 ,100,200 */
-    /* background: rgb(30,30,32); */
-    /* margin-left: 10px; */
     
 }
 
@@ -240,11 +201,6 @@ QComboBox#WithsComboBox::down-arrow {
     width: 10px;
     height: 10px;
 }
-/* 
-#LoggerTable::item {
-    padding: 0px;
-    margin: 0px;
-} */
 
 #LogCtrlsBtn {
     background: transparent;
@@ -252,13 +208,28 @@ QComboBox#WithsComboBox::down-arrow {
 
 
 QPushButton#LogCtrlsBtn:hover {
-    border-radius: 3px;
-    border: 1px solid grey;
+    /* border-radius: 3px; */
+    border: no;
+    border-bottom: 1px solid grey;
+
 }
 
 QPushButton#LogCtrlsBtn:pressed {
-    border-radius: 3px;
-    border: 1px solid white;
+    /* border-radius: 3px; */
+    border: no;
+    border-bottom: 1px solid white;
     /* background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
     stop: 0 #006DCC, stop: .6 #006DCC,stop: 1.0 #0033BF); */
 }
+/* https://bugreports.qt.io/browse/QTBUG-2982?focusedCommentId=321792&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-321792
+QPushButton[external=true]#LogCtrlsBtn:hover {
+    qproperty-icon: url(" "); 
+    qproperty-iconSize: 28px 0px; 
+    background-image: url("link-external.png");
+    background-repeat: no-repeat;
+}
+QPushButton[external=true]:hover {
+    background-image: url("link-external-h.png");
+    background-repeat: no-repeat;
+} 
+*/
