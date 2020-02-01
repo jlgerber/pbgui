@@ -6,7 +6,7 @@ use qt_widgets::{
     cpp_core::{CastInto, CppBox, MutPtr, Ref as QRef},
     q_abstract_item_view::SelectionBehavior,
     q_header_view::ResizeMode,
-    QCheckBox, QFrame, QGroupBox, QHBoxLayout, QPushButton, QTableView, QWidget,
+    QCheckBox, QFrame, QGridLayout, QGroupBox, QHBoxLayout, QPushButton, QTableView, QWidget,
 };
 use rustqt_utils::{create_hlayout, create_vlayout, qs, set_stylesheet_from_str};
 use std::cell::Cell;
@@ -122,7 +122,7 @@ impl LogLevelState {
 pub struct InnerLogWin {
     main: MutPtr<QFrame>,
     table_view: MutPtr<QTableView>,
-    view_ctrls: MutPtr<QFrame>,
+    view_ctrls_qframe: MutPtr<QFrame>,
     clear_button: MutPtr<QPushButton>,
     trace_cb: MutPtr<QCheckBox>,
     debug_cb: MutPtr<QCheckBox>,
@@ -184,7 +184,7 @@ impl InnerLogWin {
         // add the view to the main layout
         main_layout.add_widget(view.into_ptr());
         let AddCtrlsReturn {
-            view_ctrls,
+            view_ctrls_qframe,
             clear_button,
             trace_cb,
             debug_cb,
@@ -208,7 +208,7 @@ impl InnerLogWin {
         Self {
             main: main_frame_ptr,
             table_view: view_ptr,
-            view_ctrls,
+            view_ctrls_qframe,
             clear_button,
             trace_cb,
             debug_cb,
@@ -226,32 +226,41 @@ impl InnerLogWin {
     }
 
     fn add_ctrls(
-        mut layout: MutPtr<QHBoxLayout>,
+        mut parent_layout: MutPtr<QHBoxLayout>,
         levelconfig: &LogLevelCtrlsConfig,
         metadataconfig: &LogMetadataCtrlsConfig,
     ) -> AddCtrlsReturn {
         unsafe {
-            // create view controls
-            let mut view_ctrls = QFrame::new_0a();
-            view_ctrls.set_object_name(&qs("LogCtrlsFrame"));
-            let view_ctrls_ptr = view_ctrls.as_mut_ptr();
-            let mut ctrls_layout = create_vlayout();
+            // create view controls - main fram
+            let mut view_ctrls_qframe = QFrame::new_0a();
+            view_ctrls_qframe.set_object_name(&qs("LogCtrlsFrame"));
+            let view_ctrls_qframe_ptr = view_ctrls_qframe.as_mut_ptr();
+            let mut ctrls_top_l = create_vlayout();
+            let mut ctrls_top_layout = ctrls_top_l.as_mut_ptr();
+            view_ctrls_qframe.set_layout(ctrls_top_l.into_ptr());
 
+            let mut ctrls_l = QGridLayout::new_0a(); //create_vlayout();
+            let mut ctrls_layout = ctrls_l.as_mut_ptr();
+            ctrls_layout.set_spacing(10);
+            //view_ctrls_qframe.set_layout(ctrls_l.into_ptr());
+            ctrls_top_layout.add_layout_1a(ctrls_l.into_ptr());
+            ctrls_top_layout.add_stretch_0a();
             // add clear button
             let mut clear_button = QPushButton::from_q_string(&QString::from_std_str("Clear"));
             let clear_button_ptr = clear_button.as_mut_ptr();
-            ctrls_layout.add_widget(clear_button.into_ptr());
+            ctrls_layout.add_widget_5a(clear_button.into_ptr(), 0, 0, 1, 2);
 
             // spacer
             let mut spacer = QFrame::new_0a();
             spacer.set_object_name(&qs("Spacer"));
             spacer.set_minimum_width(20);
             spacer.set_minimum_height(20);
-            ctrls_layout.add_widget(spacer.into_ptr());
+            ctrls_layout.add_widget_3a(spacer.into_ptr(), 1, 0);
 
             let mut loglevel_grp_box = QGroupBox::new();
             let mut loglevel_grp_box_ptr = loglevel_grp_box.as_mut_ptr();
-            ctrls_layout.add_widget(loglevel_grp_box.into_ptr());
+            ctrls_layout.add_widget_3a(loglevel_grp_box.into_ptr(), 2, 0);
+
             let name = qs("Active Log Levels");
             loglevel_grp_box_ptr.set_title(&name);
             loglevel_grp_box_ptr.set_object_name(&name);
@@ -289,17 +298,17 @@ impl InnerLogWin {
             loglevel_grp_box_ptr.set_layout(loglevel_grp_box_layout.into_ptr());
 
             // spacer
-            let mut spacer = QFrame::new_0a();
-            spacer.set_object_name(&qs("Spacer"));
-            spacer.set_minimum_width(20);
-            spacer.set_minimum_height(20);
-            ctrls_layout.add_widget(spacer.into_ptr());
+            // let mut spacer = QFrame::new_0a();
+            // spacer.set_object_name(&qs("Spacer"));
+            // spacer.set_minimum_width(20);
+            // spacer.set_minimum_height(20);
+            // ctrls_layout.add_widget(spacer.into_ptr());
 
             // second group
 
             let mut metadata_grp_box = QGroupBox::new();
             let mut metadata_grp_box_ptr = metadata_grp_box.as_mut_ptr();
-            ctrls_layout.add_widget(metadata_grp_box.into_ptr());
+            ctrls_layout.add_widget_3a(metadata_grp_box.into_ptr(), 2, 1);
             let name = qs("Log Metadata");
 
             metadata_grp_box_ptr.set_title(&name);
@@ -338,11 +347,19 @@ impl InnerLogWin {
 
             metadata_grp_box_ptr.set_layout(metadata_grp_box_layout.into_ptr());
 
-            ctrls_layout.add_stretch_0a();
-            view_ctrls.set_layout(ctrls_layout.into_ptr());
-            layout.add_widget(view_ctrls.into_ptr());
+            //ctrls_layout.add_stretch_0a();
+
+            // spacer
+            let mut spacer = QFrame::new_0a();
+            spacer.set_object_name(&qs("Spacer"));
+            spacer.set_minimum_width(20);
+            spacer.set_minimum_height(20);
+            ctrls_layout.add_widget_5a(spacer.into_ptr(), 4, 0, 1, 2);
+
+            //view_ctrls_qframe.set_layout(ctrls_layout.into_ptr());
+            parent_layout.add_widget(view_ctrls_qframe.into_ptr());
             AddCtrlsReturn {
-                view_ctrls: view_ctrls_ptr,
+                view_ctrls_qframe: view_ctrls_qframe_ptr,
                 clear_button: clear_button_ptr,
                 trace_cb: trace_cb_ptr,
                 debug_cb: debug_cb_ptr,
@@ -370,7 +387,7 @@ impl InnerLogWin {
 
     /// Return a mutable pointer to the view control frame
     pub fn ctrls(&self) -> MutPtr<QFrame> {
-        self.view_ctrls
+        self.view_ctrls_qframe
     }
 
     /// Return a mutable pointer to the clear button
@@ -581,7 +598,7 @@ impl InnerLogWin {
     /// Turn the controls on and off
     pub fn set_ctrls_visible(&self, visible: bool) {
         unsafe {
-            let mut ctrls = self.view_ctrls;
+            let mut ctrls = self.view_ctrls_qframe;
             ctrls.set_visible(visible)
         };
     }
@@ -714,7 +731,7 @@ impl InnerLogWin {
 /// Structure returned by the add_ctrls associated
 /// function
 pub struct AddCtrlsReturn {
-    view_ctrls: MutPtr<QFrame>,
+    view_ctrls_qframe: MutPtr<QFrame>,
     clear_button: MutPtr<QPushButton>,
     trace_cb: MutPtr<QCheckBox>,
     debug_cb: MutPtr<QCheckBox>,
