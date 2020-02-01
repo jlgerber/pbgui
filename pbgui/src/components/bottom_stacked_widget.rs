@@ -12,6 +12,11 @@ use qt_widgets::{
     QWidget,
 };
 
+use qt_core::QSize;
+use qt_gui::{
+    q_icon::{Mode, State},
+    QIcon,
+};
 //
 // Create pinchanges widget
 //
@@ -29,6 +34,7 @@ pub fn create_bottom_stacked_widget<'a>(
     MutPtr<QPushButton>,
     MutPtr<QPushButton>,
     MutPtr<QStackedWidget>,
+    CppBox<QIcon>,
 ) {
     unsafe {
         // create widget
@@ -149,8 +155,26 @@ pub fn create_bottom_stacked_widget<'a>(
         let mut log_layout_ptr = log_layout.as_mut_ptr();
         log_widget.set_layout(log_layout.into_ptr());
         // add controls button
-        let mut log_ctrls_button = QPushButton::from_q_string(&QString::from_std_str("Ctrls"));
+        let mut mode_icon = QIcon::new();
+        let size = QSize::new_2a(24, 24);
+        mode_icon.add_file_4a(
+            &qs(":images/gear_black.svg"),
+            &size,
+            Mode::Normal,
+            State::Off,
+        );
+        mode_icon.add_file_4a(
+            &qs(":images/gear_white.svg"),
+            &size,
+            Mode::Normal,
+            State::On,
+        );
+
+        let mut log_ctrls_button =
+            QPushButton::from_q_icon_q_string(&mode_icon, &QString::from_std_str(""));
+        log_ctrls_button.set_object_name(&qs("LogCtrlsBtn"));
         let log_ctrls_button_ptr = log_ctrls_button.as_mut_ptr();
+
         log_ctrls_button.set_checkable(true);
         log_layout_ptr.add_widget(log_ctrls_button.into_ptr());
         controls.push(log_widget);
@@ -170,6 +194,7 @@ pub fn create_bottom_stacked_widget<'a>(
             log_button_ptr,
             log_ctrls_button_ptr,
             controls_widget_ptr,
+            mode_icon,
         )
     }
 }

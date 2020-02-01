@@ -37,7 +37,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         level
     } else {
-        "warn"
+        "debug"
     };
     // {
     //     env::set_var("RUST_LOG", level);
@@ -59,6 +59,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         ));
         let _result = QResource::register_resource_q_string(&qs(
             "/Users/jgerber/bin/pbgui-resources/pbgui_withlist.rcc",
+        ));
+        let _result = QResource::register_resource_q_string(&qs(
+            "/Users/jgerber/bin/pbgui-resources/pbgui_logger.rcc",
         ));
         let pbgui_root = main_window::MainWindow::new(to_thread_sender.clone());
         init::packages_tree::init(to_thread_sender.clone());

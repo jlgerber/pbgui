@@ -24,6 +24,7 @@ use pbgui_withs::WithsList;
 use qt_core::{
     QItemSelection, QPoint, QString, Slot, SlotOfBool, SlotOfQItemSelectionQItemSelection,
 };
+use qt_gui::QIcon;
 use qt_gui::QKeySequence;
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr, Ref as QRef},
@@ -74,7 +75,12 @@ impl<'a> InnerMainWindow<'a> {
     /// This is a common pattern, mainly designed to allow this author to take advantage
     /// of an api in slots. Without the division, we would have to duplicate logic between
     /// slots and external consumers.
-    pub fn new() -> (InnerMainWindow<'a>, CppBox<QMainWindow>, CppBox<QMenu>) {
+    pub fn new() -> (
+        InnerMainWindow<'a>,
+        CppBox<QMainWindow>,
+        CppBox<QMenu>,
+        CppBox<QIcon>,
+    ) {
         unsafe {
             // create the main window, menus, central widget and layout
             let (mut main_window, main_widget_ptr, mut main_layout_ptr) = create_main_window();
@@ -111,6 +117,7 @@ impl<'a> InnerMainWindow<'a> {
                 log_button,
                 toggle_log_ctrls_button,
                 controls_ptr,
+                mode_icon,
             ) = create_bottom_stacked_widget(vpin_table_splitter.clone());
 
             // setup popup menu for versionpin table
@@ -181,7 +188,7 @@ impl<'a> InnerMainWindow<'a> {
             // configuration
             view_withs.set_checked(false);
 
-            (main_window_inst, main_window, dist_popup_menu)
+            (main_window_inst, main_window, dist_popup_menu, mode_icon)
         }
     }
 
@@ -501,6 +508,7 @@ pub struct MainWindow<'a> {
     main: Rc<InnerMainWindow<'a>>,
     _main_box: CppBox<QMainWindow>,
     _dist_popup_menu_box: CppBox<QMenu>,
+    _logger_icon: CppBox<QIcon>,
     //
     // slots
     //
@@ -529,12 +537,14 @@ impl<'a> MainWindow<'a> {
     /// # Returns
     /// * MainWindow instance
     pub unsafe fn new(to_thread_sender: Sender<OMsg>) -> MainWindow<'a> {
-        let (pbgui_root, pbgui_main_cppbox, dist_popup_menu_box) = InnerMainWindow::new();
+        let (pbgui_root, pbgui_main_cppbox, dist_popup_menu_box, logger_icon) =
+            InnerMainWindow::new();
         let main = Rc::new(pbgui_root);
         let main_win = MainWindow {
             main: main.clone(),
             _main_box: pbgui_main_cppbox,
             _dist_popup_menu_box: dist_popup_menu_box,
+            _logger_icon: logger_icon,
             //
             // slots
             //
