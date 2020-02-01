@@ -233,6 +233,7 @@ impl InnerLogWin {
         unsafe {
             // create view controls
             let mut view_ctrls = QFrame::new_0a();
+            view_ctrls.set_object_name(&qs("LogCtrlsFrame"));
             let view_ctrls_ptr = view_ctrls.as_mut_ptr();
             let mut ctrls_layout = create_vlayout();
 
@@ -240,6 +241,13 @@ impl InnerLogWin {
             let mut clear_button = QPushButton::from_q_string(&QString::from_std_str("Clear"));
             let clear_button_ptr = clear_button.as_mut_ptr();
             ctrls_layout.add_widget(clear_button.into_ptr());
+
+            // spacer
+            let mut spacer = QFrame::new_0a();
+            spacer.set_object_name(&qs("Spacer"));
+            spacer.set_minimum_width(20);
+            spacer.set_minimum_height(20);
+            ctrls_layout.add_widget(spacer.into_ptr());
 
             let mut loglevel_grp_box = QGroupBox::new();
             let mut loglevel_grp_box_ptr = loglevel_grp_box.as_mut_ptr();
@@ -279,6 +287,13 @@ impl InnerLogWin {
             loglevel_grp_box_layout.add_widget(error_cb.into_ptr());
 
             loglevel_grp_box_ptr.set_layout(loglevel_grp_box_layout.into_ptr());
+
+            // spacer
+            let mut spacer = QFrame::new_0a();
+            spacer.set_object_name(&qs("Spacer"));
+            spacer.set_minimum_width(20);
+            spacer.set_minimum_height(20);
+            ctrls_layout.add_widget(spacer.into_ptr());
 
             // second group
 

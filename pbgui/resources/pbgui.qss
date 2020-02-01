@@ -245,3 +245,20 @@ QComboBox#WithsComboBox::down-arrow {
     padding: 0px;
     margin: 0px;
 } */
+
+#LogCtrlsBtn {
+    background: transparent;
+}
+
+
+QPushButton#LogCtrlsBtn:hover {
+    border-radius: 3px;
+    border: 1px solid grey;
+}
+
+QPushButton#LogCtrlsBtn:pressed {
+    border-radius: 3px;
+    border: 1px solid white;
+    /* background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+    stop: 0 #006DCC, stop: .6 #006DCC,stop: 1.0 #0033BF); */
+}

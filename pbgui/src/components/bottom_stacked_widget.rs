@@ -158,7 +158,7 @@ pub fn create_bottom_stacked_widget<'a>(
         let mut mode_icon = QIcon::new();
         let size = QSize::new_2a(24, 24);
         mode_icon.add_file_4a(
-            &qs(":images/gear_black.svg"),
+            &qs(":images/gear_grey.svg"),
             &size,
             Mode::Normal,
             State::Off,

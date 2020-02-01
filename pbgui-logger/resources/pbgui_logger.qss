@@ -7,3 +7,8 @@ QTableView::item {
     padding: 0px;
     height: 6px;
 }
+
+/* #LogCtrlsFrame > QGroupBox { */
+#Spacer {
+   /* border: 1px solid red; */
+}
