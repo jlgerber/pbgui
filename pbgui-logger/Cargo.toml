@@ -11,4 +11,5 @@ qt_widgets = "~0.4.1"
 qt_ui_tools = "~0.4.1"
 log = "~0.4.8"
 chrono = "0.4.10"
+lazy_static = "1.4.0"
 rustqt-utils = {git = "https://github.com/jlgerber/rustqt-utils", tag="v0.6.0"}

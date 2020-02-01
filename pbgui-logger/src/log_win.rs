@@ -13,6 +13,11 @@ use std::rc::Rc;
 pub struct LogWin<'a> {
     inner_log_win: Rc<InnerLogWin>,
     clear_log: Slot<'a>,
+    toggle_trace_cb: SlotOfInt<'a>,
+    toggle_debug_cb: SlotOfInt<'a>,
+    toggle_info_cb: SlotOfInt<'a>,
+    toggle_warn_cb: SlotOfInt<'a>,
+    toggle_error_cb: SlotOfInt<'a>,
     toggle_level_cb: SlotOfInt<'a>,
     toggle_datetime_cb: SlotOfInt<'a>,
     toggle_target_cb: SlotOfInt<'a>,
@@ -37,6 +42,23 @@ impl<'a> LogWin<'a> {
             clear_log: Slot::new(enclose! { (inner) move || {
                inner.clear_log();
             }}),
+
+            toggle_trace_cb: SlotOfInt::new(enclose! {(inner) move |checked: i32| {
+                inner.hide_trace_cb(checked<1)
+            }}),
+            toggle_debug_cb: SlotOfInt::new(enclose! {(inner) move |checked: i32| {
+                inner.hide_debug_cb(checked<1)
+            }}),
+            toggle_info_cb: SlotOfInt::new(enclose! {(inner) move |checked: i32| {
+                inner.hide_info_cb(checked<1)
+            }}),
+            toggle_warn_cb: SlotOfInt::new(enclose! {(inner) move |checked: i32| {
+                inner.hide_warn_cb(checked<1)
+            }}),
+            toggle_error_cb: SlotOfInt::new(enclose! {(inner) move |checked: i32| {
+                inner.hide_error_cb(checked<1)
+            }}),
+
             toggle_level_cb: SlotOfInt::new(enclose! {(inner) move |checked: i32| {
                 inner.hide_level_md_cb(checked<1)
             }}),
@@ -63,6 +85,26 @@ impl<'a> LogWin<'a> {
         let inner = log_win.inner();
         inner.set_ctrls_visible(false);
         inner.configure_view_columns(&log_metadata_ctrls_config);
+        inner
+            .trace_cb()
+            .state_changed()
+            .connect(&log_win.toggle_trace_cb);
+        inner
+            .debug_cb()
+            .state_changed()
+            .connect(&log_win.toggle_debug_cb);
+        inner
+            .info_cb()
+            .state_changed()
+            .connect(&log_win.toggle_info_cb);
+        inner
+            .warn_cb()
+            .state_changed()
+            .connect(&log_win.toggle_warn_cb);
+        inner
+            .error_cb()
+            .state_changed()
+            .connect(&log_win.toggle_error_cb);
         inner
             .level_md_cb()
             .state_changed()

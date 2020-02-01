@@ -8,8 +8,7 @@ use qt_widgets::{
     q_header_view::ResizeMode,
     QCheckBox, QFrame, QGroupBox, QHBoxLayout, QPushButton, QTableView, QWidget,
 };
-
-use rustqt_utils::{create_hlayout, create_vlayout, qs, set_stylesheet_from_str, ToQStringOwned};
+use rustqt_utils::{create_hlayout, create_vlayout, qs, set_stylesheet_from_str};
 use std::cell::Cell;
 
 const STYLE_STR: &'static str = include_str!("../resources/pbgui_logger.qss");
@@ -379,26 +378,105 @@ impl InnerLogWin {
         self.trace_cb
     }
 
+    /// hide or unhide the file metadata checkbox
+    pub fn hide_trace_cb(&self, hide: bool) {
+        unsafe {
+            // let mut view = self.table_view();
+            //view.set_column_hidden(0, hide);
+            if self.visible_levels.trace.get() == hide {
+                let trace = QString::from_std_str("TRACE");
+                self.visible_levels.trace.set(!hide);
+                let mut view = self.table_view();
+                for row in 0..self.model.row_count_0a() {
+                    if self.model.item_2a(row, 0).text().compare_q_string(&trace) == 0 {
+                        view.set_row_hidden(row, hide);
+                    }
+                }
+            }
+        }
+    }
     /// Return the debug level checkbox from the log controlx
     pub fn debug_cb(&self) -> MutPtr<QCheckBox> {
         self.debug_cb
     }
 
+    /// hide or unhide the file metadata checkbox
+    pub fn hide_debug_cb(&self, hide: bool) {
+        unsafe {
+            // this looks backwards becasue we set the
+            // value to !hide
+            if self.visible_levels.debug.get() == hide {
+                let debug = QString::from_std_str("DEBUG");
+                self.visible_levels.debug.set(!hide);
+                let mut view = self.table_view();
+                for row in 0..self.model.row_count_0a() {
+                    if self.model.item_2a(row, 0).text().compare_q_string(&debug) == 0 {
+                        view.set_row_hidden(row, hide);
+                    }
+                }
+            }
+        }
+    }
     /// Return the info level checkbox from the log controlx
     pub fn info_cb(&self) -> MutPtr<QCheckBox> {
         self.info_cb
     }
 
+    /// hide or unhide the file metadata checkbox
+    pub fn hide_info_cb(&self, hide: bool) {
+        unsafe {
+            if self.visible_levels.info.get() == hide {
+                let info = QString::from_std_str("INFO");
+                self.visible_levels.info.set(!hide);
+                let mut view = self.table_view();
+                for row in 0..self.model.row_count_0a() {
+                    if self.model.item_2a(row, 0).text().compare_q_string(&info) == 0 {
+                        view.set_row_hidden(row, hide);
+                    }
+                }
+            }
+        }
+    }
     /// Return the warn level checkbox from the log controlx
     pub fn warn_cb(&self) -> MutPtr<QCheckBox> {
         self.warn_cb
     }
 
+    /// hide or unhide the file metadata checkbox
+    pub fn hide_warn_cb(&self, hide: bool) {
+        unsafe {
+            if self.visible_levels.warn.get() == hide {
+                let warn = QString::from_std_str("WARN");
+                self.visible_levels.warn.set(!hide);
+                let mut view = self.table_view();
+                for row in 0..self.model.row_count_0a() {
+                    if self.model.item_2a(row, 0).text().compare_q_string(&warn) == 0 {
+                        view.set_row_hidden(row, hide);
+                    }
+                }
+            }
+        }
+    }
     /// Return the error level checkbox from the log controlx
     pub fn error_cb(&self) -> MutPtr<QCheckBox> {
         self.error_cb
     }
 
+    /// hide or unhide the file metadata checkbox
+    pub fn hide_error_cb(&self, hide: bool) {
+        unsafe {
+            if self.visible_levels.trace.get() == hide {
+                let error = QString::from_std_str("ERROR");
+                self.visible_levels.error.set(!hide);
+                let mut view = self.table_view();
+                for row in 0..self.model.row_count_0a() {
+                    if self.model.item_2a(row, 0).text().compare_q_string(&error) == 0 {
+                        view.set_row_hidden(row, hide);
+                    }
+                }
+            }
+        }
+    }
     /// Return the level metadata checkbox from the log controlx
     pub fn level_md_cb(&self) -> MutPtr<QCheckBox> {
         self.level_md_cb
