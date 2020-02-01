@@ -14,7 +14,7 @@ pub fn match_ui_logger<'a>(event: UiLogger, logger: Rc<LogWin>, receiver: &Recei
             })) = receiver.recv()
             {
                 let log_data = LogData {
-                    level,
+                    //level,
                     target: target.as_str(),
                     file: file.as_deref(),
                     line,
@@ -22,7 +22,7 @@ pub fn match_ui_logger<'a>(event: UiLogger, logger: Rc<LogWin>, receiver: &Recei
                 unsafe {
                     let mut log_data = Some(log_data);
                     for log in msg.split("\n") {
-                        logger.log(log_data, log);
+                        logger.log(level, log_data, log);
                         log_data = None
                     }
                 }

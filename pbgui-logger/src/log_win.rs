@@ -1,5 +1,6 @@
 use crate::inner_log_win::{LogData, LogLevelCtrlsConfig, LogMetadataCtrlsConfig};
 use crate::InnerLogWin;
+use log::Level;
 use qt_core::{Slot, SlotOfInt};
 use qt_gui::QStandardItemModel;
 use qt_widgets::{
@@ -88,7 +89,7 @@ impl<'a> LogWin<'a> {
     pub unsafe fn inner(&self) -> Rc<InnerLogWin> {
         self.inner_log_win.clone()
     }
-
+    /// Remove all rows of data from the log
     pub fn clear_log(&self) {
         self.inner_log_win.clear_log();
     }
@@ -101,8 +102,8 @@ impl<'a> LogWin<'a> {
     pub unsafe fn table_view(&self) -> MutPtr<QTableView> {
         self.inner_log_win.table_view()
     }
-
-    pub unsafe fn log(&self, log_data: Option<LogData>, msg: &str) {
-        self.inner_log_win.log(log_data, msg);
+    /// inject log data onto the end of the log
+    pub unsafe fn log(&self, level: Level, log_data: Option<LogData>, msg: &str) {
+        self.inner_log_win.log(level, log_data, msg);
     }
 }
