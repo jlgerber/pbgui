@@ -204,6 +204,11 @@ QComboBox#WithsComboBox::down-arrow {
 
 #LogCtrlsBtn {
     background: transparent;
+     margin: 10px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    padding: 0px;
+    padding-bottom: 10px;
 }
 
 
@@ -221,6 +226,13 @@ QPushButton#LogCtrlsBtn:pressed {
     /* background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
     stop: 0 #006DCC, stop: .6 #006DCC,stop: 1.0 #0033BF); */
 }
+
+
+QPushButton#LogCtrlsBtn:on {
+    border: no;
+    border-bottom: 1px solid white;
+}
+
 /* https://bugreports.qt.io/browse/QTBUG-2982?focusedCommentId=321792&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel#comment-321792
 QPushButton[external=true]#LogCtrlsBtn:hover {
     qproperty-icon: url(" "); 
