@@ -1,6 +1,6 @@
 [package]
 name = "pbgui-logger"
-version = "0.6.0"
+version = "0.7.0"
 authors = ["jlgerber <jlgerber@gmail.com>"]
 edition = "2018"
 

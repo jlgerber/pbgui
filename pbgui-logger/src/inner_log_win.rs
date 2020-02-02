@@ -1,4 +1,4 @@
-use crate::output::{Log, LogItem};
+use crate::serialize::{Log, LogItem};
 use chrono::{DateTime, Local};
 use log::Level;
 use qt_core::{GlobalColor, QString};
