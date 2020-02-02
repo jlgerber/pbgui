@@ -22,8 +22,10 @@ strum_macros = "~0.17.1"
 crossbeam = "0.7.3"
 crossbeam-utils = "0.7.0"
 crossbeam-channel = "0.4.0"
-serde = { version = "1.0.104", features = ["derive"] }
-quick-xml = { version = "0.17.2", features = [ "serialize" ] }
+#serde = { version = "1.0.104", features = ["derive"] }
+#quick-xml = { version = "0.17.2", features = [ "serialize" ] }
+simple_xml_serialize = "0.2.3"
+simple_xml_serialize_macro = "0.2.1"
 pbgui-withs = {path= "../pbgui-withs"}
 pbgui-toolbar = {path="../pbgui-toolbar"}
 pbgui-tree = {path="../pbgui-tree"}
