@@ -173,6 +173,7 @@ pub struct InnerLogWin {
     table_view: MutPtr<QTableView>,
     view_ctrls_qframe: MutPtr<QFrame>,
     clear_button: MutPtr<QPushButton>,
+    save_button: MutPtr<QPushButton>,
     trace_cb: MutPtr<QCheckBox>,
     debug_cb: MutPtr<QCheckBox>,
     info_cb: MutPtr<QCheckBox>,
@@ -237,6 +238,7 @@ impl InnerLogWin {
         let AddCtrlsReturn {
             view_ctrls_qframe,
             clear_button,
+            save_button,
             trace_cb,
             debug_cb,
             info_cb,
@@ -261,6 +263,7 @@ impl InnerLogWin {
             table_view: view_ptr,
             view_ctrls_qframe,
             clear_button,
+            save_button,
             trace_cb,
             debug_cb,
             info_cb,
@@ -300,7 +303,12 @@ impl InnerLogWin {
             // add clear button
             let mut clear_button = QPushButton::from_q_string(&QString::from_std_str("Clear"));
             let clear_button_ptr = clear_button.as_mut_ptr();
-            ctrls_layout.add_widget_5a(clear_button.into_ptr(), 0, 0, 1, 2);
+            ctrls_layout.add_widget_5a(clear_button.into_ptr(), 0, 0, 1, 1);
+
+            // add Save button
+            let mut save_button = QPushButton::from_q_string(&QString::from_std_str("Save"));
+            let save_button_ptr = save_button.as_mut_ptr();
+            ctrls_layout.add_widget_5a(save_button.into_ptr(), 0, 1, 1, 1);
 
             // spacer
             let mut spacer = QFrame::new_0a();
@@ -413,6 +421,7 @@ impl InnerLogWin {
             AddCtrlsReturn {
                 view_ctrls_qframe: view_ctrls_qframe_ptr,
                 clear_button: clear_button_ptr,
+                save_button: save_button_ptr,
                 trace_cb: trace_cb_ptr,
                 debug_cb: debug_cb_ptr,
                 info_cb: info_cb_ptr,
@@ -445,6 +454,11 @@ impl InnerLogWin {
     /// Return a mutable pointer to the clear button
     pub fn clear_button(&self) -> MutPtr<QPushButton> {
         self.clear_button
+    }
+
+    /// Return a mutable pointer to the save button
+    pub fn save_button(&self) -> MutPtr<QPushButton> {
+        self.save_button
     }
 
     /// Retrieve a mutable pointer to the model
@@ -785,6 +799,7 @@ impl InnerLogWin {
 pub struct AddCtrlsReturn {
     view_ctrls_qframe: MutPtr<QFrame>,
     clear_button: MutPtr<QPushButton>,
+    save_button: MutPtr<QPushButton>,
     trace_cb: MutPtr<QCheckBox>,
     debug_cb: MutPtr<QCheckBox>,
     info_cb: MutPtr<QCheckBox>,
