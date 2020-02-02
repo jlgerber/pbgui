@@ -1,4 +1,4 @@
-//! Write out packages.xml
+//! Generate packages.xml
 //!
 
 //use quick_xml::{de::from_str, de::DeError, se::to_string};
@@ -65,7 +65,9 @@ impl Packages {
     }
 }
 
-//#[derive(Debug, Serialize, Deserialize, PartialEq)]
+/// Rust representation of the xml element with the `package` tag. Unfortunately,
+/// the tag would more accurately be considered a distribution than a package.
+/// However, we stick with Package to be consistent with the output xml file.
 #[xml_element("package")]
 pub struct Package {
     #[sxs_type_attr]
@@ -81,7 +83,8 @@ pub struct Package {
 }
 
 impl Package {
-    /// New up a package
+    /// New up a Package isntance. (Note that we use the terminology of the packages.xml target file.
+    /// However, the Package struct should probably be named Distribution)
     pub fn new<I: Into<String>>(name: I, version: I, os: Option<I>, site: Option<I>) -> Self {
         Self {
             name: name.into(),
@@ -93,6 +96,14 @@ impl Package {
     }
 
     /// New up a Package instance given the name and version of a distribution
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The package name
+    /// * `version` - The package version
+    ///
+    /// # Returns
+    /// * Package instance
     pub fn from_name_and_version<I: Into<String>>(name: I, version: I) -> Self {
         Self {
             name: name.into(),
@@ -126,18 +137,33 @@ impl Package {
         }
     }
 
-    /// Add a with to the list of withs
+    /// Add a `with`ß to the list of withs
+    ///
+    /// # Arguments
+    ///
+    /// * `with` - An Option wrapped with package name
     pub fn add_with(&mut self, with: With) {
         self.withs.push(with);
     }
 
     /// Add a with package, returning Self. Used as part of a builder pattern.
+    ///
+    /// # Arguments
+    ///
+    /// * `with` - An Option wrapped with package name
+    ///
+    /// # Returns
+    /// * Self
     pub fn add_with_owned(mut self, with: With) -> Self {
         self.withs.push(with);
         self
     }
 
     /// Set the os field.
+    ///
+    /// # Arguments
+    ///
+    /// * `os` - An Option wrapped platform name
     pub fn set_os<I: Into<String>>(&mut self, os: Option<I>) {
         self.os = os.map(|x| x.into());
     }
@@ -196,6 +222,7 @@ impl With {
     }
 }
 
+/// A set of role
 #[xml_element("role")]
 pub struct Roles {
     #[sxs_type_multi_element(rename = "role")]
