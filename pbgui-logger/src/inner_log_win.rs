@@ -1,3 +1,4 @@
+use crate::output::{Log, LogItem};
 use chrono::{DateTime, Local};
 use log::Level;
 use qt_core::{GlobalColor, QString};
@@ -6,7 +7,8 @@ use qt_widgets::{
     cpp_core::{CastInto, CppBox, MutPtr, Ref as QRef},
     q_abstract_item_view::SelectionBehavior,
     q_header_view::ResizeMode,
-    QCheckBox, QFrame, QGridLayout, QGroupBox, QHBoxLayout, QPushButton, QTableView, QWidget,
+    QCheckBox, QFileDialog, QFrame, QGridLayout, QGroupBox, QHBoxLayout, QPushButton, QTableView,
+    QWidget,
 };
 use rustqt_utils::{create_hlayout, create_vlayout, qs, set_stylesheet_from_str};
 use std::cell::Cell;
@@ -660,7 +662,62 @@ impl InnerLogWin {
             model.remove_rows_2a(0, cnt);
         }
     }
+    /// save teh log
+    pub fn save_log(&self, trim_space: bool, trim_return: bool) {
+        unsafe {
+            let output_path = QFileDialog::get_save_file_name_4a(
+                self.main(),
+                &qs("save log"),
+                &qs(""),
+                &qs("*.json"),
+            );
+            if output_path.is_null() {
+                log::debug!("log save cancelled by user");
+                return;
+            }
+            let output_path = output_path.to_std_string();
+            log::info!("saving to {}", &output_path);
+            let mut items: Vec<LogItem> = Vec::new();
+            for row in 0..self.model.row_count_0a() {
+                let level = &self
+                    .model
+                    .item_2a(row, 0)
+                    .text()
+                    .as_mut_ptr()
+                    .to_std_string();
+                let msg = self
+                    .model
+                    .item_2a(row, 5)
+                    .text()
+                    .as_mut_ptr()
+                    .to_std_string();
+                if level.as_str() == "" {
+                    let msg = if trim_space == true { msg.trim() } else { &msg };
+                    let join = if trim_return == true { " " } else { "\n" };
+                    let txt = format!("{}{}", join, msg);
+                    match items.last_mut() {
+                        Some(item) => item.append_msg(txt.as_str()),
+                        None => (),
+                    };
+                    continue;
+                }
 
+                items.push(LogItem::new(
+                    &self.model.item_2a(row, 0).text().as_mut_ptr(),
+                    &self.model.item_2a(row, 1).text().as_mut_ptr(),
+                    &self.model.item_2a(row, 2).text().as_mut_ptr(),
+                    &self.model.item_2a(row, 3).text().as_mut_ptr(),
+                    &self.model.item_2a(row, 4).text().as_mut_ptr(),
+                    msg,
+                ));
+            }
+            let log = Log::new(items);
+            match log.write(&output_path) {
+                Ok(_) => (),
+                Err(e) => log::error!("{:?}", e),
+            };
+        }
+    }
     /// Turn the controls on and off
     pub fn set_ctrls_visible(&self, visible: bool) {
         unsafe {

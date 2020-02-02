@@ -3,6 +3,7 @@ pub use inner_log_win::InnerLogWin;
 
 pub mod log_win;
 pub use log_win::LogWin;
+pub mod output;
 
 #[cfg(test)]
 mod tests {

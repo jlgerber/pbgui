@@ -15,6 +15,7 @@ use std::rc::Rc;
 pub struct LogWin<'a> {
     inner_log_win: Rc<InnerLogWin>,
     clear_log: Slot<'a>,
+    save_log: Slot<'a>,
     toggle_trace_cb: SlotOfInt<'a>,
     toggle_debug_cb: SlotOfInt<'a>,
     toggle_info_cb: SlotOfInt<'a>,
@@ -45,7 +46,10 @@ impl<'a> LogWin<'a> {
             clear_log: Slot::new(enclose! { (inner) move || {
                inner.clear_log();
             }}),
-
+            save_log: Slot::new(enclose! { (inner) move || {
+                // trim_space? trim_return?
+               inner.save_log(true, true);
+            }}),
             toggle_trace_cb: SlotOfInt::new(enclose! {(inner) move |checked: i32| {
                 inner.hide_trace_cb(checked<1)
             }}),
@@ -84,6 +88,11 @@ impl<'a> LogWin<'a> {
             .clear_button()
             .clicked()
             .connect(&log_win.clear_log);
+        log_win
+            .inner()
+            .save_button()
+            .clicked()
+            .connect(&log_win.save_log);
         //configure
         let inner = log_win.inner();
         inner.set_ctrls_visible(false);
