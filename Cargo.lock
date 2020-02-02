@@ -817,7 +817,9 @@ dependencies = [
  "qt_thread_conductor 0.3.1 (git+https://github.com/jlgerber/rust-qt-conductor?tag=v0.3.1)",
  "qt_ui_tools 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "qt_widgets 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "quick-xml 0.17.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustqt-utils 0.6.0 (git+https://github.com/jlgerber/rustqt-utils?tag=v0.6.0)",
+ "serde 1.0.104 (registry+https://github.com/rust-lang/crates.io-index)",
  "structopt 0.3.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "strum 0.17.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "strum_macros 0.17.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -1124,6 +1126,15 @@ dependencies = [
 name = "quick-error"
 version = "1.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "quick-xml"
+version = "0.17.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "memchr 2.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "serde 1.0.104 (registry+https://github.com/rust-lang/crates.io-index)",
+]
 
 [[package]]
 name = "quote"
@@ -1849,6 +1860,7 @@ dependencies = [
 "checksum qt_ui_tools 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)" = "8b07b0b55eb4e8034735360edfe9818d6720ddce8b79c6e1ad63597c7d3bc02a"
 "checksum qt_widgets 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)" = "6ddb098a3fed1e1a6f2329e1fb13a823200897ca4ac53bf37acf4cf8958b9646"
 "checksum quick-error 1.2.3 (registry+https://github.com/rust-lang/crates.io-index)" = "a1d01941d82fa2ab50be1e79e6714289dd7cde78eba4c074bc5a4374f650dfe0"
+"checksum quick-xml 0.17.2 (registry+https://github.com/rust-lang/crates.io-index)" = "fe1e430bdcf30c9fdc25053b9c459bb1a4672af4617b6c783d7d91dc17c6bbb0"
 "checksum quote 0.6.13 (registry+https://github.com/rust-lang/crates.io-index)" = "6ce23b6b870e8f94f81fb0a363d65d86675884b34a09043c81e5562f11c1f8e1"
 "checksum quote 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)" = "053a8c8bcc71fcce321828dc897a98ab9760bef03a4fc36693c231e5b3216cfe"
 "checksum rand 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)" = "6a6b1679d49b24bbfe0c803429aa1874472f50d9b363131f0e89fc356b544d03"
