@@ -252,26 +252,29 @@ pub(crate) fn match_main_win(
                 }
                 if role != &Role::Any {
                     let role_str = role.to_string();
-                    println!("role: {}", role_str.as_str());
-                    let mut role_tag = io::Role::new(role_str);
+                    //println!("role: {}", role_str.as_str());
+                    //let mut role_tag = io::Role::new(role_str);
 
                     //role_tag.add_package(package);
 
                     // if our last iter was a role
                     if let Some(ref last) = last_role {
                         // if the current role is the same as the last
-                        // role, we add the tag into our list
+                        // role, we add the package into our list
                         if role == last {
-                            role_tags.push(role_tag);
+                            role_tags.push(package);
                         } else {
-                            // otherwise we drain the list of saved role tags,
+                            // otherwise we drain the list of saved role packages,
                             // adding them in to the show
-                            for tag in role_tags.drain(..) {
-                                show.add_role(tag);
+                            let mut role_tag = io::Role::new(role_str);
+                            for pkg in role_tags.drain(..) {
+                                role_tag.add_package(pkg);
                             }
+                            show.add_role(role_tag);
                             // and we push the current role tag into our list,
                             // which is now empty
-                            role_tags.push(role_tag);
+                            //role_tags.push(role_tag);
+                            role_tags.push(package);
                         }
                     } else {
                         // in the case where our last iter was NOT a role
@@ -280,7 +283,7 @@ pub(crate) fn match_main_win(
                         //     show.add_role(tag);
                         // }
                         assert_eq!(role_tags.len(), 0);
-                        role_tags.push(role_tag);
+                        //role_tags.push(role_tag);
                     }
                     //let role_cpy = role.clone();
                     last_role = Some(role.clone());
