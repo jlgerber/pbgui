@@ -153,7 +153,7 @@ pub struct Package {
     #[sxs_type_attr]
     site: Option<String>,
     /// withs contents
-    #[sxs_type_multi_element(rename = "withs")]
+    #[sxs_type_multi_element(rename = "with")]
     withs: Vec<With>,
 }
 

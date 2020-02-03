@@ -244,6 +244,11 @@ pub(crate) fn match_main_win(
                 let level = row.coords.level(); // hwo is this handled?
                 let role = row.coords.role();
                 let mut package = io::Package::new(package, version, None, None);
+                if let Some(withs) = row.withs {
+                    for with in withs {
+                        package.add_with(io::With::new(with));
+                    }
+                }
                 if site != &Site::Any {
                     package.set_site(Some(site.to_string()));
                 }
