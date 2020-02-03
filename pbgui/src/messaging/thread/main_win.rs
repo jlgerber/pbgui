@@ -234,7 +234,7 @@ pub(crate) fn match_main_win(
             // iterate through version pins, creating appropriate data structure for outgoing
             let mut show = io::Show::new(show);
             let mut last_role: Option<Role> = None;
-            let mut role_tags = Vec::new();
+            let mut role_packages = Vec::new();
             for row in vpins {
                 let package = row.distribution.package();
                 let version = row.distribution.version();
@@ -252,42 +252,31 @@ pub(crate) fn match_main_win(
                 }
                 if role != &Role::Any {
                     let role_str = role.to_string();
-                    //println!("role: {}", role_str.as_str());
-                    //let mut role_tag = io::Role::new(role_str);
-
-                    //role_tag.add_package(package);
 
                     // if our last iter was a role
                     if let Some(ref last) = last_role {
                         // if the current role is the same as the last
                         // role, we add the package into our list
                         if role == last {
-                            role_tags.push(package);
+                            role_packages.push(package);
                         } else {
-                            // otherwise we drain the list of saved role packages,
-                            // adding them in to the show
+                            // otherwise we drain the list of saved packages,
+                            // adding them in to the current role
                             let mut role_tag = io::Role::new(role_str);
-                            for pkg in role_tags.drain(..) {
+                            for pkg in role_packages.drain(..) {
                                 role_tag.add_package(pkg);
                             }
                             show.add_role(role_tag);
-                            // and we push the current role tag into our list,
+                            // and we push the current package into our list,
                             // which is now empty
-                            //role_tags.push(role_tag);
-                            role_tags.push(package);
+                            role_packages.push(package);
                         }
                     } else {
                         // in the case where our last iter was NOT a role
-                        // role tags should be zero sized
-                        // for tag in role_tags.drain(..) {
-                        //     show.add_role(tag);
-                        // }
-                        assert_eq!(role_tags.len(), 0);
-                        //role_tags.push(role_tag);
+                        // role packages should be zero sized
+                        assert_eq!(role_packages.len(), 0);
                     }
-                    //let role_cpy = role.clone();
                     last_role = Some(role.clone());
-                //show.add_role(role_tag);
                 } else {
                     show.add_package(package);
                     last_role = None;
