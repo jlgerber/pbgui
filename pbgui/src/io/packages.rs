@@ -1,14 +1,13 @@
-//! Generate packages.xml
+//! Structures designed to generate packages.xml
 //!
 
-//use quick_xml::{de::from_str, de::DeError, se::to_string};
-//use serde::{Deserialize, Serialize};
 use simple_xml_serialize::XMLElement;
 use simple_xml_serialize_macro::xml_element;
 use std::mem;
 
 /// Determine if an XML element is closed (eg <foo />)
 pub trait IsClosed {
+    /// Indicates whether or not a Xml Node has contents or not
     fn is_closed(&self) -> bool;
 }
 
@@ -30,6 +29,14 @@ pub struct Show {
 }
 
 impl Show {
+    /// New up a Show instance
+    ///
+    /// #Arguments
+    ///
+    /// * `show` - The name of the show
+    ///
+    /// # Returns
+    /// * Show instance
     pub fn new<I: Into<String>>(show: I) -> Self {
         Self {
             name: show.into(),
@@ -38,15 +45,61 @@ impl Show {
         }
     }
 
+    /// Add a Package instance to the list of packages in the show
+    ///
+    /// # Arguments
+    ///
+    /// * `package` - A Package instance
+    ///
+    /// # Returns
+    /// * None
     pub fn add_package(&mut self, package: Package) {
         self.packages.push(package)
     }
 
+    /// Add a Package instance to the list of packages in the show and
+    /// return Self. Used as part of a builder pattern.
+    ///
+    /// # Arguments
+    ///
+    /// * `package` - A Package instance
+    ///
+    /// # Returns
+    /// * Self
+    pub fn add_package_owned(mut self, package: Package) -> Self {
+        self.packages.push(package);
+        self
+    }
+
+    /// Add a Role instance to the list of roles on the show
+    ///
+    /// # Arguments
+    ///
+    /// * `role` - A Role instance
+    ///
+    /// # Returns
+    /// * None
     pub fn add_role(&mut self, role: Role) {
         self.roles.push(role)
     }
+
+    /// Add a Role instance to the list of roles on the show and return
+    /// Self. Used as part of a builder pattern.
+    ///
+    /// # Arguments
+    ///
+    /// * `role` - A Role instance
+    ///
+    /// # Returns
+    /// * Self
+    pub fn add_role_owned(mut self, role: Role) -> Self {
+        self.roles.push(role);
+        self
+    }
 }
 
+/// Element which represents a parent tag whose contents is a list of packages.
+/// (ie  <package>... </package>)
 #[xml_element("package")]
 pub struct Packages {
     #[sxs_type_multi_element(rename = "package")]
@@ -54,12 +107,29 @@ pub struct Packages {
 }
 
 impl Packages {
+    /// New up an empty Packages instance.
+    ///
+    /// # Arguments
+    ///
+    /// * None
+    ///
+    /// # Returns
+    ///
+    /// * Packages instance
     pub fn new() -> Self {
         Self {
             package: Vec::new(),
         }
     }
 
+    /// Add a package to the list of package contents
+    ///
+    /// # Arguments
+    ///
+    /// * `package` - Package instance
+    ///
+    /// # Returns
+    /// * None
     pub fn push(&mut self, package: Package) {
         self.package.push(package)
     }
@@ -70,14 +140,19 @@ impl Packages {
 /// However, we stick with Package to be consistent with the output xml file.
 #[xml_element("package")]
 pub struct Package {
+    /// Name of the distribution
     #[sxs_type_attr]
     name: String,
+    /// Version of the distribution
     #[sxs_type_attr]
     version: String,
+    /// Optional platform name
     #[sxs_type_attr]
     os: Option<String>,
+    /// Optional site name
     #[sxs_type_attr]
     site: Option<String>,
+    /// withs contents
     #[sxs_type_multi_element(rename = "withs")]
     withs: Vec<With>,
 }
@@ -206,7 +281,8 @@ impl Package {
         self
     }
 }
-//#[derive(Debug, Serialize, Deserialize, PartialEq)]
+
+/// Element that represents a named package.
 #[xml_element("with")]
 pub struct With {
     #[sxs_type_attr]
@@ -215,6 +291,13 @@ pub struct With {
 
 impl With {
     /// New up a With
+    ///
+    /// # Arguments
+    ///
+    /// * `package` - Name of the package
+    ///
+    /// # Returns
+    /// * With instance
     pub fn new<I: Into<String>>(package: I) -> Self {
         Self {
             package: package.into(),
@@ -222,13 +305,15 @@ impl With {
     }
 }
 
-/// A set of role
+/// The element whose contents is a list of Role instances.
+/// (ie <role>...</role>)
 #[xml_element("role")]
 pub struct Roles {
     #[sxs_type_multi_element(rename = "role")]
     role: Vec<Role>,
 }
 impl Roles {
+    /// New up an instance of Roles
     pub fn new() -> Roles {
         Roles { role: Vec::new() }
     }
@@ -241,22 +326,43 @@ impl Roles {
         self.role.push(role)
     }
 }
-//#[derive(Debug, Serialize, Deserialize, PartialEq)]
+
+/// Role element contains a list of Package instances
 #[xml_element("role")]
 pub struct Role {
+    /// Name of the Role
     #[sxs_type_attr]
     name: String,
+    /// packages tag
     #[sxs_type_element(rename = "packages")]
     packages: Packages,
 }
 
 impl Role {
+    /// New up a Role instance
+    ///
+    /// # Arguments
+    ///
+    /// * `name` - The name of the Role, provided as a type which implements
+    /// Into<String>
+    ///
+    /// # Returns
+    /// * Role instance
     pub fn new<I: Into<String>>(name: I) -> Self {
         Self {
             name: name.into(),
             packages: Packages::new(),
         }
     }
+
+    /// Add a Package instance to the list of contents of the node
+    ///
+    /// # Arguments
+    ///
+    /// * `package` - Package instance
+    ///
+    /// # Returns
+    /// * None
     pub fn add_package(&mut self, package: Package) {
         self.packages.push(package);
     }
@@ -297,10 +403,18 @@ pub struct ToXml {
 }
 
 impl ToXml {
+    /// New up an instance of the ToXml converter
     pub fn new() -> Self {
         Self { prune_closed: true }
     }
     /// Convert entry into xml element provided it implw Into<XMLElemet>
+    ///
+    /// # Arguments
+    ///
+    /// * `entry` - instance of an item that implements Into<XLElement>
+    ///
+    /// # Returns
+    /// * XMLElement instance
     pub fn to_xml(&self, entry: impl Into<XMLElement>) -> XMLElement {
         let mut xml = entry.into();
         if self.prune_closed {
@@ -310,16 +424,35 @@ impl ToXml {
     }
 
     /// Given an element, generate a pretty string rep
+    ///
+    /// # Arguments
+    ///
+    /// * `elem` - A reference to an XMLElement
+    ///
+    /// # Returns
+    /// * A pretty formatted string representation of the xml element
     pub fn to_pretty_string(elem: &XMLElement) -> String {
         elem.to_string_pretty("\n", "  ")
     }
 
     /// Given an element, generate a string representation
+    ///
+    /// # Arguments
+    ///
+    /// * `elem` - A reference to an XMLElement
+    ///
+    /// # Returns
+    /// * A formatted string representation of the xml element
     pub fn to_string(elem: &XMLElement) -> String {
         elem.to_string()
     }
 
-    // given a node, prune its closed contents
+    // Given an XMLElement node, prune its closed contents. This is used
+    // to remove empty roles in the case that it is empty in the Snow element.alloc//
+    //
+    // # Arguments
+    //
+    // * `elem` - mutable reference to an XMLElement
     fn prune_closed_contents(elem: &mut XMLElement) {
         if elem.contents.is_some() {
             let contents = elem.contents.take().unwrap();
@@ -336,6 +469,7 @@ impl ToXml {
         }
     }
 }
+
 #[cfg(test)]
 mod tests {
     use super::*;
