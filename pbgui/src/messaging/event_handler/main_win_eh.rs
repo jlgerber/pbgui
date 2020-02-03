@@ -305,6 +305,13 @@ pub unsafe fn match_main_win<'a>(
                 log::error!("PackagesTree::ChooseDistribution IMsg does not match event state");
             }
         }
+        MainWin::SavePackagesXml => {
+            // TODO
+            if let Ok(IMsg::MainWin(IMainWin::SavePackagesXml(success))) = receiver.recv() {
+            } else {
+                log::error!("Unable to save packages.xml to disk");
+            }
+        }
     }
 }
 

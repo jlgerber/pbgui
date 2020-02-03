@@ -17,6 +17,7 @@ pub enum IMainWin {
         version: String,
         row: i32,
     },
+    SavePackagesXml(bool),
 }
 
 impl ToIMsg for IMainWin {

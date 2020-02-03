@@ -11,8 +11,8 @@ pub use components::{
     versionpin_row, versionpin_table, versionpin_table_splitter, withs_splitter,
 };
 pub use slot_functions::{
-    choose_distribution, save_versionpin_changes, select_history, store_withpackage_changes,
-    update_changes_table, update_versionpin_table, update_withpackages,
+    choose_distribution, save_packages_xml, save_versionpin_changes, select_history,
+    store_withpackage_changes, update_changes_table, update_versionpin_table, update_withpackages,
 };
 pub mod change_type;
 pub mod main_window;

@@ -325,6 +325,17 @@ impl Roles {
     pub fn push(&mut self, role: Role) {
         self.role.push(role)
     }
+
+    pub fn last_role(&self) -> Option<&str> {
+        let role_len = self.role.len();
+        if role_len == 0 {
+            return None;
+        }
+        Some(
+            // get unchecked TODO
+            self.role[role_len - 1].name.as_str(),
+        )
+    }
 }
 
 /// Role element contains a list of Package instances

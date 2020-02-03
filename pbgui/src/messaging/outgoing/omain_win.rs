@@ -28,6 +28,10 @@ pub enum OMainWin {
         version: String,
         row: i32,
     },
+    SavePackagesXml {
+        show: String,
+        output: String,
+    },
 }
 
 impl ToOMsg for OMainWin {

@@ -7,6 +7,7 @@ use crate::{
     choose_distribution::choose_alternative_distribution,
     constants::COL_REV_TXID,
     left_toolbar, package_withs_list, packages_tree,
+    save_packages_xml::save_packages_xml,
     save_versionpin_changes::save_versionpin_changes,
     select_history::select_history,
     store_withpackage_changes,
@@ -18,9 +19,11 @@ use crate::{
 };
 use log;
 use pbgui_logger::LogWin;
+use pbgui_menubar::MenuBar;
 use pbgui_toolbar::toolbar;
 use pbgui_tree::tree;
 use pbgui_withs::WithsList;
+
 use qt_core::{
     QItemSelection, QPoint, QString, Slot, SlotOfBool, SlotOfQItemSelectionQItemSelection,
 };
@@ -41,6 +44,7 @@ use std::rc::Rc;
 pub struct InnerMainWindow<'a> {
     main: MutPtr<QMainWindow>,
     main_widget: MutPtr<QWidget>,
+    main_menubar: MenuBar<'a>,
     main_toolbar: Rc<toolbar::MainToolbar>,
     withs_splitter: MutPtr<QSplitter>,
     packages_tree: Rc<RefCell<tree::DistributionTreeView<'a>>>,
@@ -83,7 +87,8 @@ impl<'a> InnerMainWindow<'a> {
     ) {
         unsafe {
             // create the main window, menus, central widget and layout
-            let (mut main_window, main_widget_ptr, mut main_layout_ptr) = create_main_window();
+            let (mut main_window, main_widget_ptr, mut main_layout_ptr, main_menubar) =
+                create_main_window();
             let mut main_window_ptr = main_window.as_mut_ptr();
             let main_toolbar = Rc::new(create_top_toolbar(main_window_ptr.clone()));
 
@@ -157,6 +162,7 @@ impl<'a> InnerMainWindow<'a> {
             let main_window_inst = InnerMainWindow {
                 main: main_window_ptr,
                 main_widget: main_widget_ptr,
+                main_menubar,
                 main_toolbar: main_toolbar,
                 withs_splitter: with_splitter_ptr,
                 packages_tree: packages_ptr,
@@ -219,6 +225,9 @@ impl<'a> InnerMainWindow<'a> {
         self.main_widget
     }
 
+    pub unsafe fn main_menubar(&self) -> &MenuBar {
+        &self.main_menubar
+    }
     /// Returns a reference counted pointer to the PinChangedCache. This is not
     /// suitable to be moved between threads as it is `Rc`.
     ///
@@ -470,14 +479,20 @@ impl<'a> InnerMainWindow<'a> {
 }
 
 // create the main window, the main menubar, and the central widget
-fn create_main_window() -> (CppBox<QMainWindow>, MutPtr<QWidget>, MutPtr<QVBoxLayout>) {
+fn create_main_window<'a>() -> (
+    CppBox<QMainWindow>,
+    MutPtr<QWidget>,
+    MutPtr<QVBoxLayout>,
+    MenuBar<'a>,
+) {
     unsafe {
         let mut main_window = QMainWindow::new_0a();
         // the qmainwindow takes ownership of the menubar,
         // even though it takes a MutPtr instead of a Cpp
         let main_menu_bar = QMenuBar::new_0a();
         main_window.set_menu_bar(main_menu_bar.into_ptr());
-
+        let main_window_ptr = main_window.as_mut_ptr();
+        let main_menu_bar = MenuBar::create(main_window_ptr);
         // main_widget - central widget of teh main_window
 
         let mut main_widget = QWidget::new_0a();
@@ -492,7 +507,7 @@ fn create_main_window() -> (CppBox<QMainWindow>, MutPtr<QWidget>, MutPtr<QVBoxLa
         // set main_widget as the central widget in main_window
         main_window.set_central_widget(main_widget.into_ptr());
 
-        (main_window, main_widget_ptr, main_layout_ptr)
+        (main_window, main_widget_ptr, main_layout_ptr, main_menu_bar)
     }
 }
 
@@ -526,6 +541,7 @@ pub struct MainWindow<'a> {
     revision_changed: SlotOfQItemSelectionQItemSelection<'a>,
     distribution_changed: SlotOfQItemSelectionQItemSelection<'a>,
     save_withpackages: Slot<'a>,
+    save_packages_xml: Slot<'a>,
 }
 
 impl<'a> MainWindow<'a> {
@@ -680,6 +696,11 @@ impl<'a> MainWindow<'a> {
                     main.cache(),
                 );
             }}),
+            save_packages_xml: Slot::new(enclose! { (main, to_thread_sender) move || {
+                let toolbar = main.main_toolbar();
+                let level_cb = toolbar.level();
+                save_packages_xml(main.main(), level_cb, to_thread_sender.clone());
+            }}),
         };
 
         //
@@ -753,6 +774,12 @@ impl<'a> MainWindow<'a> {
         // set initial state of with button to on
         let mut button = main.left_toolbar_actions().view_withs;
         button.toggle();
+
+        main.main_menubar()
+            .inner()
+            .save_packages_action()
+            .triggered()
+            .connect(&main_win.save_packages_xml);
 
         main_win
     }

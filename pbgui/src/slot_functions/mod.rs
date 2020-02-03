@@ -2,6 +2,7 @@
 //! Most slot closures delegate repsonsbility to a slot function.
 //! At a minimum, it makes the main_window a bit more readable
 pub mod choose_distribution;
+pub mod save_packages_xml;
 pub mod save_versionpin_changes;
 pub mod select_history;
 pub mod store_withpackage_changes;

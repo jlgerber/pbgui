@@ -1,6 +1,6 @@
 [package]
-name = "pbgui-toolbar"
-version = "0.8.0"
+name = "pbgui-menubar"
+version = "0.1.0"
 authors = ["jlgerber <jlgerber@gmail.com>"]
 edition = "2018"
 
@@ -9,7 +9,6 @@ qt_core = "0.4.1"
 qt_gui = "0.4.1"
 qt_widgets = "0.4.1"
 qt_ui_tools = "0.4.1"
-#whoami = "0.7.0"
 log = "0.4.8"
+qt_thread_conductor = {git= "https://github.com/jlgerber/rust-qt-conductor", tag="v0.3.1"}
 rustqt-utils = {git="https://github.com/jlgerber/rustqt-utils", tag="v0.6.0"}
-packybara = {git= "https://github.com/jlgerber/packybara", tag="v0.34.0"}

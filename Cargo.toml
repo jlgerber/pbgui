@@ -5,5 +5,6 @@ members = [
     "pbgui-tree",
     "pbgui-toolbar",
     "pbgui-withs",
-    "pbgui-logger"
+    "pbgui-logger",
+    "pbgui-menubar"
 ]
