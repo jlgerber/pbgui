@@ -307,7 +307,8 @@ pub unsafe fn match_main_win<'a>(
         }
         MainWin::SavePackagesXml => {
             // TODO
-            if let Ok(IMsg::MainWin(IMainWin::SavePackagesXml(success))) = receiver.recv() {
+            if let Ok(IMsg::MainWin(IMainWin::SavePackagesXml(_success))) = receiver.recv() {
+                log::info!("wrote out packages.xml to disk");
             } else {
                 log::error!("Unable to save packages.xml to disk");
             }

@@ -10,6 +10,6 @@ qt_gui = "0.4.1"
 qt_widgets = "0.4.1"
 qt_ui_tools = "0.4.1"
 log = "0.4.8"
-packybara = {git= "https://github.com/jlgerber/packybara", tag="v0.34.0"}
+packybara = {git= "https://github.com/jlgerber/packybara", tag="v0.35.0"}
 qt_thread_conductor = {git= "https://github.com/jlgerber/rust-qt-conductor", tag="v0.3.1"}
 rustqt-utils = {git="https://github.com/jlgerber/rustqt-utils", tag="v0.6.0"}

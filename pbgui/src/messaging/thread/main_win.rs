@@ -1,21 +1,22 @@
 use super::*;
 use crate::change_type::Change;
-use crate::io;
+//use crate::io;
 use packybara::db::update::versionpins::VersionPinChange;
-use packybara::platform::Platform;
-use packybara::site::Site;
+use packybara::packrat::PackratDb;
+//use packybara::platform::Platform;
+//use packybara::site::Site;
 use packybara::LtreeSearchMode;
 use packybara::OrderDirection;
 use packybara::OrderRevisionBy;
-use packybara::Role;
-use packybara::SearchAttribute;
-use std::fs::File;
-use std::io::{Error, Write};
+//use packybara::Role;
+//use packybara::SearchAttribute;
+//use std::fs::File;
+//use std::io::{Error, Write};
 use std::str::FromStr;
 
 pub(crate) fn match_main_win(
     msg: OMainWin,
-    db: &mut packybara::db::packrat::PackratDb,
+    db: &mut PackratDb,
     conductor: &mut qt_thread_conductor::conductor::Conductor<Event>,
     sender: &Sender<IMsg>,
 ) {
@@ -208,103 +209,7 @@ pub(crate) fn match_main_win(
             conductor.signal(MainWin::ChooseDistribution.to_event());
         }
         OMainWin::SavePackagesXml { show, output } => {
-            // TODO: Imple
-            // get a list of version pins for the show
-            let results = db
-                .find_all_versionpins()
-                .isolate_facility(true)
-                .level(show.as_str())
-                .search_mode(LtreeSearchMode::Descendant)
-                .order_by(vec![SearchAttribute::Role, SearchAttribute::Package])
-                .query();
-            let vpins = match results {
-                Ok(vpins) => vpins,
-                Err(err) => {
-                    sender
-                        .send(IMsg::Error(format!(
-                            "Unable to get version pins from db: {}",
-                            err
-                        )))
-                        .expect("unable to send error msg");
-                    conductor.signal(Event::Error);
-                    return;
-                }
-            };
-            // get a list of withs for the show
-            // iterate through version pins, creating appropriate data structure for outgoing
-            let mut show = io::Show::new(show);
-            let mut last_role: Option<Role> = None;
-            let mut role_packages = Vec::new();
-            for row in vpins {
-                let package = row.distribution.package();
-                let version = row.distribution.version();
-                let site = row.coords.site();
-                let platform = row.coords.platform();
-                // TODO: do not know how seq/shot is handled in packages.xml
-                let level = row.coords.level(); // hwo is this handled?
-                let role = row.coords.role();
-                let mut package = io::Package::new(package, version, None, None);
-                if let Some(withs) = row.withs {
-                    for with in withs {
-                        package.add_with(io::With::new(with));
-                    }
-                }
-                if site != &Site::Any {
-                    package.set_site(Some(site.to_string()));
-                }
-                if platform != &Platform::Any {
-                    package.set_os(Some(platform.to_string()));
-                }
-                if role != &Role::Any {
-                    let role_str = role.to_string();
-
-                    // if our last iter was a role
-                    if let Some(ref last) = last_role {
-                        // if the current role is the same as the last
-                        // role, we add the package into our list
-                        if role == last {
-                            role_packages.push(package);
-                        } else {
-                            // otherwise we drain the list of saved packages,
-                            // adding them in to the current role
-                            let mut role_tag = io::Role::new(role_str);
-                            for pkg in role_packages.drain(..) {
-                                role_tag.add_package(pkg);
-                            }
-                            show.add_role(role_tag);
-                            // and we push the current package into our list,
-                            // which is now empty
-                            role_packages.push(package);
-                        }
-                    } else {
-                        // in the case where our last iter was NOT a role
-                        // role packages should be zero sized
-                        assert_eq!(role_packages.len(), 0);
-                    }
-                    last_role = Some(role.clone());
-                } else {
-                    show.add_package(package);
-                    last_role = None;
-                }
-            }
-            // serialise to disk
-            let xml_writer = io::ToXml::new();
-            let show = xml_writer.to_xml(show);
-            let xml_str = io::ToXml::to_pretty_string(&show);
-            let mut output = match File::create(output) {
-                Ok(output) => output,
-                Err(err) => {
-                    sender
-                        .send(IMsg::Error(format!(
-                            "Unable to create packages.xml for writing: {}",
-                            err
-                        )))
-                        .expect("unable to send error msg");
-                    conductor.signal(Event::Error);
-                    return;
-                }
-            };
-            match write!(output, "{}", xml_str) {
+            match db.export_packages(show.as_str(), output.as_str()) {
                 Ok(_) => {
                     sender
                         .send(IMainWin::SavePackagesXml(true).to_imsg())
@@ -320,7 +225,120 @@ pub(crate) fn match_main_win(
                         .expect("unable to send error msg");
                     conductor.signal(Event::Error);
                 }
-            };
+            }
+            // // TODO: Impl
+            // // get a list of version pins for the show
+            // let results = db
+            //     .find_all_versionpins()
+            //     .isolate_facility(true)
+            //     .level(show.as_str())
+            //     .search_mode(LtreeSearchMode::Descendant)
+            //     .order_by(vec![SearchAttribute::Role, SearchAttribute::Package])
+            //     .query();
+            // let vpins = match results {
+            //     Ok(vpins) => vpins,
+            //     Err(err) => {
+            //         sender
+            //             .send(IMsg::Error(format!(
+            //                 "Unable to get version pins from db: {}",
+            //                 err
+            //             )))
+            //             .expect("unable to send error msg");
+            //         conductor.signal(Event::Error);
+            //         return;
+            //     }
+            // };
+            // // get a list of withs for the show
+            // // iterate through version pins, creating appropriate data structure for outgoing
+            // let mut show = io::Show::new(show);
+            // let mut last_role: Option<Role> = None;
+            // let mut role_packages = Vec::new();
+            // for row in vpins {
+            //     let package = row.distribution.package();
+            //     let version = row.distribution.version();
+            //     let site = row.coords.site();
+            //     let platform = row.coords.platform();
+            //     // TODO: do not know how seq/shot is handled in packages.xml
+            //     let level = row.coords.level(); // hwo is this handled?
+            //     let role = row.coords.role();
+            //     let mut package = io::Package::new(package, version, None, None);
+            //     if let Some(withs) = row.withs {
+            //         for with in withs {
+            //             package.add_with(io::With::new(with));
+            //         }
+            //     }
+            //     if site != &Site::Any {
+            //         package.set_site(Some(site.to_string()));
+            //     }
+            //     if platform != &Platform::Any {
+            //         package.set_os(Some(platform.to_string()));
+            //     }
+            //     if role != &Role::Any {
+            //         let role_str = role.to_string();
+
+            //         // if our last iter was a role
+            //         if let Some(ref last) = last_role {
+            //             // if the current role is the same as the last
+            //             // role, we add the package into our list
+            //             if role == last {
+            //                 role_packages.push(package);
+            //             } else {
+            //                 // otherwise we drain the list of saved packages,
+            //                 // adding them in to the current role
+            //                 let mut role_tag = io::Role::new(role_str);
+            //                 for pkg in role_packages.drain(..) {
+            //                     role_tag.add_package(pkg);
+            //                 }
+            //                 show.add_role(role_tag);
+            //                 // and we push the current package into our list,
+            //                 // which is now empty
+            //                 role_packages.push(package);
+            //             }
+            //         } else {
+            //             // in the case where our last iter was NOT a role
+            //             // role packages should be zero sized
+            //             assert_eq!(role_packages.len(), 0);
+            //         }
+            //         last_role = Some(role.clone());
+            //     } else {
+            //         show.add_package(package);
+            //         last_role = None;
+            //     }
+            // }
+            // // serialise to disk
+            // let xml_writer = io::ToXml::new();
+            // let show = xml_writer.to_xml(show);
+            // let xml_str = io::ToXml::to_pretty_string(&show);
+            // let mut output = match File::create(output) {
+            //     Ok(output) => output,
+            //     Err(err) => {
+            //         sender
+            //             .send(IMsg::Error(format!(
+            //                 "Unable to create packages.xml for writing: {}",
+            //                 err
+            //             )))
+            //             .expect("unable to send error msg");
+            //         conductor.signal(Event::Error);
+            //         return;
+            //     }
+            // };
+            // match write!(output, "{}", xml_str) {
+            //     Ok(_) => {
+            //         sender
+            //             .send(IMainWin::SavePackagesXml(true).to_imsg())
+            //             .expect("unable to send changes");
+            //         conductor.signal(MainWin::SavePackagesXml.to_event());
+            //     }
+            //     Err(err) => {
+            //         sender
+            //             .send(IMsg::Error(format!(
+            //                 "Unable to write packages.xml: {}",
+            //                 err
+            //             )))
+            //             .expect("unable to send error msg");
+            //         conductor.signal(Event::Error);
+            //     }
+            // };
         }
     }
 }
