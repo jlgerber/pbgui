@@ -9,7 +9,9 @@ use pbgui::messaging::{
 };
 use pbgui::utility::{distribution_from_idx, qs};
 use pbgui_vpin::vpin_dialog;
-use qt_core::{QModelIndex, QResource, Slot, SlotOfQModelIndex};
+use qt_core::{
+    ApplicationAttribute, QCoreApplication, QModelIndex, QResource, Slot, SlotOfQModelIndex,
+};
 use qt_thread_conductor::conductor::Conductor;
 use qt_widgets::{
     cpp_core::{MutPtr, Ref},
@@ -49,7 +51,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (to_thread_sender, to_thread_receiver): (Sender<OMsg>, Receiver<OMsg>) = channel();
     // sender to handle quitting
     let to_thread_sender_quit = to_thread_sender.clone();
-
+    // turn off native menubar
+    unsafe {
+        QCoreApplication::set_attribute_1a(ApplicationAttribute::AADontUseNativeMenuBar);
+    }
     QApplication::init(|app| unsafe {
         let _result = QResource::register_resource_q_string(&qs(
             "/Users/jgerber/bin/pbgui-resources/pbgui.rcc",
