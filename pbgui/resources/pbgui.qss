@@ -95,7 +95,7 @@ QWidget#HistoryWidget {
     border-bottom: 1px solid white;
 }
 
-#ContainerWidget {
+#BottomStackedWidget {
     padding: 0px;
     margin: 0px;
     /* border: 1px solid red; */

@@ -14,8 +14,8 @@ use qt_gui::{
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr},
     q_size_policy::Policy,
-    QAction, QFrame, QHBoxLayout, QPushButton, QSizePolicy, QSplitter, QStackedWidget,
-    QTableWidget, QToolButton, QWidget,
+    QAction, QFrame, QPushButton, QSizePolicy, QSplitter, QStackedWidget, QTableWidget,
+    QToolButton, QWidget,
 };
 
 use std::rc::Rc;
@@ -41,22 +41,22 @@ pub fn create_bottom_stacked_widget<'a>(
 ) {
     unsafe {
         // create widget
-        let mut bottom_stacked_widget = QWidget::new_0a();
+        let mut bottom_stacked_widget = QFrame::new_0a();
         // create vertical layout owned by widget
         let mut pc_vlayout = create_vlayout();
-        bottom_stacked_widget.set_object_name(&qs("ContainerWidget"));
+        bottom_stacked_widget.set_object_name(&qs("BottomStackedWidget"));
         let mut pc_vlayout_ptr = pc_vlayout.as_mut_ptr();
         bottom_stacked_widget.set_layout(pc_vlayout.into_ptr());
 
         // Create top horizontal layout for hosting switches for the stacked
         // layout as well as context controls.
-        let mut top_hlayout = QHBoxLayout::new_0a();
+        let mut top_hlayout = create_hlayout();
         let mut top_hlayout_ptr = top_hlayout.as_mut_ptr();
         top_hlayout.set_spacing(10);
-        top_hlayout.set_contents_margins_4a(10, 10, 10, 10);
-        // pin changes button
-        // let mut pinchanges_button = create_check_button("Pin Changes", true);
+        // contents margins 4a params: left, top, right, bottom
+        top_hlayout.set_contents_margins_4a(10, 2, 10, 0);
 
+        // pin changes button
         let action = menubar
             .view_action_at_idx(7)
             .expect("unable to get action from menubar");
@@ -64,15 +64,15 @@ pub fn create_bottom_stacked_widget<'a>(
 
         let pinchanges_button_ptr = pinchanges_button.as_mut_ptr();
         top_hlayout.add_widget(pinchanges_button.into_ptr());
-        //history button
 
+        //history button
         let action = menubar
             .view_action_at_idx(8)
             .expect("unable to get action from menubar");
         let mut history_button = create_toolbutton(action, false);
-
         let history_button_ptr = history_button.as_mut_ptr();
         top_hlayout.add_widget(history_button.into_ptr());
+
         // logger button
         let action = menubar
             .view_action_at_idx(9) // index of button in toolbar
@@ -99,6 +99,7 @@ pub fn create_bottom_stacked_widget<'a>(
         let mut pg1_layout_ptr = pg1_layout.as_mut_ptr();
         pg1_widget.set_layout(pg1_layout.into_ptr());
         stacked_ptr.add_widget(pg1_widget.into_ptr());
+
         // create a spacer widget to attempt to push
         // future buttons to right side
         let mut spacer = QWidget::new_0a();
@@ -111,6 +112,7 @@ pub fn create_bottom_stacked_widget<'a>(
         let mut pinchanges = versionpin_changes_table::create();
         let pinchanges_ptr = pinchanges.as_mut_ptr();
         pg1_layout_ptr.add_widget(pinchanges.into_ptr());
+
         // save button
         let mut save_widget = QWidget::new_0a();
         let mut save_layout = create_hlayout();
@@ -131,6 +133,7 @@ pub fn create_bottom_stacked_widget<'a>(
         pg2_widget.set_layout(pg2_layout.into_ptr());
         stacked_ptr.add_widget(pg2_widget.into_ptr());
         splitter.add_widget(bottom_stacked_widget.into_ptr());
+
         // page2 context widget
         let pg2_context_widget = QWidget::new_0a();
         //nothing in it
@@ -139,7 +142,6 @@ pub fn create_bottom_stacked_widget<'a>(
         // Add revisions table
         //
         let mut revisions_widget = QWidget::new_0a();
-        //let mut revisions_widget_ptr = revisions_widget.as_mut_ptr();
         let mut rsplitter = QSplitter::new();
         rsplitter.set_orientation(Orientation::Horizontal);
         let mut rsplitter_ptr = rsplitter.as_mut_ptr();
@@ -160,9 +162,9 @@ pub fn create_bottom_stacked_widget<'a>(
         let mut pg1_frame = QFrame::new_0a();
         let pg1_frame_ptr = pg1_frame.as_mut_ptr();
         let pg1_layout = create_vlayout();
-        //let pg1_layout_ptr = pg1_layout.as_mut_ptr();
         pg1_frame.set_layout(pg1_layout.into_ptr());
         stacked_ptr.add_widget(pg1_frame.into_ptr());
+
         // now for the win
         let log_win = LogWin::new(pg1_frame_ptr);
 
@@ -172,6 +174,7 @@ pub fn create_bottom_stacked_widget<'a>(
         log_layout.insert_stretch_2a(0, 1);
         let mut log_layout_ptr = log_layout.as_mut_ptr();
         log_widget.set_layout(log_layout.into_ptr());
+
         // add controls button
         let mut mode_icon = QIcon::new();
         let size = QSize::new_2a(24, 24);
