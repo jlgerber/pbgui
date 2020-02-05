@@ -93,7 +93,8 @@ impl<'a> InnerMainWindow<'a> {
             let main_toolbar = Rc::new(create_top_toolbar(main_window_ptr.clone()));
 
             // create left toolbar
-            let left_toolbar_actions = left_toolbar::create(&mut main_window_ptr);
+            let left_toolbar_actions =
+                left_toolbar::create(&mut main_window_ptr, main_menubar.inner());
             let mut view_withs = left_toolbar_actions.view_withs;
 
             // create the splitter between the center widget and the withs

@@ -1,16 +1,21 @@
 use log;
-use qt_core::{QObject, Slot};
-use qt_widgets::{
-    cpp_core::{MutPtr, StaticDowncast},
-    QAction, QComboBox, QFileDialog, QMainWindow, QMenu, QMenuBar,
-};
+use qt_core::Slot;
+use qt_widgets::{cpp_core::MutPtr, QAction, QMainWindow, QMenu, QMenuBar};
 use rustqt_utils::qs;
 use std::rc::Rc;
 
 pub struct InnerMenuBar {
     menubar: MutPtr<QMenuBar>,
-    windows_menu: MutPtr<QMenu>,
-    save_packages_action: MutPtr<QAction>,
+    pub file_menu: MutPtr<QMenu>,
+    pub help_menu: MutPtr<QMenu>,
+    pub edit_menu: MutPtr<QMenu>,
+    pub view_menu: MutPtr<QMenu>,
+    pub save_packages_action: MutPtr<QAction>,
+    pub clear_edits_action: MutPtr<QAction>,
+    // pub toggle_distributions_action: MutPtr<QAction>,
+    // pub toggle_withs_action: MutPtr<QAction>,
+    // pub toggle_history_action: MutPtr<QAction>,
+    pub documentation_action: MutPtr<QAction>,
 }
 
 impl InnerMenuBar {
@@ -18,13 +23,37 @@ impl InnerMenuBar {
     pub fn create(main_window: MutPtr<QMainWindow>) -> InnerMenuBar {
         unsafe {
             let mut menubar: MutPtr<QMenuBar> = main_window.menu_bar();
-            let mut windows_menu = menubar.add_menu_q_string(&qs("File"));
-            let save_packages_action = windows_menu.add_action_q_string(&qs("save packages.xml"));
+            let mut file_menu = menubar.add_menu_q_string(&qs("File"));
+            let save_packages_action = file_menu.add_action_q_string(&qs("save packages.xml"));
+
+            let mut edit_menu = menubar.add_menu_q_string(&qs("Edit"));
+            let clear_edits_action = edit_menu.add_action_q_string(&qs("clear edits"));
+            let view_menu = menubar.add_menu_q_string(&qs("View"));
+            // let mut toggle_distributions_action =
+            //     view_menu.add_action_q_string(&qs("Distributions"));
+            // toggle_distributions_action.set_checkable(true);
+
+            // let mut toggle_withs_action = view_menu.add_action_q_string(&qs("Withs"));
+            // toggle_withs_action.set_checkable(true);
+
+            // let mut toggle_history_action = view_menu.add_action_q_string(&qs("History"));
+            // toggle_history_action.set_checkable(true);
+
+            let mut help_menu = menubar.add_menu_q_string(&qs("Help"));
+            let documentation_action = help_menu.add_action_q_string(&qs("Documentation"));
 
             InnerMenuBar {
                 menubar,
-                windows_menu,
+                file_menu,
+                edit_menu,
+                view_menu,
+                help_menu,
                 save_packages_action,
+                clear_edits_action,
+                // toggle_distributions_action,
+                // toggle_withs_action,
+                // toggle_history_action,
+                documentation_action,
             }
         }
     }
@@ -33,8 +62,8 @@ impl InnerMenuBar {
         self.menubar
     }
 
-    pub fn windows_menu(&self) -> MutPtr<QMenu> {
-        self.windows_menu
+    pub fn file_menu(&self) -> MutPtr<QMenu> {
+        self.file_menu
     }
 
     pub fn save_packages_action(&self) -> MutPtr<QAction> {
@@ -44,63 +73,20 @@ impl InnerMenuBar {
 
 pub struct MenuBar<'a> {
     inner: Rc<InnerMenuBar>,
-    save_packages: Slot<'a>,
+    _save_packages: Slot<'a>,
 }
 
 impl<'a> MenuBar<'a> {
     pub fn create(main_window: MutPtr<QMainWindow>) -> MenuBar<'a> {
-        let mwp = main_window.clone();
         let inner = Rc::new(InnerMenuBar::create(main_window));
         let menubar = MenuBar {
             inner,
-            save_packages: Slot::new(move || {})
-            
-            // save_packages: Slot::new(move || {
-            //     log::debug!("save packages triggered");
-            //     unsafe {
-            //         let combo = mwp.find_child_q_object_1a(&qs("LevelCB"));
-            //         if combo.is_null() {
-            //             log::error!("Unable to get combobox pointer");
-            //         } else {
-            //             let cb: MutPtr<QComboBox> = QObject::static_downcast_mut(combo);
-            //             if cb.is_null() {
-            //                 log::error!("Unable to cast qobject pointer to qcombobox");
-            //                 return;
-            //             }
-            //             let level = cb.current_text().to_std_string();
-            //             log::info!("current show: {}", &level);
-            //             // now I need qdialog
-            //             let output_path = QFileDialog::get_save_file_name_4a(
-            //                 mwp,
-            //                 &qs("save packages.xml"),
-            //                 &qs(""),
-            //                 &qs("*.xml"),
-            //             );
-            //             if output_path.is_null() {
-            //                 log::debug!("packages.xml save cancelled by user");
-            //                 return;
-            //             }
-            //             let output_path = output_path.to_std_string();
-            //             log::debug!("saving packages.xml to {}", output_path);
-            //         }
-            //     }
-            // }),
+            _save_packages: Slot::new(move || {}),
         };
-        // unsafe {
-        //     menubar
-        //         .inner()
-        //         .save_packages_action()
-        //         .triggered()
-        //         .connect(&menubar.save_packages);
-        // }
         menubar
     }
 
     pub fn inner(&self) -> Rc<InnerMenuBar> {
         self.inner.clone()
     }
-
-    // pub fn save_packages_action(&self) -> MutPtr<QAction> {
-    //     self.inner.save_packages_action
-    // }
 }

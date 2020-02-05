@@ -54,6 +54,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // turn off native menubar
     unsafe {
         QCoreApplication::set_attribute_1a(ApplicationAttribute::AADontUseNativeMenuBar);
+        QCoreApplication::set_attribute_1a(ApplicationAttribute::AADontShowIconsInMenus);
     }
     QApplication::init(|app| unsafe {
         let _result = QResource::register_resource_q_string(&qs(
