@@ -1,4 +1,5 @@
 use crate::utility::qs;
+use pbgui_menubar::menu_bar::InnerMenuBar;
 use qt_core::{QSize, ToolBarArea};
 use qt_gui::{
     q_icon::{Mode, State},
@@ -8,6 +9,7 @@ use qt_widgets::{
     cpp_core::{CppBox, MutPtr},
     QAction, QActionGroup, QMainWindow, QToolBar,
 };
+use std::rc::Rc;
 
 pub struct LeftToolBarActions {
     _mode_action_group: MutPtr<QActionGroup>,
@@ -26,6 +28,8 @@ pub struct LeftToolBarActions {
     _view_withs_icon: CppBox<QIcon>,
     pub view_vpin_changes: MutPtr<QAction>,
     _view_vpin_changes_icon: CppBox<QIcon>,
+    pub log_changes: MutPtr<QAction>,
+    _log_changes_icon: CppBox<QIcon>,
 }
 
 impl LeftToolBarActions {
@@ -46,6 +50,8 @@ impl LeftToolBarActions {
         view_withs_icon: CppBox<QIcon>,
         view_vpin_changes: CppBox<QAction>,
         view_vpin_changes_icon: CppBox<QIcon>,
+        log_changes: CppBox<QAction>,
+        log_changes_icon: CppBox<QIcon>,
     ) -> Self {
         unsafe {
             Self {
@@ -65,6 +71,8 @@ impl LeftToolBarActions {
                 _view_withs_icon: view_withs_icon,
                 view_vpin_changes: view_vpin_changes.into_ptr(),
                 _view_vpin_changes_icon: view_vpin_changes_icon,
+                log_changes: log_changes.into_ptr(),
+                _log_changes_icon: log_changes_icon,
             }
         }
     }
@@ -85,10 +93,15 @@ impl LeftToolBarActions {
 }
 
 /// Create the left toolbar and return the resulting actions
-pub fn create(main_window: &mut MutPtr<QMainWindow>) -> LeftToolBarActions {
+pub fn create(
+    main_window: &mut MutPtr<QMainWindow>,
+    menubar: Rc<InnerMenuBar>,
+) -> LeftToolBarActions {
     unsafe {
         let mut left_toolbar = QToolBar::from_q_string(&qs("Left Toolbar"));
         left_toolbar.set_object_name(&qs("LeftToolBar"));
+        let mut view_menu = menubar.view_menu;
+
         let mut mode_action_group = QActionGroup::new(left_toolbar.as_mut_ptr());
         let mode_action_group_ptr = mode_action_group.as_mut_ptr();
         let mut bottom_mode_action_group = QActionGroup::new(left_toolbar.as_mut_ptr());
@@ -97,83 +110,119 @@ pub fn create(main_window: &mut MutPtr<QMainWindow>) -> LeftToolBarActions {
         //shows
         let mut search_shows_icon = QIcon::new(); //from_q_string(&qs(":/images/wheel_us.png"));
         let size = QSize::new_0a();
-        search_shows_icon.add_file_4a(&qs(":/images/wheel.png"), &size, Mode::Normal, State::On);
-        search_shows_icon.add_file_4a(
-            &qs(":/images/wheel_us.png"),
-            &size,
-            Mode::Normal,
-            State::Off,
-        );
+        // search_shows_icon.add_file_4a(&qs(":/images/wheel.png"), &size, Mode::Normal, State::On);
+        // search_shows_icon.add_file_4a(
+        //     &qs(":/images/wheel_us.png"),
+        //     &size,
+        //     Mode::Normal,
+        //     State::Off,
+        // );
+        search_shows_icon.add_file_4a(&qs(":/images/tv_white.svg"), &size, Mode::Normal, State::On);
+        search_shows_icon.add_file_4a(&qs(":/images/tv_grey.svg"), &size, Mode::Normal, State::Off);
+
         let mut search_shows_action = QAction::from_q_icon_q_string_q_object(
             &search_shows_icon,
-            &qs("Shows"),
+            &qs("show-centric"),
             mode_action_group_ptr,
         );
         search_shows_action.set_tool_tip(&qs("Set the search mode to be show-centric"));
         search_shows_action.set_checkable(true);
         search_shows_action.set_checked(true);
         left_toolbar.add_action(search_shows_action.as_mut_ptr());
-
+        view_menu.add_action(search_shows_action.as_mut_ptr());
         //properties
         let mut search_properties_icon = QIcon::new(); //from_q_string(&qs(":/images/spyglass_us.png"));
         let size = QSize::new_0a();
+        // search_properties_icon.add_file_4a(
+        //     &qs(":/images/spyglass_us.png"),
+        //     &size,
+        //     Mode::Normal,
+        //     State::Off,
+        // );
+        // search_properties_icon.add_file_4a(
+        //     &qs(":/images/spyglass.png"),
+        //     &size,
+        //     Mode::Normal,
+        //     State::On,
+        // );
+
         search_properties_icon.add_file_4a(
-            &qs(":/images/spyglass_us.png"),
+            &qs(":/images/globe_grey.svg"),
             &size,
             Mode::Normal,
             State::Off,
         );
         search_properties_icon.add_file_4a(
-            &qs(":/images/spyglass.png"),
+            &qs(":/images/globe_white.svg"),
             &size,
             Mode::Normal,
             State::On,
         );
+
         let mut search_properties_action = QAction::from_q_icon_q_string_q_object(
             &search_properties_icon,
-            &qs("Props"),
+            &qs("datacenter-centric"),
             mode_action_group_ptr,
         );
         search_properties_action.set_tool_tip(&qs("Set the search mode to be property-centric"));
         search_properties_action.set_checkable(true);
-        //search_properties_action.set_checked(true);
         left_toolbar.add_action(search_properties_action.as_mut_ptr());
-
+        view_menu.add_action(search_properties_action.as_mut_ptr());
+        view_menu.add_separator();
         //packages
-        let mut view_packages_icon = QIcon::new(); //from_q_string(&qs(":/images/openbox_us.png"));
+        let mut view_packages_icon = QIcon::new();
+        // view_packages_icon.add_file_4a(
+        //     &qs(":/images/openbox_us.png"),
+        //     &size,
+        //     Mode::Normal,
+        //     State::Off,
+        // );
+        // view_packages_icon.add_file_4a(&qs(":/images/openbox.png"), &size, Mode::Normal, State::On);
+
         view_packages_icon.add_file_4a(
-            &qs(":/images/openbox_us.png"),
+            &qs(":/images/package_grey.svg"),
             &size,
             Mode::Normal,
             State::Off,
         );
-        view_packages_icon.add_file_4a(&qs(":/images/openbox.png"), &size, Mode::Normal, State::On);
-        let mut view_packages_action = QAction::from_q_icon_q_string(
-            //_q_object(
-            &view_packages_icon,
-            &qs("Packages"),
-            //mode_action_group_ptr,
+        view_packages_icon.add_file_4a(
+            &qs(":/images/package_white.svg"),
+            &size,
+            Mode::Normal,
+            State::On,
         );
+
+        let mut view_packages_action =
+            QAction::from_q_icon_q_string(&view_packages_icon, &qs("distributions"));
 
         view_packages_action.set_tool_tip(&qs("Display / Hide Packages tree"));
         view_packages_action.set_checkable(true);
         view_packages_action.set_checked(true);
         left_toolbar.add_action(view_packages_action.as_mut_ptr());
-
+        view_menu.add_action(view_packages_action.as_mut_ptr());
         //withs
-        let mut view_withs_icon = QIcon::new(); //from_q_string(&qs(":/images/box_us.png"));
-        view_withs_icon.add_file_4a(&qs(":/images/box_us.png"), &size, Mode::Normal, State::Off);
-        view_withs_icon.add_file_4a(&qs(":/images/box.png"), &size, Mode::Normal, State::On);
-        let mut view_withs_action = QAction::from_q_icon_q_string(
-            //_q_object(
-            &view_withs_icon,
-            &qs("Withs"),
-            //mode_action_group_ptr,
+        let mut view_withs_icon = QIcon::new();
+        // view_withs_icon.add_file_4a(&qs(":/images/box_us.png"), &size, Mode::Normal, State::Off);
+        // view_withs_icon.add_file_4a(&qs(":/images/box.png"), &size, Mode::Normal, State::On);
+        view_withs_icon.add_file_4a(
+            &qs(":/images/hat_grey.svg"),
+            &size,
+            Mode::Normal,
+            State::Off,
         );
+        view_withs_icon.add_file_4a(
+            &qs(":/images/hat_white.svg"),
+            &size,
+            Mode::Normal,
+            State::On,
+        );
+        let mut view_withs_action = QAction::from_q_icon_q_string(&view_withs_icon, &qs("withs"));
         view_withs_action.set_tool_tip(&qs("Display / Hide Withs List"));
         view_withs_action.set_checkable(true);
         view_withs_action.set_checked(true);
         left_toolbar.add_action(view_withs_action.as_mut_ptr());
+        view_menu.add_action(view_withs_action.as_mut_ptr());
+
         //view_vpin_changes
         let mut view_vpin_changes_icon = QIcon::new();
         view_vpin_changes_icon.add_file_4a(
@@ -184,11 +233,13 @@ pub fn create(main_window: &mut MutPtr<QMainWindow>) -> LeftToolBarActions {
         );
         view_vpin_changes_icon.add_file_4a(&qs(":/images/pin.png"), &size, Mode::Normal, State::On);
         let mut view_vpin_changes_action =
-            QAction::from_q_icon_q_string(&view_vpin_changes_icon, &qs("VpinChanges"));
+            QAction::from_q_icon_q_string(&view_vpin_changes_icon, &qs("bottom pane"));
         view_vpin_changes_action.set_tool_tip(&qs("Display / Hide Withs List"));
         view_vpin_changes_action.set_checkable(true);
         view_vpin_changes_action.set_checked(true);
         left_toolbar.add_action(view_vpin_changes_action.as_mut_ptr());
+        view_menu.add_action(view_vpin_changes_action.as_mut_ptr());
+        view_menu.add_separator();
 
         //change pins
         let mut change_pins_icon = QIcon::new();
@@ -201,13 +252,13 @@ pub fn create(main_window: &mut MutPtr<QMainWindow>) -> LeftToolBarActions {
         change_pins_icon.add_file_4a(&qs(":/images/anchor.png"), &size, Mode::Normal, State::On);
         let mut change_pins_action = QAction::from_q_icon_q_string_q_object(
             &change_pins_icon,
-            &qs("ChangeVpins"),
+            &qs("session changes"),
             bottom_mode_action_group_ptr,
         );
         change_pins_action.set_tool_tip(&qs("Show / Hide Versionpin Change List"));
         change_pins_action.set_checkable(true);
         left_toolbar.add_action(change_pins_action.as_mut_ptr());
-
+        view_menu.add_action(change_pins_action.as_mut_ptr());
         //revisiions pins
         let mut view_revisions_icon = QIcon::new(); //from_q_string(&qs(":/images/tea_madleine_us.png"));
         view_revisions_icon.add_file_4a(
@@ -224,12 +275,38 @@ pub fn create(main_window: &mut MutPtr<QMainWindow>) -> LeftToolBarActions {
         );
         let mut view_revisions_action = QAction::from_q_icon_q_string_q_object(
             &view_revisions_icon,
-            &qs("ViewRevision"),
+            &qs("view revisions"),
             bottom_mode_action_group_ptr,
         );
         view_revisions_action.set_tool_tip(&qs("Show / Hide Revision History List"));
         view_revisions_action.set_checkable(true);
         left_toolbar.add_action(view_revisions_action.as_mut_ptr());
+        view_menu.add_action(view_revisions_action.as_mut_ptr());
+
+        //revisiions pins
+        let mut log_icon = QIcon::new();
+        log_icon.add_file_4a(
+            &qs(":/images/log_grey.svg"),
+            &size,
+            Mode::Normal,
+            State::Off,
+        );
+        log_icon.add_file_4a(
+            &qs(":/images/log_white.svg"),
+            &size,
+            Mode::Normal,
+            State::On,
+        );
+        let mut log_action = QAction::from_q_icon_q_string_q_object(
+            &log_icon,
+            &qs("view logs"),
+            bottom_mode_action_group_ptr,
+        );
+        log_action.set_tool_tip(&qs("Show / Hide logs"));
+        log_action.set_checkable(true);
+        left_toolbar.add_action(log_action.as_mut_ptr());
+        view_menu.add_action(log_action.as_mut_ptr());
+
         main_window.add_tool_bar_tool_bar_area_q_tool_bar(
             ToolBarArea::LeftToolBarArea,
             left_toolbar.into_ptr(),
@@ -252,6 +329,8 @@ pub fn create(main_window: &mut MutPtr<QMainWindow>) -> LeftToolBarActions {
             view_withs_icon,
             view_vpin_changes_action,
             view_vpin_changes_icon,
+            log_action,
+            log_icon,
         )
     }
 }
