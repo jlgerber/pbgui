@@ -69,6 +69,24 @@ impl InnerMenuBar {
     pub fn save_packages_action(&self) -> MutPtr<QAction> {
         self.save_packages_action
     }
+
+    pub fn view_action_at_idx(&self, idx: i32) -> Option<MutPtr<QAction>> {
+        unsafe {
+            let mut actions = self.view_menu.actions();
+            let lookup = actions.index(idx);
+            if lookup.is_null() {
+                None
+            } else {
+                let raw = lookup.as_mut_raw_ptr();
+                let mut_ptr = MutPtr::from_raw(*raw);
+                if mut_ptr.is_null() {
+                    log::error!("Unable to convert MutRef<QAction> to MutPtr<QAction> via *mut T");
+                    return None;
+                }
+                Some(mut_ptr)
+            }
+        }
+    }
 }
 
 pub struct MenuBar<'a> {

@@ -252,11 +252,13 @@ pub fn create(
         change_pins_icon.add_file_4a(&qs(":/images/pin.png"), &size, Mode::Normal, State::On);
         let mut change_pins_action = QAction::from_q_icon_q_string_q_object(
             &change_pins_icon,
-            &qs("session changes"),
+            &qs("changes"),
             bottom_mode_action_group_ptr,
         );
         change_pins_action.set_tool_tip(&qs("Show / Hide Versionpin Change List"));
         change_pins_action.set_checkable(true);
+        change_pins_action.set_checked(true);
+
         left_toolbar.add_action(change_pins_action.as_mut_ptr());
         view_menu.add_action(change_pins_action.as_mut_ptr());
         //revisiions pins
@@ -275,7 +277,7 @@ pub fn create(
         );
         let mut view_revisions_action = QAction::from_q_icon_q_string_q_object(
             &view_revisions_icon,
-            &qs("view history"),
+            &qs("history"),
             bottom_mode_action_group_ptr,
         );
         view_revisions_action.set_tool_tip(&qs("Show / Hide Revision History List"));
@@ -299,7 +301,7 @@ pub fn create(
         );
         let mut log_action = QAction::from_q_icon_q_string_q_object(
             &log_icon,
-            &qs("view logs"),
+            &qs("logs"),
             bottom_mode_action_group_ptr,
         );
         log_action.set_tool_tip(&qs("Show / Hide logs"));

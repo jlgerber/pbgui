@@ -4,24 +4,27 @@ use super::revisions_table;
 use super::versionpin_changes_table;
 use crate::utility::{create_hlayout, create_vlayout, qs};
 use pbgui_logger::LogWin;
-use qt_core::{Orientation, QString};
-use qt_widgets::{
-    cpp_core::{CppBox, MutPtr},
-    q_size_policy::Policy,
-    QFrame, QHBoxLayout, QPushButton, QSizePolicy, QSplitter, QStackedWidget, QTableWidget,
-    QWidget,
-};
-
+use pbgui_menubar::menu_bar::InnerMenuBar;
 use qt_core::QSize;
+use qt_core::{Orientation, QString, ToolButtonStyle};
 use qt_gui::{
     q_icon::{Mode, State},
     QIcon,
 };
+use qt_widgets::{
+    cpp_core::{CppBox, MutPtr},
+    q_size_policy::Policy,
+    QAction, QFrame, QHBoxLayout, QPushButton, QSizePolicy, QSplitter, QStackedWidget,
+    QTableWidget, QToolButton, QWidget,
+};
+
+use std::rc::Rc;
 //
 // Create pinchanges widget
 //
 pub fn create_bottom_stacked_widget<'a>(
     mut splitter: MutPtr<QSplitter>,
+    menubar: Rc<InnerMenuBar>,
 ) -> (
     MutPtr<QTableWidget>,
     MutPtr<QTableWidget>,
@@ -29,9 +32,9 @@ pub fn create_bottom_stacked_widget<'a>(
     LogWin<'a>,
     MutPtr<QPushButton>,
     MutPtr<QStackedWidget>,
-    MutPtr<QPushButton>,
-    MutPtr<QPushButton>,
-    MutPtr<QPushButton>,
+    MutPtr<QToolButton>,
+    MutPtr<QToolButton>,
+    MutPtr<QToolButton>,
     MutPtr<QPushButton>,
     MutPtr<QStackedWidget>,
     CppBox<QIcon>,
@@ -44,6 +47,7 @@ pub fn create_bottom_stacked_widget<'a>(
         bottom_stacked_widget.set_object_name(&qs("ContainerWidget"));
         let mut pc_vlayout_ptr = pc_vlayout.as_mut_ptr();
         bottom_stacked_widget.set_layout(pc_vlayout.into_ptr());
+
         // Create top horizontal layout for hosting switches for the stacked
         // layout as well as context controls.
         let mut top_hlayout = QHBoxLayout::new_0a();
@@ -51,16 +55,30 @@ pub fn create_bottom_stacked_widget<'a>(
         top_hlayout.set_spacing(10);
         top_hlayout.set_contents_margins_4a(10, 10, 10, 10);
         // pin changes button
-        let mut pinchanges_button = create_check_button("Pin Changes", true);
+        // let mut pinchanges_button = create_check_button("Pin Changes", true);
+
+        let action = menubar
+            .view_action_at_idx(7)
+            .expect("unable to get action from menubar");
+        let mut pinchanges_button = create_toolbutton(action, true);
+
         let pinchanges_button_ptr = pinchanges_button.as_mut_ptr();
         top_hlayout.add_widget(pinchanges_button.into_ptr());
         //history button
-        let mut history_button = create_check_button("History", false);
+
+        let action = menubar
+            .view_action_at_idx(8)
+            .expect("unable to get action from menubar");
+        let mut history_button = create_toolbutton(action, false);
+
         let history_button_ptr = history_button.as_mut_ptr();
         top_hlayout.add_widget(history_button.into_ptr());
-        // top_hlayout.add_stretch_0a();
         // logger button
-        let mut log_button = create_check_button("Log", false);
+        let action = menubar
+            .view_action_at_idx(9) // index of button in toolbar
+            .expect("unable to get action from menubar");
+        let mut log_button = create_toolbutton(action, false);
+
         let log_button_ptr = log_button.as_mut_ptr();
         top_hlayout.add_widget(log_button.into_ptr());
         top_hlayout.add_stretch_0a();
@@ -197,6 +215,8 @@ pub fn create_bottom_stacked_widget<'a>(
         )
     }
 }
+
+/*
 // create a check button which controls the stack widget
 fn create_check_button(label: &'static str, checked: bool) -> CppBox<QPushButton> {
     unsafe {
@@ -207,4 +227,16 @@ fn create_check_button(label: &'static str, checked: bool) -> CppBox<QPushButton
         check_button.set_checked(checked);
         check_button
     }
+}
+*/
+unsafe fn create_toolbutton(action: MutPtr<QAction>, checked: bool) -> CppBox<QToolButton> {
+    let mut check_button = QToolButton::new_0a();
+    check_button.set_object_name(&qs("StackWidgetToolButton"));
+    check_button.set_default_action(action);
+    check_button.set_auto_exclusive(true);
+    check_button.set_checkable(true);
+    check_button.set_checked(checked);
+
+    check_button.set_tool_button_style(ToolButtonStyle::ToolButtonTextOnly);
+    check_button
 }

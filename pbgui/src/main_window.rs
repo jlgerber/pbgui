@@ -32,7 +32,7 @@ use qt_gui::QKeySequence;
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr, Ref as QRef},
     QAction, QMainWindow, QMenu, QMenuBar, QPushButton, QShortcut, QSplitter, QStackedWidget,
-    QTableWidget, QVBoxLayout, QWidget, SlotOfQPoint,
+    QTableWidget, QToolButton, QVBoxLayout, QWidget, SlotOfQPoint,
 };
 use rustqt_utils::enclose;
 use std::cell;
@@ -56,12 +56,12 @@ pub struct InnerMainWindow<'a> {
     bottom_stacked_widget: MutPtr<QStackedWidget>,
     bottom_ctrls_stacked_widget: MutPtr<QStackedWidget>,
     save_button: MutPtr<QPushButton>,
-    pin_changes_button: MutPtr<QPushButton>,
+    pin_changes_button: MutPtr<QToolButton>,
     revision_changes_table: MutPtr<QTableWidget>,
-    history_button: MutPtr<QPushButton>,
+    history_button: MutPtr<QToolButton>,
     revisions_table: MutPtr<QTableWidget>,
     log_win: Rc<LogWin<'a>>,
-    log_button: MutPtr<QPushButton>,
+    log_button: MutPtr<QToolButton>,
     toggle_log_ctrls_button: MutPtr<QPushButton>,
     dist_popup_menu: MutPtr<QMenu>,
     dist_popup_action: MutPtr<QAction>,
@@ -124,7 +124,7 @@ impl<'a> InnerMainWindow<'a> {
                 toggle_log_ctrls_button,
                 controls_ptr,
                 mode_icon,
-            ) = create_bottom_stacked_widget(vpin_table_splitter.clone());
+            ) = create_bottom_stacked_widget(vpin_table_splitter.clone(), main_menubar.inner());
 
             // setup popup menu for versionpin table
             let mut dist_popup_menu = QMenu::new();
@@ -351,8 +351,8 @@ impl<'a> InnerMainWindow<'a> {
     /// * None
     ///
     /// # Returns
-    /// * MutPtr<QPushButton>
-    pub unsafe fn pinchanges_button(&self) -> MutPtr<QPushButton> {
+    /// * MutPtr<QToolButton>
+    pub unsafe fn pinchanges_button(&self) -> MutPtr<QToolButton> {
         self.pin_changes_button
     }
 
@@ -396,8 +396,8 @@ impl<'a> InnerMainWindow<'a> {
     /// * None
     ///
     /// # Returns
-    /// * MutPtr<QPushButton>
-    pub unsafe fn history_button(&self) -> MutPtr<QPushButton> {
+    /// * MutPtr<QToolButton>
+    pub unsafe fn history_button(&self) -> MutPtr<QToolButton> {
         self.history_button
     }
     /// Returns a mutable pointer to the log button
@@ -406,8 +406,8 @@ impl<'a> InnerMainWindow<'a> {
     /// * None
     ///
     /// # Returns
-    /// * MutPtr<QPushButton>
-    pub unsafe fn log_button(&self) -> MutPtr<QPushButton> {
+    /// * MutPtr<QToolButton>
+    pub unsafe fn log_button(&self) -> MutPtr<QToolButton> {
         self.log_button
     }
 
@@ -727,14 +727,19 @@ impl<'a> MainWindow<'a> {
             .connect(&main_win.show_dist_menu);
 
         main.pinchanges_button()
-            .clicked()
+            .default_action()
+            .toggled()
             .connect(&main_win.select_pin_changes);
 
         main.history_button()
-            .clicked()
+            .default_action()
+            .toggled()
             .connect(&main_win.select_history);
 
-        main.log_button().clicked().connect(&main_win.select_log);
+        main.log_button()
+            .default_action()
+            .toggled()
+            .connect(&main_win.select_log);
 
         main.toggle_log_ctrls_button()
             .clicked()
