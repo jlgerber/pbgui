@@ -39,6 +39,13 @@ use std::cell;
 use std::cell::RefCell;
 use std::rc::Rc;
 
+/// Are we limiting our search to the current show or are we searching
+/// globally?
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub enum SearchMode {
+    Show,
+    All,
+}
 /// Just as it sounds, MainWindow is the MainWindow struct, holding on
 /// to various pointers that need to persist as well as top level slots
 pub struct InnerMainWindow<'a> {
@@ -379,6 +386,16 @@ impl<'a> InnerMainWindow<'a> {
         self.withs_splitter
     }
 
+    /// Return the current SearchMode
+    pub fn search_mode(&self) -> SearchMode {
+        unsafe {
+            if self.left_toolbar_actions.search_shows.is_checked() {
+                SearchMode::Show
+            } else {
+                SearchMode::All
+            }
+        }
+    }
     /// Returns a mutable pointer to the save button
     ///
     /// # Arguments
@@ -567,7 +584,7 @@ impl<'a> MainWindow<'a> {
             //
             query_button_clicked: Slot::new(enclose! {(main, to_thread_sender) move || {
                 update_vpin_table(
-                    main.main_toolbar(),
+                    main.clone(),
                     to_thread_sender.clone(),
                 );
             }}),

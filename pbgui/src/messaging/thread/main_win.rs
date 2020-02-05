@@ -1,17 +1,12 @@
 use super::*;
 use crate::change_type::Change;
-//use crate::io;
 use packybara::db::update::versionpins::VersionPinChange;
 use packybara::packrat::PackratDb;
-//use packybara::platform::Platform;
-//use packybara::site::Site;
 use packybara::LtreeSearchMode;
 use packybara::OrderDirection;
 use packybara::OrderRevisionBy;
-//use packybara::Role;
-//use packybara::SearchAttribute;
-//use std::fs::File;
-//use std::io::{Error, Write};
+
+use crate::SearchMode;
 use std::str::FromStr;
 
 pub(crate) fn match_main_win(
@@ -22,16 +17,17 @@ pub(crate) fn match_main_win(
 ) {
     match msg {
         OMainWin::GetVpins {
+            mode,
+            package,
             level,
             role,
             platform,
             site,
             dir,
-            package,
         } => {
             let results = db
                 .find_all_versionpins()
-                .isolate_facility(true)
+                .isolate_facility(mode == SearchMode::Show)
                 .level(level.as_str())
                 .role(role.as_str())
                 .platform(platform.as_str())

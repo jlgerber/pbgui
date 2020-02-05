@@ -16,6 +16,7 @@ pub use slot_functions::{
 };
 pub mod change_type;
 pub mod main_window;
+pub use main_window::SearchMode;
 pub mod traits;
 pub use traits::{RowSetterTrait, RowTrait};
 

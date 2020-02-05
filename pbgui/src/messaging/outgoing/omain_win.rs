@@ -1,15 +1,17 @@
 use super::*;
 use crate::change_type::Change;
+use crate::SearchMode;
 
 #[derive(Debug, PartialEq)]
 pub enum OMainWin {
     GetVpins {
+        mode: SearchMode,
+        package: Option<String>,
         level: String,
         role: String,
         platform: String,
         site: String,
         dir: String,
-        package: Option<String>,
     },
     GetWithsForVpin {
         vpin_id: i32,
