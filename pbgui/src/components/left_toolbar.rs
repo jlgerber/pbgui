@@ -226,12 +226,17 @@ pub fn create(
         //view_vpin_changes
         let mut view_vpin_changes_icon = QIcon::new();
         view_vpin_changes_icon.add_file_4a(
-            &qs(":/images/pin_us.png"),
+            &qs(":/images/anchor_us.png"),
             &size,
             Mode::Normal,
             State::Off,
         );
-        view_vpin_changes_icon.add_file_4a(&qs(":/images/pin.png"), &size, Mode::Normal, State::On);
+        view_vpin_changes_icon.add_file_4a(
+            &qs(":/images/anchor.png"),
+            &size,
+            Mode::Normal,
+            State::On,
+        );
         let mut view_vpin_changes_action =
             QAction::from_q_icon_q_string(&view_vpin_changes_icon, &qs("bottom pane"));
         view_vpin_changes_action.set_tool_tip(&qs("Display / Hide Withs List"));
@@ -243,13 +248,8 @@ pub fn create(
 
         //change pins
         let mut change_pins_icon = QIcon::new();
-        change_pins_icon.add_file_4a(
-            &qs(":/images/anchor_us.png"),
-            &size,
-            Mode::Normal,
-            State::Off,
-        );
-        change_pins_icon.add_file_4a(&qs(":/images/anchor.png"), &size, Mode::Normal, State::On);
+        change_pins_icon.add_file_4a(&qs(":/images/pin_us.png"), &size, Mode::Normal, State::Off);
+        change_pins_icon.add_file_4a(&qs(":/images/pin.png"), &size, Mode::Normal, State::On);
         let mut change_pins_action = QAction::from_q_icon_q_string_q_object(
             &change_pins_icon,
             &qs("session changes"),
@@ -275,7 +275,7 @@ pub fn create(
         );
         let mut view_revisions_action = QAction::from_q_icon_q_string_q_object(
             &view_revisions_icon,
-            &qs("view revisions"),
+            &qs("view history"),
             bottom_mode_action_group_ptr,
         );
         view_revisions_action.set_tool_tip(&qs("Show / Hide Revision History List"));
