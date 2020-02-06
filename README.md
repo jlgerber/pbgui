@@ -4,8 +4,6 @@
 Pbgui is now a multi-crate project, consisting of:
 
 * pbgui - The primary user interface, importing all the other crates 
-* pbgui-messaging - Secondary thread which communicates with the database
-* pbgui-tree - The left hand project / distribution / platform tree view
 * pbgui-withs - The right hand package withs list
 * pbgui-vpin - The dialog to choose select or create a versionpin for a distribution
  
@@ -22,7 +20,7 @@ Truthfully, I am not completely sold on this being a multi-project setup and wil
 - [IP] update client to use separate thread for persistence, including all db queries and updates.
 - [ ] add selected distro/platform to current level
 - [ ] modify current pin's platform / role / etc
-- [ ] add packages.xml generation / installation
+- [IP] add packages.xml generation / installation
 - [ ] add install table to db
 - [ ] add install distro to packybara to populate table 
 - [ ] modify packages tree to use install as source of data
