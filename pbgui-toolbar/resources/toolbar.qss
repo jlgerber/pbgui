@@ -1,9 +1,9 @@
 
 #ButtonFrame {
-    margin: 0px;
-    border: 1px solid rgb(120,120,120);
-    border-right: none;
-    background: rgb(60,60,60);
+    margin: 0;
+    border: 1px solid rgb(100,100,100);
+    /* border-right: none; */
+    background: rgb(70,70,70);
 }
 
 QPushButton#QueryButton {
@@ -32,22 +32,23 @@ QFrame > QLabel {
 }
 
 #ComboFrame {
-    border: 1px solid rgb(120,120,120);
-    border-left: none;
-    margin: 0px;
+    border: 1px solid rgb(100,100,100);
+    /* border-left: none; */
+    margin: 0;
+    spacing: 0;
     padding: 0px;
-    padding-left: 10px;
+    padding-left: 0px;
     padding-right: 10px;
-    background: rgb(60,60,60);
+    background: rgb(70,70,70);
 }
 
 #FirstComboFrame {
-    margin: 0px;
-    border: 1px solid rgb(120,120,120);
+    margin: 0;
+    border: 1px solid rgb(100,100,100);
     padding: 0px;
-    padding-left: 10px;
-     padding-right: 10px;
-    background: rgb(60,60,60);
+    padding-left: 0px;
+    padding-right: 10px;
+    background: rgb(70,70,70);
 }
 
 #FirstComboFrame > QLabel, #ComboFrame > QLabel {
@@ -64,7 +65,7 @@ QComboBox#DirCB {
 /* temp */
     margin-top:3px;
 
-    background: rgb(60,60,60);
+    background: rgb(70,70,70);
 }
 
 QComboBox#PlatformCB, 
@@ -139,8 +140,8 @@ QPushButton#SiteIcon {
 }
 
 QFrame#PackageLineEditFrame {
-    border: 1px solid rgb(120,120,120);
-    background: rgb(60,60,60);
+    border: 1px solid rgb(100,100,100);
+    background: rgb(70,70,70);
 }
 
 QLineEdit {

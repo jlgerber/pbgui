@@ -810,7 +810,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "pbgui"
-version = "0.53.0"
+version = "0.54.0"
 dependencies = [
  "crossbeam 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "crossbeam-channel 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -824,7 +824,7 @@ dependencies = [
  "pbgui-toolbar 0.8.0",
  "pbgui-tree 0.11.1",
  "pbgui-vpin 0.8.0",
- "pbgui-withs 0.18.0",
+ "pbgui-withs 0.19.0",
  "qt_core 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "qt_gui 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "qt_thread_conductor 0.3.1 (git+https://github.com/jlgerber/rust-qt-conductor?tag=v0.3.1)",
@@ -908,7 +908,7 @@ dependencies = [
 
 [[package]]
 name = "pbgui-withs"
-version = "0.18.0"
+version = "0.19.0"
 dependencies = [
  "log 0.4.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "qt_core 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",

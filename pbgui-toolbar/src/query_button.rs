@@ -1,8 +1,4 @@
-use qt_widgets::{
-    cpp_core::{MutPtr, StaticUpcast},
-    qt_core::QString,
-    QFrame, QLayout, QPushButton,
-};
+use qt_widgets::{cpp_core::MutPtr, qt_core::QString, QFrame, QPushButton, QToolBar};
 use rustqt_utils::{create_hlayout, qs};
 
 //
@@ -15,10 +11,7 @@ use rustqt_utils::{create_hlayout, qs};
 ///
 /// # Returns
 /// * A mutalble pointer wrapping a QPushButton
-pub fn create<T>(label: Option<&str>, layout: MutPtr<T>) -> MutPtr<QPushButton>
-where
-    T: StaticUpcast<QLayout>,
-{
+pub fn create(label: Option<&str>, mut toolbar: MutPtr<QToolBar>) -> MutPtr<QPushButton> {
     unsafe {
         let mut button = match label {
             Some(label) => QPushButton::from_q_string(&QString::from_std_str(label)),
@@ -35,7 +28,7 @@ where
         let mut widget_layout = create_hlayout();
         widget_layout.add_widget(button.into_ptr());
         widget.set_layout(widget_layout.into_ptr());
-        T::static_upcast_mut(layout).add_widget(widget.into_ptr());
+        toolbar.add_widget(widget.into_ptr());
         button_ptr
     }
 }

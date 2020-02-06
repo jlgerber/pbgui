@@ -1,37 +1,30 @@
 use qt_core::QString;
-use qt_widgets::{
-    cpp_core::{MutPtr, StaticUpcast},
-    QComboBox, QFrame, QLabel, QLayout, QPushButton,
-};
+use qt_widgets::{cpp_core::MutPtr, QComboBox, QFrame, QLabel, QPushButton, QToolBar};
 use rustqt_utils::{create_hlayout, qs};
 
 //------------------------//
 // build the combo boxes  //
 //------------------------//
-pub fn create<'b, T>(
-    layout: &mut MutPtr<T>,
+pub fn create<'b>(
+    mut toolbar: &mut MutPtr<QToolBar>,
 ) -> (
     MutPtr<QComboBox>,
     MutPtr<QComboBox>,
     MutPtr<QComboBox>,
     MutPtr<QComboBox>,
     MutPtr<QComboBox>,
-)
-where
-    T: StaticUpcast<QLayout>,
-{
+) {
     unsafe {
-        let mut layout = layout.static_upcast_mut();
         //results
-        let level_cb_ptr = setup_levels_cb(&mut layout);
+        let level_cb_ptr = setup_levels_cb(&mut toolbar);
         // Roles
-        let role_cb_ptr = setup_roles_cb(&mut layout);
+        let role_cb_ptr = setup_roles_cb(&mut toolbar);
         // Platform
-        let platform_cb_ptr = setup_platforms_cb(&mut layout);
+        let platform_cb_ptr = setup_platforms_cb(&mut toolbar);
         // Site
-        let site_cb_ptr = setup_sites_cb(&mut layout);
+        let site_cb_ptr = setup_sites_cb(&mut toolbar);
         // Direction
-        let dir_cb_ptr = setup_directions_cb(&mut layout);
+        let dir_cb_ptr = setup_directions_cb(&mut toolbar);
 
         (
             level_cb_ptr,
@@ -45,7 +38,7 @@ where
 
 // Setup Levels Combobox
 //
-unsafe fn setup_levels_cb<'b>(layout: &mut MutPtr<QLayout>) -> MutPtr<QComboBox> {
+unsafe fn setup_levels_cb<'b>(toolbar: &mut MutPtr<QToolBar>) -> MutPtr<QComboBox> {
     //results
     let mut level_combobox = QComboBox::new_0a();
     level_combobox.set_object_name(&qs("LevelCB"));
@@ -57,23 +50,19 @@ unsafe fn setup_levels_cb<'b>(layout: &mut MutPtr<QLayout>) -> MutPtr<QComboBox>
     pxlabel.set_object_name(&qs("LevelIcon"));
     let label = QLabel::from_q_string(&qs("Level"));
     let mut hlayout = create_hlayout();
-    //let hlayout_ptr = hlayout.as_mut_ptr();
     hlayout.add_widget(pxlabel.into_ptr());
     hlayout.add_widget(label.into_ptr());
     // assign owner of level
-    // let align: QFlags<AlignmentFlag> = AlignmentFlag::AlignBottom.into();
     hlayout.add_widget(level_combobox.into_ptr());
-    // hlayout.set_alignment_q_layout_q_flags_alignment_flag(hlayout_ptr, align);
-    //hlayout.set_alignment_q_widget_q_flags_alignment_flag(level_cb_ptr, align);
     grpbox.set_layout(hlayout.into_ptr());
-    layout.add_widget(grpbox.into_ptr());
+    toolbar.add_widget(grpbox.into_ptr());
     level_cb_ptr
 }
 
 //
 // set up the roles combobox
 //
-unsafe fn setup_roles_cb<'b>(layout: &mut MutPtr<QLayout>) -> MutPtr<QComboBox> {
+unsafe fn setup_roles_cb<'b>(toolbar: &mut MutPtr<QToolBar>) -> MutPtr<QComboBox> {
     let mut role_combobox = QComboBox::new_0a();
     role_combobox.set_object_name(&qs("RoleCB"));
     let role_cb_ptr = role_combobox.as_mut_ptr();
@@ -88,13 +77,13 @@ unsafe fn setup_roles_cb<'b>(layout: &mut MutPtr<QLayout>) -> MutPtr<QComboBox> 
     hlayout.add_widget(label.into_ptr());
     hlayout.add_widget(role_combobox.into_ptr());
     grpbox.set_layout(hlayout.into_ptr());
-    layout.add_widget(grpbox.into_ptr());
+    toolbar.add_widget(grpbox.into_ptr());
     role_cb_ptr
 }
 //------------------//
 // setup Platforms  //
 //------------------//
-unsafe fn setup_platforms_cb<'b>(layout: &mut MutPtr<QLayout>) -> MutPtr<QComboBox> {
+unsafe fn setup_platforms_cb<'b>(toolbar: &mut MutPtr<QToolBar>) -> MutPtr<QComboBox> {
     let mut platform_combobox = QComboBox::new_0a();
     platform_combobox.set_object_name(&qs("PlatformCB"));
     let platform_cb_ptr = platform_combobox.as_mut_ptr();
@@ -115,13 +104,13 @@ unsafe fn setup_platforms_cb<'b>(layout: &mut MutPtr<QLayout>) -> MutPtr<QComboB
 
     grpbox.set_layout(hlayout.into_ptr());
 
-    layout.add_widget(grpbox.into_ptr());
+    toolbar.add_widget(grpbox.into_ptr());
     platform_cb_ptr
 }
 //
 // Site Combobox
 //
-unsafe fn setup_sites_cb<'b>(layout: &mut MutPtr<QLayout>) -> MutPtr<QComboBox> {
+unsafe fn setup_sites_cb<'b>(toolbar: &mut MutPtr<QToolBar>) -> MutPtr<QComboBox> {
     let mut site_combobox = QComboBox::new_0a();
     site_combobox.set_object_name(&qs("SiteCB"));
     let site_cb_ptr = site_combobox.as_mut_ptr();
@@ -139,13 +128,13 @@ unsafe fn setup_sites_cb<'b>(layout: &mut MutPtr<QLayout>) -> MutPtr<QComboBox> 
     hlayout.add_widget(label.into_ptr());
     hlayout.add_widget(site_combobox.into_ptr());
     grpbox.set_layout(hlayout.into_ptr());
-    layout.add_widget(grpbox.into_ptr());
+    toolbar.add_widget(grpbox.into_ptr());
     site_cb_ptr
 }
 //
 // Set up the directions combobox
 //
-unsafe fn setup_directions_cb<'b>(layout: &mut MutPtr<QLayout>) -> MutPtr<QComboBox> {
+unsafe fn setup_directions_cb<'b>(toolbar: &mut MutPtr<QToolBar>) -> MutPtr<QComboBox> {
     let mut dir_combobox = QComboBox::new_0a();
     dir_combobox.set_object_name(&qs("DirCB"));
     let dir_cb_ptr = dir_combobox.as_mut_ptr();
@@ -160,6 +149,6 @@ unsafe fn setup_directions_cb<'b>(layout: &mut MutPtr<QLayout>) -> MutPtr<QCombo
     hlayout.add_widget(label.into_ptr());
     hlayout.add_widget(dir_combobox.into_ptr());
     grpbox.set_layout(hlayout.into_ptr());
-    layout.add_widget(grpbox.into_ptr());
+    toolbar.add_widget(grpbox.into_ptr());
     dir_cb_ptr
 }

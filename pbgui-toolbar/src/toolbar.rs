@@ -2,10 +2,10 @@ use crate::{combo_boxes, line_edit, query_button};
 use qt_core::{AlignmentFlag, QFlags, QString};
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr, Ptr},
-    QAction, QComboBox, QFrame, QLineEdit, QMainWindow, QMenu, QPushButton, QToolBar,
+    QAction, QComboBox, QLineEdit, QMainWindow, QMenu, QPushButton, QToolBar,
 };
 
-use rustqt_utils::{create_hlayout, qs, set_stylesheet_from_str};
+use rustqt_utils::{qs, set_stylesheet_from_str};
 
 /// The main toolbar structure
 pub struct MainToolbar {
@@ -29,23 +29,24 @@ pub fn create(main_window: MutPtr<QMainWindow>) -> MainToolbar {
     unsafe {
         let mut main_window = main_window;
         let mut top_toolbar = main_window.add_tool_bar_q_string(&qs("TopToolBar"));
-        top_toolbar.set_floatable(false);
-        top_toolbar.set_movable(false);
-        let mut hlayout = create_hlayout();
-        let mut hlayout_ptr = hlayout.as_mut_ptr();
-        let query_btn = query_button::create(None, hlayout.as_mut_ptr());
+        top_toolbar.set_floatable(true);
+        top_toolbar.set_movable(true);
+        //let top_toolbar_ptr = top_toolbar.clone();
+        //let mut hlayout = create_hlayout();
+        //let hlayout_ptr = hlayout.as_mut_ptr();
+        let query_btn = query_button::create(None, top_toolbar.clone());
 
-        let (level, role, platform, site, dir) = combo_boxes::create(&mut hlayout_ptr);
+        let (level, role, platform, site, dir) = combo_boxes::create(&mut top_toolbar.clone());
 
-        let (line_edit, menu, clear_line_edit_action) = line_edit::create(hlayout.as_mut_ptr());
+        let (line_edit, menu, clear_line_edit_action) = line_edit::create(top_toolbar.clone());
         let _align: QFlags<AlignmentFlag> = AlignmentFlag::AlignCenter.into();
         // hlayout.set_alignment_q_layout_q_flags_alignment_flag(hlayout_ptr, align);
         // hlayout.set_alignment_q_widget_q_flags_alignment_flag(level, align);
 
-        let mut toolbar_frame = QFrame::new_0a();
-        toolbar_frame.set_object_name(&qs("ToobarFrame"));
-        toolbar_frame.set_layout(hlayout.into_ptr());
-        top_toolbar.add_widget(toolbar_frame.into_ptr());
+        //let mut toolbar_frame = QFrame::new_0a();
+        //toolbar_frame.set_object_name(&qs("ToobarFrame"));
+        //toolbar_frame.set_layout(hlayout.into_ptr());
+        //top_toolbar.add_widget(toolbar_frame.into_ptr());
 
         MainToolbar {
             toolbar: top_toolbar,
