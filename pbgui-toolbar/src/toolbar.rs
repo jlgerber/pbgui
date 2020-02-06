@@ -1,10 +1,10 @@
-use crate::{combo_boxes, line_edit, query_button};
+use crate::{combo_boxes::*, line_edit, query_button};
 use qt_core::{AlignmentFlag, QFlags, QString};
+use qt_gui::QIcon;
 use qt_widgets::{
     cpp_core::{CppBox, MutPtr, Ptr},
     QAction, QComboBox, QLineEdit, QMainWindow, QMenu, QPushButton, QToolBar,
 };
-
 use rustqt_utils::{qs, set_stylesheet_from_str};
 
 /// The main toolbar structure
@@ -12,10 +12,15 @@ pub struct MainToolbar {
     toolbar: MutPtr<QToolBar>,
     query_btn: MutPtr<QPushButton>,
     level: MutPtr<QComboBox>,
+    _level_icon: CppBox<QIcon>,
     role: MutPtr<QComboBox>,
+    _role_icon: CppBox<QIcon>,
     platform: MutPtr<QComboBox>,
+    _platform_icon: CppBox<QIcon>,
     site: MutPtr<QComboBox>,
+    _site_icon: CppBox<QIcon>,
     dir: MutPtr<QComboBox>,
+    _dir_icon: CppBox<QIcon>,
     line_edit: MutPtr<QLineEdit>,
     menu: CppBox<QMenu>,
     clear_line_edit_action: MutPtr<QAction>,
@@ -31,31 +36,34 @@ pub fn create(main_window: MutPtr<QMainWindow>) -> MainToolbar {
         let mut top_toolbar = main_window.add_tool_bar_q_string(&qs("TopToolBar"));
         top_toolbar.set_floatable(true);
         top_toolbar.set_movable(true);
-        //let top_toolbar_ptr = top_toolbar.clone();
-        //let mut hlayout = create_hlayout();
-        //let hlayout_ptr = hlayout.as_mut_ptr();
         let query_btn = query_button::create(None, top_toolbar.clone());
-
-        let (level, role, platform, site, dir) = combo_boxes::create(&mut top_toolbar.clone());
+        //results
+        let (level, level_icon) = setup_levels_cb(&mut top_toolbar.clone());
+        // Roles
+        let (role, role_icon) = setup_roles_cb(&mut top_toolbar.clone());
+        // Platform
+        let (platform, platform_icon) = setup_platforms_cb(&mut top_toolbar.clone());
+        // Site
+        let (site, site_icon) = setup_sites_cb(&mut top_toolbar.clone());
+        // Direction
+        let (dir, dir_icon) = setup_directions_cb(&mut top_toolbar.clone());
 
         let (line_edit, menu, clear_line_edit_action) = line_edit::create(top_toolbar.clone());
+
         let _align: QFlags<AlignmentFlag> = AlignmentFlag::AlignCenter.into();
-        // hlayout.set_alignment_q_layout_q_flags_alignment_flag(hlayout_ptr, align);
-        // hlayout.set_alignment_q_widget_q_flags_alignment_flag(level, align);
-
-        //let mut toolbar_frame = QFrame::new_0a();
-        //toolbar_frame.set_object_name(&qs("ToobarFrame"));
-        //toolbar_frame.set_layout(hlayout.into_ptr());
-        //top_toolbar.add_widget(toolbar_frame.into_ptr());
-
         MainToolbar {
             toolbar: top_toolbar,
             query_btn,
             level,
+            _level_icon: level_icon,
             role,
+            _role_icon: role_icon,
             platform,
+            _platform_icon: platform_icon,
             site,
+            _site_icon: site_icon,
             dir,
+            _dir_icon: dir_icon,
             line_edit,
             menu,
             clear_line_edit_action,

@@ -1,4 +1,5 @@
 
+
 #ButtonFrame {
     margin: 0;
     border: 1px solid rgb(100,100,100);
@@ -50,39 +51,35 @@ QFrame > QLabel {
     padding-right: 10px;
     background: rgb(70,70,70);
 }
-
+/* 
 #FirstComboFrame > QLabel, #ComboFrame > QLabel {
-    /*temp while figuring out the centering issue */
     margin-top: 3px;
-}
+} */
 QComboBox#RoleCB, 
 QComboBox#LevelCB, 
 QComboBox#PlatformCB, 
 QComboBox#SiteCB, 
 QComboBox#DirCB {
     border: none; 
-    /* height: 20px; */
-/* temp */
-    margin-top:3px;
-
+    margin-top:2px;
     background: rgb(70,70,70);
 }
 
 QComboBox#PlatformCB, 
 QComboBox#SiteCB {
-    min-width: 7em;
+    min-width: 4em;
 }
 
 QComboBox#RoleCB {
-    min-width: 9em;
+    min-width: 7em;
 }
 
 QComboBox#LevelCB {
-    min-width:6em;
+    min-width:5em;
 }
 
 QComboBox#DirCB {
-   min-width: 7em; 
+   min-width: 5em; 
 }
 
 QComboBox:on { 
@@ -114,7 +111,7 @@ QComboBox#DirCB::down-arrow
 QComboBox QAbstractItemView {
     min-width: 8em;
 }
-
+/* 
 QPushButton#LevelIcon {
     background: transparent;
     image: url(:images/volume.png);
@@ -137,7 +134,7 @@ QPushButton#SiteIcon {
     background: transparent;
     image: url(:images/earth.png);
     margin-right:5px;
-}
+} */
 
 QFrame#PackageLineEditFrame {
     border: 1px solid rgb(100,100,100);
@@ -153,4 +150,17 @@ QLineEdit {
     border: 1px solid rgb(80,80,80);
     margin-left:10px;
     margin-right:10px;
+}
+
+/* we set the text size of the QToolButton */
+#CBToolButtonAsLabel {
+    font-size: 14px;
+}
+/* We disable to toolbutton because we really just want to 
+display an icon and text. So, we also disable the button so that it
+doesnt change color when pressed. However, we need to set the text color 
+because it is greyed out by default in this case.
+*/
+#CBToolButtonAsLabel:disabled {
+    color: rgb(250,250,250);
 }
