@@ -9,6 +9,7 @@ pub mod bottom_context_widget;
 pub mod bottom_stacked_widget;
 
 pub mod center_widget;
+pub mod dist_tree;
 pub mod left_toolbar;
 pub mod package_withs_list;
 pub mod packages_tree;

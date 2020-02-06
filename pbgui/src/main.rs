@@ -60,9 +60,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let _result = QResource::register_resource_q_string(&qs(
             "/Users/jgerber/bin/pbgui-resources/pbgui.rcc",
         ));
-        let _result = QResource::register_resource_q_string(&qs(
-            "/Users/jgerber/bin/pbgui-resources/pbgui_tree.rcc",
-        ));
+        // moved into current package
+        // let _result = QResource::register_resource_q_string(&qs(
+        //     "/Users/jgerber/bin/pbgui-resources/pbgui_tree.rcc",
+        // ));
         let _result = QResource::register_resource_q_string(&qs(
             "/Users/jgerber/bin/pbgui-resources/pbgui_withlist.rcc",
         ));

@@ -46,5 +46,18 @@
         <file>images/log_grey.svg</file>
         <file>images/globe_white.svg</file>
         <file>images/globe_grey.svg</file>
+        <!-- from tree-->
+        <file>images/pin_white.png</file>
+        <file>images/pin_blue.png</file>
+        <file>images/pin_grey.png</file>
+        <file>images/dropdown.png</file>
+        <file>images/pin_white.svg</file>
+        <file>images/pin_grey.svg</file>
+        <file>images/pin_blue.svg</file>
+        <file>images/package_md.svg</file>
+        <file>images/package_md.png</file>
+        <file>images/world.svg</file>
+        <file>images/filter_white_sm.svg</file>
+        <file>images/filter_blue_sm.svg</file>
     </qresource>
 </RCC>

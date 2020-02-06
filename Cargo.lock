@@ -904,7 +904,7 @@ checksum = "a3bf70094d203e07844da868b634207e71bfab254fe713171fae9a6e751ccf31"
 
 [[package]]
 name = "pbgui"
-version = "0.56.0"
+version = "0.57.0"
 dependencies = [
  "crossbeam",
  "crossbeam-channel",
@@ -916,7 +916,6 @@ dependencies = [
  "pbgui-logger",
  "pbgui-menubar",
  "pbgui-toolbar",
- "pbgui-tree",
  "pbgui-vpin",
  "pbgui-withs",
  "qt_core",
@@ -970,20 +969,6 @@ dependencies = [
  "packybara",
  "qt_core",
  "qt_gui",
- "qt_ui_tools",
- "qt_widgets",
- "rustqt-utils",
-]
-
-[[package]]
-name = "pbgui-tree"
-version = "0.11.1"
-dependencies = [
- "log",
- "packybara",
- "qt_core",
- "qt_gui",
- "qt_thread_conductor",
  "qt_ui_tools",
  "qt_widgets",
  "rustqt-utils",

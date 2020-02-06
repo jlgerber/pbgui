@@ -1,5 +1,5 @@
+use super::dist_tree::tree;
 use crate::utility::create_vlayout;
-use pbgui_tree::tree;
 use qt_widgets::{cpp_core::MutPtr, QFrame, QSplitter};
 use std::cell::RefCell;
 use std::rc::Rc;

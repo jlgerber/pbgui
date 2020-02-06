@@ -10,7 +10,7 @@ use qt_widgets::{
 };
 use rustqt_utils::{create_hlayout, create_vlayout, qs, set_stylesheet_from_str, ToQStringOwned};
 
-const STYLE_STR: &'static str = include_str!("../resources/tree.qss");
+const STYLE_STR: &'static str = include_str!("../../../resources/tree.qss");
 
 /// A struct holding the QTreeView and providing a simple Api, mirrored
 /// by the parent.

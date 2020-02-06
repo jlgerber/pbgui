@@ -1,5 +1,5 @@
-use crate::api::{ClientProxy, PackratDb};
-use crate::inner_tree::InnerTreeView;
+use super::api::{ClientProxy, PackratDb};
+use super::inner_tree::InnerTreeView;
 use packybara::traits::*;
 use qt_core::{QModelIndex, QString, Signal, SlotOfBool, SlotOfQModelIndex, SlotOfQString};
 use qt_gui::{QStandardItem, QStandardItemModel};
@@ -16,7 +16,6 @@ use std::rc::Rc;
 /// collapsing components
 pub struct DistributionTreeView<'a> {
     view: Rc<InnerTreeView>,
-    //clicked: SlotOfQModelIndex<'a>,
     expanded: SlotOfQModelIndex<'a>,
     collapsed: SlotOfQModelIndex<'a>,
     filter_visible: SlotOfBool<'a>,

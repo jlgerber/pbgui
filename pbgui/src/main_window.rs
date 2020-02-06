@@ -1,3 +1,4 @@
+use crate::components::dist_tree::tree;
 use crate::messaging::OMsg;
 use crate::messaging::Sender;
 use crate::{
@@ -21,7 +22,6 @@ use log;
 use pbgui_logger::LogWin;
 use pbgui_menubar::MenuBar;
 use pbgui_toolbar::toolbar;
-use pbgui_tree::tree;
 use pbgui_withs::WithsList;
 
 use qt_core::{

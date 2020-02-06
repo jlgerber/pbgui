@@ -1,6 +1,6 @@
 [package]
 name = "pbgui"
-version = "0.56.0"
+version = "0.57.0"
 authors = ["jgerber <jlgerber@gmail.com>"]
 edition = "2018"
 
@@ -26,7 +26,6 @@ simple_xml_serialize =  "0.2.3"
 simple_xml_serialize_macro = { version = "0.2.1", features = ["process_options"] }
 pbgui-withs = {path= "../pbgui-withs"}
 pbgui-toolbar = {path="../pbgui-toolbar"}
-pbgui-tree = {path="../pbgui-tree"}
 pbgui-vpin = {path="../pbgui-vpin"}
 pbgui-logger = {path="../pbgui-logger"}
 pbgui-menubar = {path="../pbgui-menubar"}
