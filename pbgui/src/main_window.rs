@@ -86,7 +86,9 @@ impl<'a> InnerMainWindow<'a> {
     /// This is a common pattern, mainly designed to allow this author to take advantage
     /// of an api in slots. Without the division, we would have to duplicate logic between
     /// slots and external consumers.
-    pub fn new() -> (
+    pub fn new(
+        to_thread_sender: Sender<OMsg>,
+    ) -> (
         InnerMainWindow<'a>,
         CppBox<QMainWindow>,
         CppBox<QMenu>,
@@ -108,7 +110,7 @@ impl<'a> InnerMainWindow<'a> {
             let mut with_splitter_ptr = withs_splitter::create(&mut main_layout_ptr);
 
             // create packages treeview on left side
-            let packages_ptr = packages_tree::create(with_splitter_ptr);
+            let packages_ptr = packages_tree::create(with_splitter_ptr, to_thread_sender);
 
             // create the center widget
             let mut center_layout_ptr = center_widget::create(&mut with_splitter_ptr);
@@ -573,7 +575,7 @@ impl<'a> MainWindow<'a> {
     /// * MainWindow instance
     pub unsafe fn new(to_thread_sender: Sender<OMsg>) -> MainWindow<'a> {
         let (pbgui_root, pbgui_main_cppbox, dist_popup_menu_box, logger_icon) =
-            InnerMainWindow::new();
+            InnerMainWindow::new(to_thread_sender.clone());
         let main = Rc::new(pbgui_root);
         let main_win = MainWindow {
             main: main.clone(),

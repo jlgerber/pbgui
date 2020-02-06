@@ -1,5 +1,8 @@
 use super::api::{ClientProxy, PackratDb};
 use super::inner_tree::InnerTreeView;
+use crate::messaging::outgoing::omain_win::OMainWin;
+use crate::messaging::OMsg;
+use crate::messaging::Sender;
 use packybara::traits::*;
 use qt_core::{QModelIndex, QString, Signal, SlotOfBool, SlotOfQModelIndex, SlotOfQString};
 use qt_gui::{QStandardItem, QStandardItemModel};
@@ -7,7 +10,6 @@ use qt_widgets::{
     cpp_core::{MutPtr, Ref, StaticUpcast},
     QPushButton, QWidget,
 };
-
 use rustqt_utils::{enclose, ToQStringOwned};
 use std::rc::Rc;
 
@@ -39,7 +41,10 @@ impl<'a> DistributionTreeView<'a> {
     ///
     /// # Returns
     /// * `DistributionTreeView instance
-    pub fn create<T>(parent_widget: MutPtr<T>) -> DistributionTreeView<'a>
+    pub fn create<T>(
+        parent_widget: MutPtr<T>,
+        to_thread_sender: Sender<OMsg>,
+    ) -> DistributionTreeView<'a>
     where
         T: StaticUpcast<QWidget>,
     {
