@@ -21,9 +21,8 @@ QListView#WithsListView::item:selected { /*:active */
 
 #ItemComboWidget {
     padding-top: 6px;
-    padding-bottom: 10px;
+    padding-bottom: 12px;
 }
-
 
 #WithsToolbarModeButton {
     margin: 0px;

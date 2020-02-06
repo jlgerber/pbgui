@@ -241,6 +241,17 @@ impl<'l> WithsList<'l> {
         }
     }
 
+    /// Set the stylesheet to the internal stylesheet
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// * None
+    pub fn set_default_stylesheet(&self) {
+        self.inner.set_default_stylesheet();
+    }
+
     /// Retrieve the model for the component
     ///
     /// # Arguments

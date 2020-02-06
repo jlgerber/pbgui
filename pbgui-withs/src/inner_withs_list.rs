@@ -15,6 +15,9 @@ use qt_widgets::{
     QWidget,
 };
 //use rustqt_utils::{as_mut_ref, as_ref, enclose, enclose_all};
+use rustqt_utils::set_stylesheet_from_str;
+
+const STYLE_STR: &'static str = include_str!("../resources/withlist.qss");
 
 //
 // ITEMLIST
@@ -381,6 +384,17 @@ impl InnerWithsList {
         unsafe {
             self.add_combobox().set_max_visible_items(max);
         }
+    }
+
+    /// Set the stylesheet to the internal stylesheet
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// *None
+    pub(crate) fn set_default_stylesheet(&self) {
+        set_stylesheet_from_str(STYLE_STR, self.main());
     }
 
     /// Given a path as a &str to a stylesheet, apply it to the components.

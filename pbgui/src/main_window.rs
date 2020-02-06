@@ -145,6 +145,7 @@ impl<'a> InnerMainWindow<'a> {
 
             // create the with with package list on the right hand side
             let item_list_ptr = package_withs_list::create(with_splitter_ptr);
+            item_list_ptr.borrow_mut().set_default_stylesheet();
             item_list_ptr.borrow_mut().set_add_mode();
             item_list_ptr.borrow_mut().set_cb_max_visible_items(30);
 
