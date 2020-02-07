@@ -5,6 +5,7 @@ pub enum PackagesTree {
     GetPackages,
     GetSites,
     GetDistsForPackage,
+    GetPlatformsForDist,
 }
 
 impl ToEvent for PackagesTree {
@@ -21,6 +22,9 @@ impl ToQString for PackagesTree {
             &PackagesTree::GetDistsForPackage => {
                 QString::from_std_str("PackagesTree::GetDistsForPackage")
             }
+            &PackagesTree::GetPlatformsForDist => {
+                QString::from_std_str("PackagesTree::GetPlatformsForDist")
+            }
         }
     }
 }
@@ -31,6 +35,7 @@ impl FromQString for PackagesTree {
             "PackagesTree::GetPackages" => PackagesTree::GetPackages,
             "PackagesTree::GetSites" => PackagesTree::GetSites,
             "PackagesTree::GetDistsForPackage" => PackagesTree::GetDistsForPackage,
+            "PackagesTree::GetPlatformsForDist" => PackagesTree::GetPlatformsForDist,
             _ => panic!("Unable to convert to Event"),
         }
     }

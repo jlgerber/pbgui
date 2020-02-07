@@ -4,7 +4,16 @@ use super::*;
 pub enum OPackagesTree {
     GetPackages,
     GetSites,
-    GetPackageDists { package: String, package_row: i32 },
+    GetPackageDists {
+        package: String,
+        package_row: i32,
+    },
+    GetDistPlatforms {
+        package: String,
+        version: String,
+        package_row: i32,
+        dist_row: i32,
+    },
 }
 
 impl ToOMsg for OPackagesTree {

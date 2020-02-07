@@ -48,5 +48,29 @@ pub fn match_packages_tree<'a>(
                 log::error!("IMsg does not have dists")
             }
         }
+        PackagesTree::GetPlatformsForDist => {
+            if let Ok(IMsg::PackagesTree(IPackagesTree::PlatformsForDist {
+                platforms,
+                package_row,
+                dist_row,
+            })) = receiver.recv()
+            {
+                let platforms_ref = platforms.iter().map(|x| x.as_str()).collect::<Vec<_>>();
+                if platforms.len() > 0 {
+                    unsafe {
+                        let model = tree.model();
+                        let parent_idx = model.index_2a(package_row, 0);
+                        let idx = model.index_3a(dist_row, 0, parent_idx.as_ref());
+                        let item = model.item_from_index(idx.as_ref());
+                        let mut model = model;
+                        model.remove_rows_3a(0, 1, idx.as_ref());
+                        let inner = tree.inner();
+                        inner.set_children(item, platforms_ref, true);
+                    }
+                }
+            } else {
+                log::error!("IMsg does not have dists")
+            }
+        }
     }
 }

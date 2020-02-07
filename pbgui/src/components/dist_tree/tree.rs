@@ -1,9 +1,7 @@
-use super::api::{ClientProxy, PackratDb};
 use super::inner_tree::InnerTreeView;
 use crate::messaging::outgoing::opackages_tree::OPackagesTree;
 use crate::messaging::OMsg;
 use crate::messaging::Sender;
-use packybara::traits::*;
 use qt_core::{QModelIndex, QString, Signal, SlotOfBool, SlotOfQModelIndex, SlotOfQString};
 use qt_gui::{QStandardItem, QStandardItemModel};
 use qt_widgets::{
@@ -22,15 +20,6 @@ pub struct DistributionTreeView<'a> {
     collapsed: SlotOfQModelIndex<'a>,
     filter_visible: SlotOfBool<'a>,
     filter_slot: SlotOfQString<'a>,
-}
-
-// filter using is any
-fn is_not_any(item: &str) -> Option<&str> {
-    if item == "any" {
-        None
-    } else {
-        Some(item)
-    }
 }
 
 impl<'a> DistributionTreeView<'a> {
@@ -93,11 +82,9 @@ impl<'a> DistributionTreeView<'a> {
                         let item = model.item_from_index(idx);
                         let item_str = item.text().to_std_string();
 
-                        let client = ClientProxy::connect().expect("Unable to connect via ClientProxy");
-                        let mut db = PackratDb::new(client);
-                        // TODO: to_thread_sender.... replaces db call
                         // we are a child of the root. Our parent is not "valid"
-                        if idx.parent().is_valid() == false {
+                        let parent = idx.parent();
+                        if parent.is_valid() == false {
                             to_thread_sender
                                 .send(OMsg::PackagesTree(OPackagesTree::GetPackageDists {
                                 package: item_str,
@@ -105,29 +92,17 @@ impl<'a> DistributionTreeView<'a> {
                                 }))
                                 .expect("unable to get distributions for package");
 
-                            // let results = db
-                            //     .find_all_distributions()
-                            //     .package(&item_str)
-                            //     .query()
-                            //     .expect("unable to find_all_distributions");
-                            // let results = results.iter().map(|s| s.version.as_str()).collect::<Vec<_>>();
-                            // if results.len() > 0 {
-                            //     treeview.model().remove_rows_3a(0,1, idx);
-                            //     treeview.set_children(item, results, true);
-                            //}
                         } else {
-                            // if we are not the child of the root, we must be the version, revealing
-                            // the platform
-                            // TODO: to_thread_sender.... replaces db call
-                            let results = db
-                                .find_all_platforms()
-                                .query()
-                                .expect("unable to find_all_platforms");
-                            let results = results.iter().filter_map(|s| is_not_any(s.name.as_str())).collect::<Vec<_>>();
-                            if results.len() > 0 {
-                                treeview.model().remove_rows_3a(0,1, idx);
-                                treeview.set_children(item, results, false);
-                            }
+                            let parent_item = model.item_from_index(parent.as_ref());
+                            let parent_item_str = parent_item.text().to_std_string();
+                            to_thread_sender
+                                .send(OMsg::PackagesTree(OPackagesTree::GetDistPlatforms {
+                                    package: parent_item_str,
+                                    version: item_str,
+                                    package_row: parent.row(),
+                                    dist_row: idx.row()
+                                }))
+                                .expect("unable to send GetDistPlatforms");
                         }
                     }},
                 ),
