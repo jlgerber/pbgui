@@ -65,6 +65,7 @@ pub(crate) fn match_packages_tree(
         }
 
         OPackagesTree::GetPackageDists {
+            site,
             package,
             package_row,
         } => {
@@ -97,6 +98,7 @@ pub(crate) fn match_packages_tree(
             conductor.signal(PackagesTree::GetDistsForPackage.to_event());
         }
         OPackagesTree::GetDistPlatforms {
+            site,
             package,
             version,
             package_row,

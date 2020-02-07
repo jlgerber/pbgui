@@ -107,6 +107,17 @@ impl InnerTreeView {
         self.cbox
     }
 
+    /// Retrieve the current site as String
+    ///
+    /// # Arguments
+    /// * None
+    ///
+    /// # Returns
+    /// * The currently set site as a string
+    pub fn site(&self) -> String {
+        unsafe { self.cbox.current_text().to_std_string() }
+    }
+
     #[allow(dead_code)]
     /// retieve a MutPtr to the filter pushbutton
     pub(crate) fn filter_button(&self) -> MutPtr<QPushButton> {

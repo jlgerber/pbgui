@@ -5,10 +5,12 @@ pub enum OPackagesTree {
     GetPackages,
     GetSites,
     GetPackageDists {
+        site: String,
         package: String,
         package_row: i32,
     },
     GetDistPlatforms {
+        site: String,
         package: String,
         version: String,
         package_row: i32,

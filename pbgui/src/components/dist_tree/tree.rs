@@ -69,6 +69,7 @@ impl<'a> DistributionTreeView<'a> {
                 expanded: SlotOfQModelIndex::new(
                     enclose! { (treeview, to_thread_sender) move |idx: Ref<QModelIndex>| {
                         let model = treeview.model();
+                        // shouldnt some of this this go in the treeview api?
                         let row_cnt = model.row_count_1a(idx);
                         if  row_cnt > 1 { return; }
 
@@ -87,8 +88,9 @@ impl<'a> DistributionTreeView<'a> {
                         if parent.is_valid() == false {
                             to_thread_sender
                                 .send(OMsg::PackagesTree(OPackagesTree::GetPackageDists {
-                                package: item_str,
-                                package_row: idx.row()
+                                    site: treeview.site(),
+                                    package: item_str,
+                                    package_row: idx.row()
                                 }))
                                 .expect("unable to get distributions for package");
 
@@ -97,6 +99,7 @@ impl<'a> DistributionTreeView<'a> {
                             let parent_item_str = parent_item.text().to_std_string();
                             to_thread_sender
                                 .send(OMsg::PackagesTree(OPackagesTree::GetDistPlatforms {
+                                    site: treeview.site(),
                                     package: parent_item_str,
                                     version: item_str,
                                     package_row: parent.row(),
