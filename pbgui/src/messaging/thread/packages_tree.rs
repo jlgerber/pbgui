@@ -54,5 +54,44 @@ pub(crate) fn match_packages_tree(
                 .expect("unable to send sites");
             conductor.signal(PackagesTree::GetSites.to_event());
         }
+
+        OPackagesTree::GetPackageDists {
+            package,
+            package_row,
+        } => {
+            let results = match db.find_all_distributions().package(&package).query() {
+                Ok(dists) => dists,
+                Err(e) => {
+                    sender
+                        .send(IMsg::Error(format!(
+                            "Unable to get distributions from db: {}",
+                            e
+                        )))
+                        .expect("unable to send error msg");
+                    conductor.signal(Event::Error);
+                    return;
+                }
+            };
+            let results = results
+                .iter()
+                .map(|s| s.version.as_str().to_string())
+                .collect::<Vec<_>>();
+            // we use std::mem::replace because this should be a bit more efficient
+            // // than clone, and certainly more
+            // let sites = sites
+            //     .into_iter()
+            //     .map(|mut x| std::mem::replace(&mut x.name, String::new()))
+            //     .collect::<Vec<_>>();
+            sender
+                .send(
+                    IPackagesTree::DistsForPackage {
+                        dists: results,
+                        row: package_row,
+                    }
+                    .to_imsg(),
+                )
+                .expect("unable to send distributions");
+            conductor.signal(PackagesTree::GetDistsForPackage.to_event());
+        }
     }
 }

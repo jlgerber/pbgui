@@ -4,6 +4,7 @@ use super::*;
 pub enum PackagesTree {
     GetPackages,
     GetSites,
+    GetDistsForPackage,
 }
 
 impl ToEvent for PackagesTree {
@@ -17,6 +18,9 @@ impl ToQString for PackagesTree {
         match &self {
             &PackagesTree::GetPackages => QString::from_std_str("PackagesTree::GetPackages"),
             &PackagesTree::GetSites => QString::from_std_str("PackagesTree::GetSites"),
+            &PackagesTree::GetDistsForPackage => {
+                QString::from_std_str("PackagesTree::GetDistsForPackage")
+            }
         }
     }
 }
@@ -26,6 +30,7 @@ impl FromQString for PackagesTree {
         match qs.to_std_string().as_str() {
             "PackagesTree::GetPackages" => PackagesTree::GetPackages,
             "PackagesTree::GetSites" => PackagesTree::GetSites,
+            "PackagesTree::GetDistsForPackage" => PackagesTree::GetDistsForPackage,
             _ => panic!("Unable to convert to Event"),
         }
     }

@@ -1,6 +1,6 @@
 use super::api::{ClientProxy, PackratDb};
 use super::inner_tree::InnerTreeView;
-use crate::messaging::outgoing::omain_win::OMainWin;
+use crate::messaging::outgoing::opackages_tree::OPackagesTree;
 use crate::messaging::OMsg;
 use crate::messaging::Sender;
 use packybara::traits::*;
@@ -78,7 +78,7 @@ impl<'a> DistributionTreeView<'a> {
                 //     tv.clear_selection();
                 // }),
                 expanded: SlotOfQModelIndex::new(
-                    enclose! { (treeview) move |idx: Ref<QModelIndex>| {
+                    enclose! { (treeview, to_thread_sender) move |idx: Ref<QModelIndex>| {
                         let model = treeview.model();
                         let row_cnt = model.row_count_1a(idx);
                         if  row_cnt > 1 { return; }
@@ -95,22 +95,30 @@ impl<'a> DistributionTreeView<'a> {
 
                         let client = ClientProxy::connect().expect("Unable to connect via ClientProxy");
                         let mut db = PackratDb::new(client);
-
+                        // TODO: to_thread_sender.... replaces db call
                         // we are a child of the root. Our parent is not "valid"
                         if idx.parent().is_valid() == false {
-                            let results = db
-                                .find_all_distributions()
-                                .package(&item_str)
-                                .query()
-                                .expect("unable to find_all_distributions");
-                            let results = results.iter().map(|s| s.version.as_str()).collect::<Vec<_>>();
-                            if results.len() > 0 {
-                                treeview.model().remove_rows_3a(0,1, idx);
-                                treeview.set_children(item, results, true);
-                            }
+                            to_thread_sender
+                                .send(OMsg::PackagesTree(OPackagesTree::GetPackageDists {
+                                package: item_str,
+                                package_row: idx.row()
+                                }))
+                                .expect("unable to get distributions for package");
+
+                            // let results = db
+                            //     .find_all_distributions()
+                            //     .package(&item_str)
+                            //     .query()
+                            //     .expect("unable to find_all_distributions");
+                            // let results = results.iter().map(|s| s.version.as_str()).collect::<Vec<_>>();
+                            // if results.len() > 0 {
+                            //     treeview.model().remove_rows_3a(0,1, idx);
+                            //     treeview.set_children(item, results, true);
+                            //}
                         } else {
                             // if we are not the child of the root, we must be the version, revealing
                             // the platform
+                            // TODO: to_thread_sender.... replaces db call
                             let results = db
                                 .find_all_platforms()
                                 .query()
@@ -138,7 +146,6 @@ impl<'a> DistributionTreeView<'a> {
             };
 
             // Set up signals & slots
-            //treeview.view().clicked().connect(&dtv.clicked);
             treeview.view().expanded().connect(&dtv.expanded);
             treeview.view().collapsed().connect(&dtv.collapsed);
             treeview.filter().text_changed().connect(&dtv.filter_slot);
@@ -148,6 +155,10 @@ impl<'a> DistributionTreeView<'a> {
                 .connect(&dtv.filter_visible);
             dtv
         }
+    }
+
+    pub(crate) fn inner(&self) -> Rc<InnerTreeView> {
+        self.view.clone()
     }
     /// Retrieve the Filter button (which is acting as a checkbox)
     ///

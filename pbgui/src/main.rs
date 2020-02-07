@@ -120,7 +120,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         pbgui_root
             .main_win()
-            .packages_tree()
+            .tree()
             .clicked()
             .connect(&exec_dialog_slot);
 

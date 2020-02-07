@@ -35,7 +35,6 @@ use qt_widgets::{
     QTableWidget, QToolButton, QVBoxLayout, QWidget, SlotOfQPoint,
 };
 use rustqt_utils::enclose;
-use std::cell;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -54,7 +53,8 @@ pub struct InnerMainWindow<'a> {
     main_menubar: MenuBar<'a>,
     main_toolbar: Rc<toolbar::MainToolbar>,
     withs_splitter: MutPtr<QSplitter>,
-    packages_tree: Rc<RefCell<tree::DistributionTreeView<'a>>>,
+    //packages_tree: Rc<RefCell<tree::DistributionTreeView<'a>>>,
+    packages_tree: Rc<tree::DistributionTreeView<'a>>,
     package_withs_list: Rc<RefCell<WithsList<'a>>>,
     vpin_table: MutPtr<QTableWidget>,
     vpin_table_splitter: MutPtr<QSplitter>,
@@ -285,9 +285,9 @@ impl<'a> InnerMainWindow<'a> {
     ///
     /// # Returns
     /// * Ref<DistributionTreeView>
-    pub unsafe fn packages_tree(&self) -> cell::Ref<tree::DistributionTreeView<'a>> {
-        self.packages_tree.borrow()
-    }
+    // pub unsafe fn packages_tree(&self) -> cell::Ref<tree::DistributionTreeView<'a>> {
+    //     self.packages_tree.borrow()
+    // }
 
     /// Returns a reference counted pointer to a RefCell wrapped DistributionTreeView
     ///
@@ -296,7 +296,10 @@ impl<'a> InnerMainWindow<'a> {
     ///
     /// # Returns
     /// * Rc<RefCell<DistributionTreeView>>>
-    pub unsafe fn tree(&self) -> Rc<RefCell<tree::DistributionTreeView<'a>>> {
+    // pub unsafe fn tree(&self) -> Rc<RefCell<tree::DistributionTreeView<'a>>> {
+    //     self.packages_tree.clone()
+    // }
+    pub unsafe fn tree(&self) -> Rc<tree::DistributionTreeView<'a>> {
         self.packages_tree.clone()
     }
     /// Returns an reference counted pointer to a RefCell wrapped WIthsList
@@ -317,9 +320,9 @@ impl<'a> InnerMainWindow<'a> {
     ///
     /// # Returns
     /// * RefMut<DistributionTreeView>
-    pub unsafe fn packages_tree_mut(&self) -> cell::RefMut<tree::DistributionTreeView<'a>> {
-        self.packages_tree.borrow_mut()
-    }
+    // pub unsafe fn packages_tree_mut(&self) -> cell::RefMut<tree::DistributionTreeView<'a>> {
+    //     self.packages_tree.borrow_mut()
+    // }
 
     /// returns a mutable pointer to the versionpin table widget
     ///
