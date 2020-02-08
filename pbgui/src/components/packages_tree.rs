@@ -8,7 +8,6 @@ use std::rc::Rc;
 pub fn create<'c>(
     mut splitter: MutPtr<QSplitter>,
     to_thread_sender: Sender<OMsg>,
-    //) -> Rc<RefCell<tree::DistributionTreeView<'c>>> {
 ) -> Rc<tree::DistributionTreeView<'c>> {
     unsafe {
         let mut frame = QFrame::new_0a();
@@ -21,7 +20,6 @@ pub fn create<'c>(
 
         distribution_tree_view.set_default_stylesheet();
 
-        //Rc::new(RefCell::new(distribution_tree_view))
         Rc::new(distribution_tree_view)
     }
 }

@@ -904,7 +904,7 @@ checksum = "a3bf70094d203e07844da868b634207e71bfab254fe713171fae9a6e751ccf31"
 
 [[package]]
 name = "pbgui"
-version = "0.59.0"
+version = "0.60.0"
 dependencies = [
  "crossbeam",
  "crossbeam-channel",

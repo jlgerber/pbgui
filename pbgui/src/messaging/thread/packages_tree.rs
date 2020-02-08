@@ -63,7 +63,7 @@ pub(crate) fn match_packages_tree(
                 .expect("unable to send sites");
             conductor.signal(PackagesTree::GetSites.to_event());
         }
-
+        #[allow(unused_variables)]
         OPackagesTree::GetPackageDists {
             site,
             package,
@@ -97,6 +97,7 @@ pub(crate) fn match_packages_tree(
                 .expect("unable to send distributions");
             conductor.signal(PackagesTree::GetDistsForPackage.to_event());
         }
+        #[allow(unused_variables)]
         OPackagesTree::GetDistPlatforms {
             site,
             package,
