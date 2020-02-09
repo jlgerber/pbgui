@@ -22,3 +22,4 @@ pub use traits::{RowSetterTrait, RowTrait};
 
 pub mod logger;
 pub mod messaging;
+pub mod prefs;
