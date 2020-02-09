@@ -9,6 +9,9 @@ install:
 install-stylesheet:
 	cd ./pbgui && make install-stylesheet
 
+install-prefs:
+	cp ./etc/pbgui_preferences.yaml ~/etc/.
+
 rcc:
 	cd ./pbgui && make rcc
 	cd ./pbgui-withs && make rcc
@@ -21,4 +24,4 @@ install-rcc:
 	cd ./pbgui-withs && make install-rcc
 
 
-all: build install install-stylesheet rcc install-rcc
+all: build install install-prefs install-stylesheet rcc install-rcc

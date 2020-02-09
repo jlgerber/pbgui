@@ -1,12 +1,12 @@
 #![windows_subsystem = "windows"]
 use crossbeam_channel::{unbounded as channel, Receiver, Sender};
-//use env_logger;
+use main_error::MainError;
 use pbgui::main_window;
 use pbgui::messaging::init;
 use pbgui::messaging::{
-    client_proxy::ConnectParams, event::Event, new_event_handler, thread as pbthread, IMsg, OMsg,
-    OVpinDialog,
+    event::Event, new_event_handler, thread as pbthread, IMsg, OMsg, OVpinDialog,
 };
+use pbgui::prefs::*;
 use pbgui::utility::{distribution_from_idx, qs};
 use pbgui_vpin::vpin_dialog;
 use qt_core::{
@@ -28,9 +28,19 @@ pub struct PbGui {
     /// (levels: trace, debug, info, warn, error)
     #[structopt(long)]
     pub loglevel: Option<String>,
+
+    /// Supply a path to the pbgui_preferences.yaml
+    #[structopt(short = "f", long)]
+    pub prefs: Option<String>,
+
+    /// Set us into test-mode. If true we will search for preferences
+    /// in the user's work directory in addition to standard locations.
+    #[structopt(short, long)]
+    pub testmode: bool,
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+//fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn main() -> Result<(), MainError> {
     let opt = PbGui::from_args();
     let log_level = if let PbGui {
         loglevel: Some(ref level),
@@ -40,6 +50,26 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         level
     } else {
         "debug"
+    };
+
+    let test_mode = match opt {
+        PbGui { testmode, .. } => testmode,
+    };
+
+    let preference = if let PbGui {
+        prefs: Some(ref prefs),
+        ..
+    } = opt
+    {
+        PbguiPrefs::load_file(prefs)?
+    } else {
+        let finder = DDPreferenceFinder::from_env(PreferenceName::Main("pbgui".to_string()));
+        let ctx = if test_mode == true {
+            DDContext::TestEqUser
+        } else {
+            DDContext::Normal
+        };
+        PbguiPrefs::load(&finder, ctx)?
     };
     // {
     //     env::set_var("RUST_LOG", level);
@@ -131,7 +161,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let _quit_slot = pbthread::create_quit_slot(to_thread_sender_quit, app.clone());
 
         pbthread::create(
-            ConnectParams::default(),
+            preference.as_connectparams(),
             pbgui_root.main(),
             my_conductor,
             sender,
