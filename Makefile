@@ -3,6 +3,9 @@ resource_target ?= ~/bin/pbgui-resources
 build:
 	cargo build --release
 
+build-offline:
+	cargo build --release --offline
+
 install:
 	cp ./target/release/pbgui ~/bin/.
 
@@ -25,3 +28,6 @@ install-rcc:
 
 
 all: build install install-prefs install-stylesheet rcc install-rcc
+
+all-offline: build-offline install install-prefs install-stylesheet rcc install-rcc
+
