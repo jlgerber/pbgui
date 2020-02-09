@@ -5,11 +5,11 @@ use std::fmt;
 /// ClientProxy::new.
 #[derive(PartialEq, Eq, Debug)]
 pub struct ConnectParams<'a> {
-    host: &'a str,
-    user: &'a str,
-    password: &'a str,
-    dbname: &'a str,
-    port: u64,
+    pub host: &'a str,
+    pub user: &'a str,
+    pub password: &'a str,
+    pub dbname: &'a str,
+    pub port: u64,
 }
 
 impl<'a> ConnectParams<'a> {
