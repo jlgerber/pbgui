@@ -17,7 +17,7 @@ Truthfully, I am not completely sold on this being a multi-project setup and wil
 # Design Notes
 
 ## Todos - p1
-- [IP] update client to use separate thread for persistence, including all db queries and updates.
+- [X] update client to use separate thread for persistence, including all db queries and updates.
 - [ ] add selected distro/platform to current level
 - [ ] modify current pin's platform / role / etc
 - [IP] add packages.xml generation / installation
@@ -27,7 +27,7 @@ Truthfully, I am not completely sold on this being a multi-project setup and wil
 - [ ] add support for linked shows
 - [ ] update history view to present with updates, pin installs, etc 
 - [ ] add support for change sets
-- [ ] add support for servistry configuration
+- [X] add support for servistry configuration
 - [ ] copy withs between pins
 - [ ] show update locking for duration of change / install
 - [ ] change notification
@@ -49,6 +49,11 @@ select roles
 select sequence / shots
 select locations
 
+### step two - update db in response to verionpin dialog
+- output distribution
+- list of shows
+- optional platform
+- optional 
 ## change table
 currently, we have the following rows:
 
