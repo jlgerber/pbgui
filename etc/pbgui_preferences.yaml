@@ -1,0 +1,7 @@
+---
+database:
+    host: 127.0.0.1
+    user: postgres
+    password: example
+    dbname: packrat
+    port: 5432
