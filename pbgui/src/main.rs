@@ -127,6 +127,12 @@ fn main() -> Result<(), MainError> {
                 ),
                 None => println!("site:  Any"),
             }
+            // now we send a request to create vpin
+            // distribution: String
+            // roles Vec<String>
+            // level: String
+            // site: String
+            // platform: String
             dialog.accept();
         }});
 

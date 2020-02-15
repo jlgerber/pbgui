@@ -5,6 +5,7 @@ pub enum VpinDialog {
     UpdateRoles,
     UpdateSites,
     UpdateLevels,
+    SetVpin,
 }
 
 impl ToEvent for VpinDialog {
@@ -19,6 +20,7 @@ impl ToQString for VpinDialog {
             &VpinDialog::UpdateRoles => QString::from_std_str("VpinDialog::UpdateRoles"),
             &VpinDialog::UpdateSites => QString::from_std_str("VpinDialog::UpdateSites"),
             &VpinDialog::UpdateLevels => QString::from_std_str("VpinDialog::UpdateLevels"),
+            &VpinDialog::SetVpin => QString::from_std_str("VpinDialog::SetVpin"),
         }
     }
 }
@@ -29,6 +31,7 @@ impl FromQString for VpinDialog {
             "VpinDialog::UpdateRoles" => VpinDialog::UpdateRoles,
             "VpinDialog::UpdateSites" => VpinDialog::UpdateSites,
             "VpinDialog::UpdateLevels" => VpinDialog::UpdateLevels,
+            "VpinDialog::SetVpin" => VpinDialog::SetVpin,
             _ => panic!("Unable to convert to Event"),
         }
     }

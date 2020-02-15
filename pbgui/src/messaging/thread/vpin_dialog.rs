@@ -120,5 +120,15 @@ pub(crate) fn match_vpin_dialog(
                 .expect("Unable to send levelmap");
             conductor.signal(VpinDialog::UpdateLevels.to_event());
         }
+
+        OVpinDialog::SetVpin {
+            dist,
+            roles,
+            level,
+            site,
+            platform,
+        } => {
+            // TODO: implement
+        }
     }
 }

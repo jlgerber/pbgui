@@ -29,5 +29,12 @@ pub fn match_vpin_dialog<'a>(
                 log::error!("IMsg does not have LevelMap");
             }
         }
+        VpinDialog::SetVpin => {
+            if let Ok(IMsg::VpinDialog(IVpinDialog::SetVpin(bool))) = receiver.recv() {
+                // TODO
+            } else {
+                log::error!("IMsg does not have Vpin");
+            }
+        }
     }
 }

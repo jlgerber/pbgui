@@ -49,6 +49,19 @@ select roles
 select sequence / shots
 select locations
 
+processing request will be done in two parts
+1.1 - update versionpin changes table (id set to -1)
+1.2 - update verionpin table
+
+we need to reject duplicate pin requests - package + packgeCoord cannot be the same.
+(notice i leave off version from this calculation)
+but how to avoid making this an 0(n) operation? We need to store a set. and we may need a custom trait
+to hash the subset of columns we need.
+save - 
+update db & requery
+
+
+
 ### step two - update db in response to verionpin dialog
 - output distribution
 - list of shows
