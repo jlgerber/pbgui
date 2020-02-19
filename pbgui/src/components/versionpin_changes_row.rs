@@ -12,12 +12,17 @@ use qt_widgets::{
 };
 use std::fmt;
 
-/// A row of versionpin data
+/// A row of versionpin change data, representing a
+/// requested versionpin transformation
 #[derive(PartialEq, Eq, PartialOrd, Ord)]
 pub struct VersionPinChangesRow<T> {
+    /// The type of change requested
     pub change_type: ChangeType,
+    /// The context for the change
     pub context: T,
+    /// The original value prior to the change
     pub old_value: T,
+    /// The desired state for the change
     pub new_value: T,
 }
 

@@ -25,6 +25,6 @@ pub trait RowSetterTrait {
     ///
     /// # Arguments
     /// * `target_table`: the table to mutate
-    /// & 1row` - The row index to update or set
+    /// * `row` - The row index to update or set
     fn set_table_row(&self, target_table: &mut Self::TargetTable, row: i32);
 }

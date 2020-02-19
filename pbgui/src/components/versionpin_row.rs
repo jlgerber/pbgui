@@ -10,17 +10,27 @@ use qt_widgets::{
 };
 use std::fmt;
 
-/// A row of versionpin data
+/// A row of versionpin data, parameterized by the type of data returned
+/// (for example CppBox<QString>, or String)
 #[derive(PartialEq, Eq, PartialOrd, Ord)]
 pub struct VersionPinRow<T> {
+    /// The id of the versionpin
     pub id: IdType,
+    /// The distribution id of the versionpin
     pub dist_id: IdType,
+    /// The package coord id of the versionpin
     pub pkgcoord_id: IdType,
+    /// The distribution, as type T
     pub distribution: T,
+    /// The level, as type T
     pub level: T,
+    /// The role, as type T
     pub role: T,
+    /// The platform, as type T
     pub platform: T,
+    /// The site, as type T
     pub site: T,
+    /// The number of with packages
     pub withs: i32,
 }
 

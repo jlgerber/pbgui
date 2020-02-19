@@ -8,14 +8,15 @@ type ChangeIdx = usize;
 /// table can stay in sync before the user  hits `save`
 #[derive(Debug)]
 pub struct PinChangesCache {
-    /// a cache of pkgcoord id => changes ui cache
-    //pkgcoord_id => row #
+    /// A mapping of pkgcoord_id to row number
     pkgcoord_index: RefCell<HashMap<IdType, i32>>,
-    // versionpin_id => version (string)
+    /// A mapping of versionpin_id to version (string)
     original_version: RefCell<HashMap<IdType, String>>,
+    /// A vector of Change instances
     change_vec: RefCell<Vec<Change>>,
-    // row # => Change
+    /// A mapping of row number to Change index
     changes: RefCell<HashMap<i32, ChangeIdx>>,
+    /// A mapping of change index to row number
     changes_row: RefCell<HashMap<ChangeIdx, i32>>,
 }
 

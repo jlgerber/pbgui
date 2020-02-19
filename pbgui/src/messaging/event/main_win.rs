@@ -7,6 +7,8 @@ pub enum MainWin {
     GetTransactionChanges,
     GetHistoryRevisions,
     SaveVpinChanges,
+    /// Choose a distribution from a list of alternative distributions
+    /// from a popup
     ChooseDistribution,
     SavePackagesXml,
 }

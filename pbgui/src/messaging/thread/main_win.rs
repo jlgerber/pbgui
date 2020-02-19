@@ -25,6 +25,7 @@ pub(crate) fn match_main_win(
             site,
             dir,
         } => {
+            // TODO: add the package to the search
             let results = db
                 .find_all_versionpins()
                 .isolate_facility(mode == SearchMode::Show)
@@ -180,7 +181,6 @@ pub(crate) fn match_main_win(
                 .expect("unable to send changes");
             conductor.signal(MainWin::SaveVpinChanges.to_event());
         }
-
         OMainWin::ChooseDistribution {
             package,
             version,
