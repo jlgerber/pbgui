@@ -683,8 +683,8 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "levelspec"
-version = "0.7.0"
-source = "git+https://github.com/jlgerber/rust-lspec.git?tag=v0.7.0#103d0219128575551dfc47ed413fb6339a1e92ea"
+version = "0.8.0"
+source = "git+https://github.com/jlgerber/rust-lspec.git?tag=v0.8.0#e4184fd0c5d112dc79ed882ea5a8f0efcaf72324"
 dependencies = [
  "clap",
  "failure",
@@ -942,8 +942,8 @@ checksum = "2839e79665f131bdb5782e51f2c6c9599c133c6098982a54c794358bf432529c"
 
 [[package]]
 name = "packybara"
-version = "0.35.0"
-source = "git+https://github.com/jlgerber/packybara?tag=v0.35.0#4d9111642410706767ece0bf938d0ab5345c1143"
+version = "0.38.8"
+source = "git+https://github.com/jlgerber/packybara?tag=v0.38.8#49f2b5a6cf37f9eaa84c3d7a8d6d96685d3eb4f8"
 dependencies = [
  "chrono",
  "env_logger",
@@ -996,7 +996,7 @@ checksum = "a3bf70094d203e07844da868b634207e71bfab254fe713171fae9a6e751ccf31"
 
 [[package]]
 name = "pbgui"
-version = "0.62.0"
+version = "0.63.0"
 dependencies = [
  "crossbeam",
  "crossbeam-channel",
@@ -1058,7 +1058,7 @@ dependencies = [
 
 [[package]]
 name = "pbgui-toolbar"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "log",
  "packybara",
