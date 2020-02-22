@@ -1,3 +1,5 @@
+//! Provides public traits defined by pbgui are defined by the pbgui::traits` module.
+
 /// Define a VersionPinRowTrait in terms of input: T and out put ReturnType.
 pub trait RowTrait {
     type ReturnType;

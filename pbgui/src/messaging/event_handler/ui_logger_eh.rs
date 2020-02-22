@@ -1,3 +1,5 @@
+//! Provides a function that processes `messaging::event::UiLogger` events, updating the ui state or
+//! logging errors
 use super::*;
 use crate::messaging::{event::ui_logger::UiLogger, incoming::IUiLogger};
 use pbgui_logger::{inner_log_win::LogData, log_win::LogWin};

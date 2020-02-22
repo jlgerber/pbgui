@@ -1,3 +1,6 @@
+//! Provides the Change enum which models proposed versionpin changes, as
+//! well as the ChangeType enum, which provides a companion enum that simplifies
+//! Change to an enum of descriminants
 use crate::utility::qs;
 pub use num_enum::{IntoPrimitive, UnsafeFromPrimitive};
 use packybara::types::IdType;
@@ -51,7 +54,15 @@ fn calculate_hash<T: Hash>(t: &T) -> u64 {
 }
 
 impl Change {
-    /// Retrieve an identifing id.
+    /// Retrieve an identifing unique id for the Change instance
+    ///
+    /// # Argugments
+    ///
+    /// * None
+    ///
+    /// # Returns
+    ///
+    /// * u64 guaranteed to be unique to the change variant inputs
     pub fn id(&self) -> u64 {
         match self {
             Change::ChangeDistribution { vpin_id, .. } => *vpin_id as u64,
@@ -70,7 +81,16 @@ impl Change {
             Change::Unknown => panic!("unable to retrieve id for unknown type"),
         }
     }
+
     /// Determine whether a change is of a particular change type
+    ///
+    /// # Arguments
+    ///
+    /// * `ctype` - a ChangeType variant
+    ///
+    /// # Returns
+    ///
+    /// * bool, indicating whether the Change instance is of the provided ChangeType instance
     pub fn is_a(&self, ctype: &ChangeType) -> bool {
         match self {
             Change::ChangeDistribution { .. } => ctype == &ChangeType::ChangeDistribution,

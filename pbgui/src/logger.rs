@@ -1,29 +1,13 @@
+//! Provides the implementation of the Rust Logger for the application
+//! which sends logs to the UI via the messaging module's mechanisms.
 use crate::messaging::outgoing::oui_logger::OUiLogger;
 use crate::messaging::OMsg;
 use crate::messaging::Sender;
 use log::SetLoggerError;
 use log::{Level, Log, Metadata, Record};
 
-// #[derive(Debug, PartialEq)]
-// pub struct LogMsgConfig {
-//     level: bool,
-//     datetime: bool,
-//     target: bool,
-//     file: bool,
-//     line: bool,
-// }
-
-// impl Default for LogMsgConfig {
-//     fn default() -> Self {
-//         Self {
-//             level: true,
-//             datetime: true,
-//             target: false,
-//             file: false,
-//             line: false,
-//         }
-//     }
-// }
+/// Stores state for Rust Log implementation which communicates with the UI
+/// Log component
 pub struct UiLogger {
     min_level: Level,
     to_thread_sender: Sender<OMsg>,
@@ -65,6 +49,8 @@ impl Log for UiLogger {
 }
 
 impl UiLogger {
+    /// New up a UiLogger instance, given a channel sender from the `messaging`
+    /// submodule.
     pub fn new(to_thread_sender: Sender<OMsg>) -> Self {
         Self {
             min_level: Level::Debug,
@@ -72,11 +58,14 @@ impl UiLogger {
         }
     }
 
+    /// Set the minimum log level to report logs for, as an instance of `Level`.
     pub fn set_log_level(&mut self, level: Level) {
         self.min_level = level;
     }
 }
 
+/// Initialize the logger for the application, given a sender and a default level. This method should
+/// be called once, after the QApplication has been instantiated.
 pub fn init(to_thread_sender: Sender<OMsg>, default_level: &str) -> Result<(), SetLoggerError> {
     let mut logger = UiLogger::new(to_thread_sender);
     let level = match default_level {

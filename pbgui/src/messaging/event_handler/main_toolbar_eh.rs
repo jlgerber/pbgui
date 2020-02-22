@@ -1,3 +1,5 @@
+//! Provides a function that processes `messaging::event::MainToolbar` events, updating the ui state or
+//! logging errors
 use super::*;
 use crate::messaging::{event::main_toolbar::MainToolbar, incoming::imain_toolbar::IMainToolbar};
 use pbgui_toolbar::toolbar::MainToolbar as MainToolbarUiElem;

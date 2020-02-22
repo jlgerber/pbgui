@@ -1,3 +1,5 @@
+//! Provides a function that processes `messaging::event::PackageWiths` events, updating the ui state or
+//! logging errors
 use super::*;
 use crate::messaging::{
     event::package_withs::PackageWiths, incoming::ipackage_withs::IPackageWiths,

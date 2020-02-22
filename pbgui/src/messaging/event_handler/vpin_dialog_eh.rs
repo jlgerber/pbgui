@@ -1,3 +1,5 @@
+//! Provides a function that processes `messaging::event::VpinDialog` events, updating the ui state or
+//! logging errors
 use super::*;
 
 pub fn match_vpin_dialog<'a>(

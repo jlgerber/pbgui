@@ -1,4 +1,5 @@
-//! handle queries in a separate thread
+//! Handles mpsc::channel delivered OMsg queries in a separate thread, which sends response IMsgs via an mpsc::channel, and
+//! notifies QT using Conductor.
 use crate::{
     logger,
     messaging::{

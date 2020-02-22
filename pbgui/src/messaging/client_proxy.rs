@@ -1,3 +1,4 @@
+//! Provides an interface to the Packrat Database Client.
 pub use packybara::packrat::{Client, NoTls};
 use std::fmt;
 

@@ -1,13 +1,14 @@
 //! Adds switchable context controls at the same
 //! horizontal level as the buttons to switch
 //! the bottom stacked widget
+//! ```ignore
 //! --------------------------------------------
 //!                        -------------------- |
 //! page1 page2            | Context Controls | |
 //! -----                  -------------------- |
 //! ------------------------------------------- |
 //! |                                           |
-//!
+//!```
 
 use crate::utility::qs;
 use qt_widgets::{

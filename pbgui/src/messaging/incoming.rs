@@ -1,4 +1,4 @@
-//! incoming models the message being sent from the secondary thread
+//! Models the message being sent from the secondary thread
 //! to the application
 use pbgui_vpin::vpin_dialog::LevelMap;
 

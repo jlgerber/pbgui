@@ -1,3 +1,5 @@
+//! This module provides the implementation of the pbgui preferences. pbgui preferences are
+//! written in yaml.
 pub use preferences::{traits::*, DDContext, DDPathProvider, DDPreferenceFinder, PreferenceName};
 use serde::Deserialize;
 
@@ -11,12 +13,14 @@ database:
     port:
 */
 
+/// Struct which models the pbgui preference. It implements serde::Deserialize so as
+/// to be deserializable.
 #[derive(Debug, PartialEq, Deserialize)]
 pub struct PbguiPrefs {
     pub database: PbguiDbPrefs,
 }
 pub use crate::messaging::client_proxy::ConnectParams;
-
+/// Models the database section of the PbguiPrefs
 #[derive(Debug, PartialEq, Deserialize)]
 pub struct PbguiDbPrefs {
     pub host: String,
@@ -47,7 +51,7 @@ impl Preference for PbguiPrefs {
 impl PbguiPrefs {
     /// Construct a ConectParams instance from a config. Note that the
     /// lifetime of the ConnectParams is intrinsicly tied to that of
-    /// the prefs, as COnnectParams is non-owning.
+    /// the prefs, as ConnectParams is non-owning.
     pub fn as_connectparams(&self) -> ConnectParams {
         ConnectParams::new(
             self.database.host.as_str(),

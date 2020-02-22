@@ -1,4 +1,4 @@
-//! models message being sent from the application to the secondary thread
+//! Models message being sent from the application to the secondary thread
 pub mod ovpin_dialog;
 pub use ovpin_dialog::OVpinDialog;
 pub mod opackages_tree;

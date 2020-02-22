@@ -1,3 +1,5 @@
+//! Provides a function that processes `messaging::event::MainWin` events, updating the ui state or
+//! logging errors
 use super::*;
 use crate::change_type::{Change, ChangeType};
 use crate::versionpin_changes_row::VersionPinChangesRow;

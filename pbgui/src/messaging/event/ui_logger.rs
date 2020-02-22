@@ -1,3 +1,5 @@
+//! Provides the UiLogger enum, which implements the ToEvent, ToQString, and FromQString traits
+
 use super::*;
 
 #[derive(Debug, PartialEq)]

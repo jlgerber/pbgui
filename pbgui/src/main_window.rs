@@ -1,3 +1,5 @@
+//! Provides the MainWindow component, which, as it sounds, houses the QMainWindow for the application.
+
 use crate::components::dist_tree::tree;
 use crate::messaging::OMsg;
 use crate::messaging::Sender;
@@ -45,8 +47,10 @@ pub enum SearchMode {
     Show,
     All,
 }
-/// Just as it sounds, MainWindow is the MainWindow struct, holding on
-/// to various pointers that need to persist as well as top level slots
+/// Holds pointers to QT Widgets comprising the component, and
+/// exposes an api for manipulating said widgets. The inner/outer
+/// component pattern provides a means for component slots to
+/// interact with an api, making them more understandable.
 pub struct InnerMainWindow<'a> {
     main: MutPtr<QMainWindow>,
     main_widget: MutPtr<QWidget>,
@@ -541,8 +545,10 @@ fn create_top_toolbar(parent: MutPtr<QMainWindow>) -> toolbar::MainToolbar {
     tb
 }
 
-/// Holds a reference counted pointer to the InnerMainWindow instance, along with
-/// pointers to owned CppBoxed items, and all of the slots that call on the InnerMainWindow
+/// Just as it sounds, MainWindow is the MainWindow struct, holding qt pointers to owned
+/// data, as well as slot instances for the component.
+/// MainWindow follows the inner/outer qt component pattern, holding
+/// a reference counted pointer to the InnerMainWindow instance.
 pub struct MainWindow<'a> {
     main: Rc<InnerMainWindow<'a>>,
     _main_box: CppBox<QMainWindow>,

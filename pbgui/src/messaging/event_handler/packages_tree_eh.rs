@@ -1,3 +1,5 @@
+//! Provides a function that processes `messaging::event::PackagesTree` events, updating the ui state or
+//! logging errors
 use super::*;
 use crate::components::dist_tree::tree;
 use crate::messaging::{event::packages_tree::PackagesTree, IPackagesTree};

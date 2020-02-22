@@ -1,6 +1,6 @@
 //! The Event is used to formalize the qt signal that triggers an update
 //! application side. The event is sent by the Conductor and received by
-//! the event_handler, in the primary thread. THe event_handler is responsible
+//! the event_handler, in the primary thread. The event_handler is responsible
 //! for updating the state of the ui in response to a particular Event.
 //!
 //! The Event itself functions as a routing key, allowing the `event_handler` to
