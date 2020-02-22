@@ -31,7 +31,10 @@ pub fn save_versionpin_changes(
 
         // We will send change to secondary thread as vec<change>
         let mut change_vec: Vec<Change> = Vec::new();
-
+        // Retrieve the indexes of the changes in the cache and look up the changes
+        // from the cache. We introduce this indirection to make it simple to delete
+        // a change from the change table without having to delete an item from the
+        // vector of changes in the cache, which would lead to an O(n) operation.
         for idx in pinchange_cache.change_indexes() {
             let change = pinchange_cache
                 .change_at(idx)
@@ -41,7 +44,8 @@ pub fn save_versionpin_changes(
         }
         let user = whoami::username();
 
-        // reset book keeping
+        // Now that we have used the cache for its intended purpose, we reset it back to
+        // its initial state.
         pinchange_cache.reset();
         log::debug!("signaling SaveVpinChanges");
         to_thread_sender

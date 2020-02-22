@@ -202,7 +202,7 @@ pub unsafe fn match_main_win<'a>(
                 distributions,
                 package,
                 version,
-                row,
+                row, // row in the versionpin table
             })) = receiver.recv()
             {
                 let pinchange_cache = main_win.cache();
@@ -247,7 +247,7 @@ pub unsafe fn match_main_win<'a>(
                         log::info!("new value and old value match. Skipping");
                         return;
                     }
-                    // retrieve the value of the versionpin row
+                    // retrieve the value of the versionpin row from the versionpin table
                     let vpin_row = VersionPinRow::<CppBox<QString>>::from_table_at_row(
                         &vpin_table, //&vpin_tablewidget_ptr,
                         row,
@@ -258,6 +258,10 @@ pub unsafe fn match_main_win<'a>(
                     let new_value_qstr = QString::from_std_str(new_distribution);
                     // build up new string
                     distribution.set_text(&new_value_qstr);
+                    // if we arleady have the key in the pinchange table, we update the "to" value and
+                    // leave the from value alone, as it is the original state of the table prior to our
+                    // proposed changes - which we have not confirmed by hitting save yet.
+
                     if pinchange_cache.has_key(vpin_row.pkgcoord_id) {
                         let row = match pinchange_cache.index(vpin_row.pkgcoord_id) {
                             Some(r) => r,
@@ -266,6 +270,7 @@ pub unsafe fn match_main_win<'a>(
                                 return;
                             }
                         };
+                        println!("row: {}", row);
                         let mut item = pinchanges_ptr.item(row, COL_PC_NEW_VALUE);
                         if item.is_null() {
                             log::error!("problem retreiving row from pinchanges_ptr using cached row number. item is null");
@@ -278,6 +283,7 @@ pub unsafe fn match_main_win<'a>(
                         };
                         pinchange_cache.cache_change_at(change, row);
                     } else {
+                        // this is a new modification for this row of the vpin table
                         let vpc_row = VersionPinChangesRow::<CppBox<QString>>::new(
                             ChangeType::ChangeDistribution,
                             vpin_row.pkgcoord(),
@@ -286,18 +292,21 @@ pub unsafe fn match_main_win<'a>(
                         );
                         pinchange_cache.cache_original_version(vpin_row.id, version);
                         let row_cnt = pinchanges_ptr.row_count() + 1;
+                        // increase the row count by 1 in the pinchanges table
                         pinchanges_ptr.set_row_count(row_cnt);
-
+                        // cache the VersionPinChangesRow instance at the next row in the table
                         vpc_row.set_table_row(&mut pinchanges_ptr, row_cnt - 1);
                         let update_color = qcolor_blue!();
                         distribution.set_foreground(&QBrush::from_q_color(update_color.as_ref()));
                         distribution.table_widget().clear_selection();
                         let idx = pinchange_cache.row_count();
+                        // cache the index of the change (idx) by the pkgcoord's db id.
                         pinchange_cache.cache_dist(vpin_row.pkgcoord_id, idx);
                         let change = Change::ChangeDistribution {
                             vpin_id: vpin_row.id,
                             new_dist_id: *new_dist_id,
                         };
+                        // cache the change
                         pinchange_cache.cache_change(change);
                     }
                 }

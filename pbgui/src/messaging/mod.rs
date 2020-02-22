@@ -1,3 +1,9 @@
+//! The messaging sub-module is responsible for implementing a unidirectional dataflow
+//! model for the ui. Pbgui draws inspiration from predecessors like the Elm Architecture
+//! to model state changes in terms of a request / response cycle, using mpsc channels to communicate
+//! between the gui and a request processessor.
+//!
+//! Pbgui defines both incoming and outgoing messages to serve requests and responses.
 pub mod incoming;
 pub use incoming::{IMsg, IPackagesTree, IVpinDialog, ToIMsg};
 pub mod outgoing;

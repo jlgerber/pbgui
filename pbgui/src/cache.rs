@@ -1,3 +1,13 @@
+//! The cache is used to store versionpin changes/additions requested
+//! by the user, either through the dialog allowing the user to change the distribution
+//! for a given row in the versionpin table, or the dialog allowing the user to inject
+//! one or more distributions into the current show from the list of packages from
+//! the tree to the left of the versionpin table.
+//!
+//! These change requests are accumulated as the user operates, and are reset once the
+//! user applies the stored changes via the save button found between the versionpin
+//! table and the versionpin changes table below it (ultimately triggering the
+//! save_versionpin_changes slot_function ).
 use crate::change_type::{Change, ChangeType};
 use packybara::types::IdType;
 use std::cell::RefCell;
@@ -8,15 +18,23 @@ type ChangeIdx = usize;
 /// table can stay in sync before the user  hits `save`
 #[derive(Debug)]
 pub struct PinChangesCache {
-    /// A mapping of pkgcoord_id to row number
+    /// A mapping of pkgcoord_id to row number in the pinchanges table
     pkgcoord_index: RefCell<HashMap<IdType, i32>>,
     /// A mapping of versionpin_id to version (string)
     original_version: RefCell<HashMap<IdType, String>>,
     /// A vector of Change instances
     change_vec: RefCell<Vec<Change>>,
-    /// A mapping of row number to Change index
+    /// A mapping of vpinchanges_table row number to index of Change
+    /// in the  change_vec field. We can use this to apply changes in order
+    /// as well as account for changes removed from the table. ( ie when we remove
+    /// a change from the vpin change table, we dont have to perform an O(n) move of
+    /// items in the change_vec to account for the removal. We can simply remove the
+    /// row in the vpinchange table. When applying the changes, we loop over the rows,
+    /// look up the Change at the row, and apply it.)
     changes: RefCell<HashMap<i32, ChangeIdx>>,
-    /// A mapping of change index to row number
+    /// A mapping of change index to row number, allowing us to look up the vpinchanges table
+    /// row in which the change appears. The ChangeIdx is the index in the change_vec
+    /// for the change.
     changes_row: RefCell<HashMap<ChangeIdx, i32>>,
 }
 
@@ -24,6 +42,7 @@ impl PinChangesCache {
     /// Generate a new PinChangesCache instance.
     ///
     /// # Example
+    ///
     /// ```
     /// use pbgui::cache::PinChangesCache;
     /// use std::rc::Rc;
@@ -38,6 +57,7 @@ impl PinChangesCache {
             changes_row: RefCell::new(HashMap::new()),
         }
     }
+
     /// Reset the instance to its initial value
     pub fn reset(&self) {
         self.pkgcoord_index.borrow_mut().clear();
@@ -46,21 +66,29 @@ impl PinChangesCache {
         self.changes.borrow_mut().clear();
         self.changes_row.borrow_mut().clear();
     }
-    /// Return the number of rows in the ui
+
+    /// Return the number of rows in the vpinchanges_table
+    ///
     /// # Arguments
+    ///
     /// * None
     ///
     /// # Returns
-    /// * The number of rows in the ui element
+    ///
+    /// * The number of rows in the vpinchanges table
     pub fn row_count(&self) -> i32 {
         self.changes.borrow().len() as i32
     }
-    /// Retreive the index in the cache for the provided distribution id.
+
+    /// look up the index of the row in the vpinchange table for the
+    /// provided source pkgcoord_id
     ///
     /// # Arguments
-    /// * `pkgcoord_id` The distribution's id
+    ///
+    /// * `pkgcoord_id` The distribution's package coordinate id
     ///
     /// # Returns
+    ///
     /// * A Some(index) if exant
     /// * Otherwise None
     pub fn index(&self, pkgcoord_id: IdType) -> Option<i32> {
@@ -69,9 +97,11 @@ impl PinChangesCache {
             Some(v) => Some(*v),
         }
     }
-    /// Cache the original version of a versionpin
+
+    /// Cache the original version of a versionpin's distribution
     ///
     /// # Argument
+    ///
     /// * `vpin_id` - The verionpin id to use as a key
     /// * `version` - The version to cache
     pub fn cache_original_version<S>(&self, vpin_id: IdType, version: S)
@@ -82,12 +112,16 @@ impl PinChangesCache {
             .borrow_mut()
             .insert(vpin_id, version.into());
     }
-    /// Get the original version for the given versionpin id
+
+    /// Get the original version for the distribution at given versionpin id
     ///
     /// # Arguments
-    /// * `vpin_id` - The versionpin id we want to use to look up the original version for.alloc
+    ///
+    /// * `vpin_id` - The versionpin id we want to use to look up the original
+    ///               version for
     ///
     /// # Returns
+    ///
     /// * Some of version string if vpin_id exists
     /// * None otherwise
     pub fn orig_version_for(&self, vpin_id: IdType) -> Option<String> {
@@ -96,52 +130,65 @@ impl PinChangesCache {
             None => None,
         }
     }
-    /// Retrieve the change for the index.
+
+    /// Retrieve the change instance stored at the vpinchange table row.
     /// Note that this has to clone under the hood.
     ///
     /// # Arguments
-    /// * `idx` - the row index to retrieve the change at
+    ///
+    /// * `changes_row` - the row index to retrieve the change at
     ///
     /// # Returns
+    ///
     /// * Some of Change if successful
     /// * None otherwise
-    pub fn change_at(&self, idx: i32) -> Option<Change> {
-        match self.changes.borrow().get(&idx) {
+    pub fn change_at(&self, changes_row: i32) -> Option<Change> {
+        match self.changes.borrow().get(&changes_row) {
             Some(c) => Some(self.change_vec.borrow()[*c].clone()),
             None => None,
         }
     }
+
     // /// Retrieve the change for the distribution at a given index,
     // /// removing it in the process
     // ///
     // /// # Arguments
+    //
     // /// * `idx` - The row index to retrieve the Change at, removing it in the process
     // ///
     // /// # Returns
+
     // /// * Some wrapped Change if successful (removing it from self in the proxess)
     // /// * None otherwise
     // pub fn remove_change_at(&self, idx: i32) -> Option<Change> {
     //     self.changes.borrow_mut().remove(&idx)
     // }
-    /// Return a vector of change indexes.
+
+    /// Return a vector of change indexes stored in the cache. The keys are
+    /// returned in numeric sorted order.
+    ///
     /// Storing the index of the change allows us to delete rows
     ///
     /// # Arguments
+    ///
     /// * None
     ///
     /// # Returns
+    ///
     /// * Vector of change indexes
     pub fn change_indexes(&self) -> Vec<i32> {
         let mut v: Vec<i32> = self.changes.borrow().keys().map(|x| x.clone()).collect();
         v.sort();
         v
     }
-    /// Retrieve the last change index if it exsits
+    /// Retrieve an Option wrapping the last change index if it exsits
     ///
     /// # Arguments
+    ///
     /// * None
     ///
     /// # Returns
+    ///
     /// * Some wrapped index, if `self` stores any changes
     /// * None otherwise
     pub fn last_change_idx(&self) -> Option<i32> {
@@ -150,13 +197,16 @@ impl PinChangesCache {
             None => None,
         }
     }
-    /// Retrieve the row that a change is in, if it is in fact in a row
+    /// Retrieve the row in the vpinchanges table that a change is in,
+    /// if it is in fact in cached
     ///
     /// # Arguments
+    ///
     /// * `change` - A reference to a Change instance
     ///
     /// # Returns
-    /// * An Option wrapped index of the row that
+    ///
+    /// * An Option wrapped index of the row that matches the supplied chnage
     pub fn change_row(&self, change: &Change) -> Option<i32> {
         for (idx, value) in self.change_vec.borrow().iter().enumerate() {
             if value == change {
@@ -168,7 +218,19 @@ impl PinChangesCache {
         }
         None
     }
-    /// use the retrieve the row of the change using its id().
+
+    /// Retrieve the row of the change from the vpinchanges table using whose value matches
+    /// the supplied ChangeType and whose value.id matches the supplied id.
+    ///
+    /// # Arguments
+    ///
+    /// * `id` - The change's id
+    /// * `ctype` - The ChangeType instance
+    ///
+    /// # Returns
+    ///
+    /// * Some row number if the id represents a Change that is in the table
+    /// * None otherwise
     pub fn change_row_from_id(&self, id: u64, ctype: &ChangeType) -> Option<i32> {
         for (idx, value) in self.change_vec.borrow().iter().enumerate() {
             if value.is_a(&ctype) {
@@ -182,18 +244,22 @@ impl PinChangesCache {
         }
         None
     }
+
     /// Insert a change into the cache, incrementing the
     /// last index in the process.
     ///
     /// # Arguments
+    ///
     /// * `change` - A Change instance to cache
     pub fn cache_change(&self, change: Change) {
         let idx = self.last_change_idx().map_or(0, |x| x + 1);
         self.cache_change_at(change, idx);
     }
+
     /// Inserts a change at a specific index. Raises an exception
     ///
     /// # Arguments
+    ///
     /// * `change` - The Change instance to cache.
     /// * `idx - The index to cache the Change at.
     pub fn cache_change_at(&self, change: Change, idx: i32) {
@@ -202,22 +268,27 @@ impl PinChangesCache {
         self.changes.borrow_mut().insert(idx, change_idx);
         self.changes_row.borrow_mut().insert(change_idx, idx);
     }
+
     /// Inserts a distribution's id and index into the cache
     ///
     /// # Argument
+    ///
     /// * `pkgcoord_id` - The distribution's package coordinate id
-    /// * `dist_idx - THe distribution's index in the ui element
+    /// * `dist_idx - THe distribution's index in the pinchanges table
     pub fn cache_dist(&self, pkgcoord_id: IdType, dist_idx: i32) {
         self.pkgcoord_index
             .borrow_mut()
             .insert(pkgcoord_id, dist_idx);
     }
-    /// Test to see if the cache has the distribution id
+
+    /// Test to see if the cache has the pkgcoord_id
     ///
     /// # arguments
+    ///
     /// * `pkgcoord_id` - The distribution's package coordinate id to test
     ///
     /// # Returns
+    ///
     /// * true if pkgcoord_id in cache.
     /// * false if pkgcoord_id is not in cache
     pub fn has_key(&self, pkgcoord_id: IdType) -> bool {
