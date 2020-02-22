@@ -237,6 +237,10 @@ impl<'a> VpinDialog<'a> {
         self.dialog.borrow().selected_level()
     }
 
+    /// Return the distribution as a String
+    pub fn distribution(&self) -> String {
+        unsafe { self.dialog.borrow().distribution() }
+    }
     /// Set the distribution name
     ///
     /// # Arguments
