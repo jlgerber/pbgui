@@ -129,6 +129,15 @@ pub(crate) fn match_vpin_dialog(
             platform,
         } => {
             // TODO: implement
+            let roles = if roles.len() > 0 {
+                roles
+            } else {
+                vec!["any".to_string()]
+            };
+            println!(
+                "from secondary thread. setting {} @ roles:{:?} level:{} site:{} platform:{}",
+                dist, roles, level, site, platform
+            );
         }
     }
 }
