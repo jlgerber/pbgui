@@ -23,8 +23,7 @@ pub enum Change {
         new_dist_id: IdType,
     },
     AddDistribution {
-        package: String,
-        version: String,
+        distribution: String,
         level: String,
         role: String,
         platform: String,
@@ -57,17 +56,13 @@ impl Change {
         match self {
             Change::ChangeDistribution { vpin_id, .. } => *vpin_id as u64,
             Change::AddDistribution {
-                package,
-                version,
+                distribution,
                 level,
                 role,
                 platform,
                 site,
             } => {
-                let val = format!(
-                    "{}-{}-{}-{}-{}-{}",
-                    package, version, level, role, platform, site
-                );
+                let val = format!("{}-{}-{}-{}-{}", distribution, level, role, platform, site);
                 calculate_hash(&val)
             }
             Change::ChangePkgCoord { vpin_id, .. } => *vpin_id as u64,
