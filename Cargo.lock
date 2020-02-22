@@ -1071,7 +1071,7 @@ dependencies = [
 
 [[package]]
 name = "pbgui-vpin"
-version = "0.8.0"
+version = "0.9.0"
 dependencies = [
  "qt_core",
  "qt_gui",
