@@ -110,29 +110,44 @@ fn main() -> Result<(), MainError> {
 
         // we create a slot that is triggered when OK is pressed to act only in the event
         // that the user has requested action.
-        let accepted_slot = Slot::new(enclose! { (dialog) move || {
-            if let Some(roles) = dialog.selected_roles() {
-                println!("roles: {:?}", roles);
+        let accepted_slot = Slot::new(enclose! { (dialog, to_thread_sender) move || {
+            let roles = if let Some(roles) = dialog.selected_roles() {
+                roles
             } else {
-                println!("roles: any");
-            }
-            if let Some(selected_level) = dialog.selected_level() {
-                println!("level: {:?}", selected_level);
+                Vec::new()
+            };
+
+            let level = if let Some(selected_level) = dialog.selected_level() {
+                 selected_level
             } else {
-                println!("level: {}", dialog.show_name());
-            }
-            match dialog.selected_site(){
-                Some(site) => println!(
-                    "site:  {}", site
-                ),
-                None => println!("site:  Any"),
-            }
-            // now we send a request to create vpin
-            // distribution: String
-            // roles Vec<String>
-            // level: String
-            // site: String
-            // platform: String
+                "facility".to_string()
+            };
+
+            let site = match dialog.selected_site(){
+                Some(site) => site,
+                None =>"any".to_string()
+            };
+
+            let dist = dialog.distribution();
+
+            // TODO: pass in platform
+            let platform = "any".to_string();
+
+            to_thread_sender
+            .send(OMsg::VpinDialog(
+                OVpinDialog::SetVpin {
+                    dist,
+                    // and one or more roles
+                    roles,
+                    // at the supplied level
+                    level,
+                    // and site
+                    site,
+                    // and platform
+                    platform,
+                },
+            ))
+            .expect("unable to get vpins");
             dialog.accept();
         }});
 
