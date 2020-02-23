@@ -22,8 +22,9 @@ pub fn update_withpackages(
     cache: Rc<PinChangesCache>,
     to_thread_sender: Sender<OMsg>,
 ) {
-    let table_row =
-        VersionPinRow::<CppBox<QString>>::from_table_at_row(&vpin_tablewidget_ptr, row).unwrap();
+    let table_row = VersionPinRow::<CppBox<QString>>::from_table_at_row(&vpin_tablewidget_ptr, row)
+        .ok_or(false)
+        .expect("unable to unwrap from_table_at_row");
     let vpin_id = table_row.id;
     if let Some(row) = cache.change_row_from_id(vpin_id as u64, &ChangeType::ChangeWiths) {
         if let Some(Change::ChangeWiths { withs, .. }) = cache.change_at(row) {

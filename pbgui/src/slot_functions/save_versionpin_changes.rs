@@ -36,6 +36,7 @@ pub fn save_versionpin_changes(
         // a change from the change table without having to delete an item from the
         // vector of changes in the cache, which would lead to an O(n) operation.
         for idx in pinchange_cache.change_indexes() {
+            println!("getting row in change vec-  {}", idx);
             let change = pinchange_cache
                 .change_at(idx)
                 .expect("unable to unwrap change");

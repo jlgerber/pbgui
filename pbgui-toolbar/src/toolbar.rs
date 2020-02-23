@@ -106,7 +106,11 @@ impl MainToolbar {
 
     /// Retrieve the current show as a string
     pub unsafe fn show_string(&self) -> String {
-        self.level_string().split(".").next().unwrap().to_string()
+        self.level_string()
+            .split(".")
+            .next()
+            .unwrap_or("facility")
+            .to_string()
     }
 
     /// Get the current level as a qstring

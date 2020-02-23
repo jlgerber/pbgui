@@ -10,7 +10,9 @@ pub enum IVpinDialog {
     /// Returns a vector of levels in a LevelMap, which is a type alias for
     /// a HashMap<String, Vec<String>>;
     Levels(LevelMap),
-    // this should probably be a SetVpinOk(Vec<AddVpinRow>) or a SetVpinFailed{err: String}
+    /// Set the current show for the diaog
+    SetShow(String),
+    /// Set the versionpin to a vector of changes
     SetVpin(Vec<Change>),
 }
 

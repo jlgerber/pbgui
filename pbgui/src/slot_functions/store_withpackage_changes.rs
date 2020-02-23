@@ -36,7 +36,7 @@ pub fn store_withpackage_changes(
                 log::warn!("Tablerow {} is None", row);
                 return;
             }
-            let table_row = table_row.unwrap();
+            let table_row = table_row.ok_or(false).expect("unable to unwrap table_row");
 
             let new_withs = items.join(",");
             let change = Change::ChangeWiths {

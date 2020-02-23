@@ -125,7 +125,7 @@ fn main() -> Result<(), MainError> {
                 let level = if let Some(selected_level) = dialog.selected_level() {
                      selected_level
                 } else {
-                    "facility".to_string()
+                    dialog.show_name()
                 };
 
                 let site = match dialog.selected_site(){

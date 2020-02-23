@@ -163,19 +163,82 @@ pub(crate) fn match_main_win(
                         let mut update = PackratDb::update_versionpins(tx)
                             .change(change)
                             .update()
-                            .unwrap();
+                            .expect("unable to unwrap results of update_versionpins(tx)");
                         tx = update.take_tx();
                         tx_cnt += 1;
                     }
                     Change::ChangeWiths { vpin_id, withs } => {
-                        let mut update = PackratDb::add_withs(tx).create(vpin_id, withs).unwrap();
+                        let mut update = PackratDb::add_withs(tx).create(vpin_id, withs).expect(
+                            "Unabe to unwrap results of calling packratdb::add_withs(tx).create(...)",
+                        );
                         tx = update.take_tx()
+                    }
+                    Change::AddDistribution {
+                        distribution,
+                        level,
+                        role,
+                        platform,
+                        site,
+                    } => {
+                        let pieces = distribution.split("-").collect::<Vec<_>>();
+
+                        let mut add_versionpins = PackratDb::add_versionpins(
+                            tx,
+                            pieces[0].to_string(),
+                            pieces[1].to_string(),
+                        );
+                        add_versionpins = add_versionpins.level(level);
+                        add_versionpins = add_versionpins.site(site);
+                        add_versionpins = add_versionpins.role(role);
+                        add_versionpins = add_versionpins.platform(platform);
+
+                        //let username = whoami::username();
+                        //let comment = "auto added change";
+                        add_versionpins = match add_versionpins.create() {
+                            Ok(add_versionpins) => add_versionpins,
+                            Err(err) => {
+                                println!("in thread. unable to call add_versionpins.create()");
+                                sender
+                                    .send(IMsg::Error(format!(
+                                        "Unable to call add_versionpins.create(): {}",
+                                        err
+                                    )))
+                                    .expect("unable to send error msg");
+                                conductor.signal(Event::Error);
+                                return;
+                            }
+                        };
+                        println!("called add_versionpins.create()");
+                        tx = add_versionpins.take_tx();
+                        // let update_cnt = match add_versionpins
+                        //     .create()
+                        //     .unwrap()
+                        //     .commit(&username, &comment)
+                        // {
+                        //     Ok(update_cnt) => update_cnt,
+                        //     Err(err) => {
+                        //         sender
+                        //             .send(IMsg::Error(format!(
+                        //                 "Unable to add versionpin to db: {}",
+                        //                 err
+                        //             )))
+                        //             .expect("unable to send error msg");
+                        //         conductor.signal(Event::Error);
+                        //         return;
+                        //     }
+                        // };
+
+                        //println!("called add_versionpins.commit");
+                        // not working
+                        // tx = add_versionpins.take_tx();
+                        //.expect("failed to call add_versionpins.commit");
+                        //tx_cnt += update_cnt;
                     }
                     _ => panic!("not implemented"),
                 }
             }
             let results = PackratDb::commit(tx, user.as_str(), comments.as_str(), tx_cnt);
-
+            println!("results are {:?}", results);
             sender
                 .send(IMainWin::SaveVpinChanges(results.is_ok()).to_imsg())
                 .expect("unable to send changes");

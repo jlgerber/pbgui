@@ -254,7 +254,9 @@ pub unsafe fn match_main_win<'a>(
                         &vpin_table, //&vpin_tablewidget_ptr,
                         row,
                     )
-                    .unwrap();
+                    .ok_or(false)
+                    .expect("unable to retrieve the versionpin row from table");
+
                     // cache the change. we will use this later to update the db. The rest of
                     // the code is for updating the ui
                     let new_value_qstr = QString::from_std_str(new_distribution);

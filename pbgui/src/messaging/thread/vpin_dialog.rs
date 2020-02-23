@@ -68,6 +68,11 @@ pub(crate) fn match_vpin_dialog(
                 }
             };
             let mut level_map = LevelMap::new();
+            println!("setting show from thread");
+            sender
+                .send(IVpinDialog::SetShow(show.clone()).to_imsg())
+                .expect("Unable to send show");
+            conductor.signal(VpinDialog::SetShow.to_event());
             // If we dont have any sequences or shots, then only the show will be returned.
             // The length of the returned vec will be 1. We can return an empty map and continue.
             if levels.len() == 1 {

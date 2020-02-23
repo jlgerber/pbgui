@@ -37,6 +37,14 @@ pub fn match_vpin_dialog<'a>(
                 log::error!("IMsg does not have LevelMap");
             }
         }
+        VpinDialog::SetShow => {
+            if let Ok(IMsg::VpinDialog(IVpinDialog::SetShow(show))) = receiver.recv() {
+                println!("setting show to {} in event handler", &show);
+                dialog.set_show_name(show);
+            } else {
+                log::error!("IMsg does not have Show");
+            }
+        }
         VpinDialog::SetVpin => {
             if let Ok(IMsg::VpinDialog(IVpinDialog::SetVpin(changes))) = receiver.recv() {
                 // TODO
@@ -72,7 +80,12 @@ pub fn match_vpin_dialog<'a>(
                             ref site,
                         } = change
                         {
-                            let version = distribution.split("-").skip(1).next().unwrap();
+                            let version = distribution
+                                .split("-")
+                                .skip(1)
+                                .next()
+                                .ok_or(false)
+                                .expect("Unable to split version from dist");
                             let versionpin_row = VersionPinRow::<CppBox<QString>>::new(
                                 id,
                                 id,
