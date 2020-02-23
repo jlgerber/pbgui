@@ -142,6 +142,7 @@ fn main() -> Result<(), MainError> {
                 // choices or (b) whether the query button has yet to be pressed. In either case we log and return
                 let vpin_table = inner_main_win.vpin_table();
                 let cnt = vpin_table.row_count();
+                println!("row count: {}", cnt);
                 // this doesnt work as the table could be empty after the query. We will need to keep track of
                 // whether the query button has been pressed.
                 // if cnt == 0 {
@@ -159,37 +160,56 @@ fn main() -> Result<(), MainError> {
                 let platform_qs = platform.to_qstring();
                 let site_qs = site.to_qstring();
                 let package_qs = dialog.package_qs();
-                let dash = QChar::from_char(45); // 45 is ascii code for dash
+                let dash = QChar::from_int(45); // 45 is ascii code for dash
                 // check to see if we match the package and coords
                 for row in 0..cnt {
                     let level_ = vpin_table.item(row,COL_LEVEL);
-                     if level_qs.compare_q_string(level_.text().as_ref()) != 0 {continue;}
+                     if level_qs.compare_q_string(level_.text().as_ref()) != 0 {
+                        // println!("level not the same. skipping");
+                         continue;
+                        }
 
                     let platform_ = vpin_table.item(row, COL_PLATFORM);
-                    if platform_qs.compare_q_string(platform_.text().as_ref()) != 0 {continue;}
+                    if platform_qs.compare_q_string(platform_.text().as_ref()) != 0 {
+                       // println!("platform not the same. skipping");
+                        continue;}
 
                     let site_ =  vpin_table.item(row, COL_SITE);
-                    if site_qs.compare_q_string(site_.text().as_ref()) != 0 {continue;}
+                    if site_qs.compare_q_string(site_.text().as_ref()) != 0 {
+                        //println!("site not the same. skipping");
+                        continue;}
 
                     let distribution = vpin_table.item(row, COL_DISTRIBUTION).text();
-                    let package_ = distribution.section_q_char_int(dash.as_ref(), 0);
-                    if package_qs.compare_q_string(package_.as_ref()) != 0 {continue;}
+                    //let package_ = distribution.section_q_char_int(dash.as_ref(), 0);
+                    // doenst work unless the following is split in two
+                    let package_ = distribution.split_q_char(dash.as_ref());
+                    let package_ = package_.first();
+                    if package_qs.compare_q_string(package_) != 0 {
+                       // println!("package not the same. skipping: {}!={}", package_.to_std_string().as_str(), package_qs.to_std_string().as_str());
+                        continue;
+                    }
 
                     //now we tackle roles. we remove any roles from the map that match, as roles is the
                     let role_ =  vpin_table.item(row, COL_ROLE).text();
                     let mut remove = Vec::new();
                     {
                         for (role_str,role_qs) in roles_map.iter() {
+                            //println!("checking roles");
                             if role_.compare_q_string(role_qs) == 0 {
+                                //println!("compared {} and it is the same", role_str.as_str());
                                 // have to clone this as it relates to the map borrow
                                 remove.push(role_str.clone());
                             }
+                            // else {
+                            //     println!("roles are different: {} {}", role_str.as_str(), &role_.to_std_string().as_str());
+                            // }
                         }
                     }
                     for role_str in remove {
                         roles_map.remove(&role_str);
                     }
                 }
+
                 if roles_map.is_empty() {
                     log::warn!("requested package and pkgcoordinates match existing items in versionpin table. skipping");
                     dialog.accept();
@@ -288,4 +308,32 @@ pub fn update_vpin_dialog(to_thread_sender: &Sender<OMsg>, show: String) {
     to_thread_sender
         .send(OMsg::VpinDialog(OVpinDialog::GetLevels(show)))
         .expect("unable to get levels");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn qchar_dash() {
+        unsafe {
+            let dash = QChar::from_int(45);
+            let qst = QString::from_q_char(dash.as_ref());
+            let qst_str = qst.to_std_string();
+            assert_eq!(qst_str.as_str(), "-");
+        }
+    }
+    #[test]
+    fn can_split() {
+        unsafe {
+            let dash = QChar::from_int(45);
+            let distribution = qs("foo-1.2.3");
+            let package_qs = qs("foo");
+            //let package_ = distribution.split_q_string(qs("-").as_ref());
+            let package_ = distribution.split_q_char(dash.as_ref());
+
+            assert_eq!(package_.length(), 2);
+            let package_ = package_.first();
+            assert_eq!(package_qs.compare_q_string(package_), 0);
+        }
+    }
 }

@@ -2,7 +2,7 @@
 //! The DistributionDialog allows the user to generate one or more pins for a distribution
 use qt_core::{FocusPolicy, QChar, QString, Signal, SlotOfInt};
 use qt_widgets::{
-    cpp_core::{CastInto, CppBox, MutPtr, Ptr},
+    cpp_core::{CastInto, CppBox, MutPtr, Ptr, Ref},
     q_abstract_item_view::SelectionMode,
     q_dialog_button_box::StandardButton,
     QCheckBox, QComboBox, QDialog, QDialogButtonBox, QFrame, QGroupBox, QHBoxLayout, QLabel,
@@ -195,11 +195,10 @@ impl<'a> InnerVpinDialog<'a> {
         self.package_qs().to_std_string()
     }
     ///retrieve the package name as a qstring
-    pub unsafe fn package_qs(&self) -> CppBox<QString> {
+    pub unsafe fn package_qs(&self) -> Ref<QString> {
         let dash = QChar::from_char(45); // 45 is ascii code for dash
-        self.distribution
-            .text()
-            .section_q_char_int(dash.as_ref(), 0)
+        let part = self.distribution.text().split_q_char(dash.as_ref());
+        part.first()
     }
     /// Return the accepted signal from the button. This is provided as a convenience
     /// for hooking up a slot from this struct.

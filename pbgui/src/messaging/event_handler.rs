@@ -58,7 +58,7 @@ pub fn new_event_handler<'a>(
         let logger = main.logger();
         match Event::from_qstring(name) {
             Event::VpinDialog(vpin_dialog_event) => {
-                match_vpin_dialog(vpin_dialog_event, dialog.clone(), &receiver)
+                match_vpin_dialog(vpin_dialog_event, dialog.clone(), main.clone(), &receiver)
             }
             Event::PackagesTree(packages_tree_event) => {
                 match_packages_tree(packages_tree_event, tree, &receiver)
