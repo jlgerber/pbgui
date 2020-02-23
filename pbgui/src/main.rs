@@ -157,26 +157,28 @@ fn main() -> Result<(), MainError> {
                 if roles_map.is_empty() {
                     log::error!("roles_map is empty but should not be");
                 }
+                println!("going to query info from dialog");
                 let platform_qs = platform.to_qstring();
                 let site_qs = site.to_qstring();
                 let package_qs = dialog.package_qs();
+                println!("dialog reports package as {}", dialog.package().as_str());
                 let dash = QChar::from_int(45); // 45 is ascii code for dash
                 // check to see if we match the package and coords
                 for row in 0..cnt {
                     let level_ = vpin_table.item(row,COL_LEVEL);
                      if level_qs.compare_q_string(level_.text().as_ref()) != 0 {
-                        // println!("level not the same. skipping");
+                        println!("level not the same. skipping");
                          continue;
                         }
 
                     let platform_ = vpin_table.item(row, COL_PLATFORM);
                     if platform_qs.compare_q_string(platform_.text().as_ref()) != 0 {
-                       // println!("platform not the same. skipping");
+                       println!("platform not the same. skipping");
                         continue;}
 
                     let site_ =  vpin_table.item(row, COL_SITE);
                     if site_qs.compare_q_string(site_.text().as_ref()) != 0 {
-                        //println!("site not the same. skipping");
+                        println!("site not the same. skipping");
                         continue;}
 
                     let distribution = vpin_table.item(row, COL_DISTRIBUTION).text();
@@ -185,9 +187,9 @@ fn main() -> Result<(), MainError> {
                     let package_ = distribution.split_q_char(dash.as_ref());
                     let package_ = package_.first();
                     if package_qs.compare_q_string(package_) != 0 {
-                       // println!("package not the same. skipping: {}!={}", package_.to_std_string().as_str(), package_qs.to_std_string().as_str());
+                       println!("package not the same. skipping: {}!={}", package_.to_std_string().as_str(), package_qs.to_std_string().as_str());
                         continue;
-                    }
+                    } else {println!("package matches{} =={}",package_.to_std_string().as_str(), package_qs.to_std_string().as_str())};
 
                     //now we tackle roles. we remove any roles from the map that match, as roles is the
                     let role_ =  vpin_table.item(row, COL_ROLE).text();

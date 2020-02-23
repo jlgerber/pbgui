@@ -1,11 +1,11 @@
 //! Provides a function that processes `messaging::event::VpinDialog` events, updating the ui state or
 //! logging errors
 use super::*;
-use crate::change_type::Change;
-use crate::components::versionpin_row::*;
+use crate::change_type::{Change, ChangeType};
+use crate::components::{versionpin_changes_row::*, versionpin_row::*};
 use crate::traits::RowSetterTrait;
 use qt_widgets::cpp_core::CppBox;
-use rustqt_utils::ToQString;
+use rustqt_utils::{qs, ToQString};
 
 pub fn match_vpin_dialog<'a>(
     event: VpinDialog,
@@ -48,26 +48,31 @@ pub fn match_vpin_dialog<'a>(
                 let cache = main_win.cache();
                 unsafe {
                     // we have to
-                    // set a versionpin_table row per change
+                    // set a versionpin_table row per change X
                     // set a versionpin_changes_table row per change
                     // set the cache
-                    let mut vpin_tablewidget_ptr = main_win.vpin_table();
+                    let mut versionpin_table = main_win.vpin_table();
+                    let mut pinchanges_ptr = main_win.vpin_requested_changes_table();
 
-                    vpin_tablewidget_ptr.set_sorting_enabled(false);
-                    let rcount = vpin_tablewidget_ptr.row_count();
-                    let mut cnt = rcount;
-                    vpin_tablewidget_ptr.set_row_count(rcount + changes.len() as i32);
+                    versionpin_table.set_sorting_enabled(false);
+                    let rcount = versionpin_table.row_count();
+                    let changes_row_count = pinchanges_ptr.row_count();
+                    println!("initial row count: {}", changes_row_count);
+                    let mut cnt = 0;
+                    versionpin_table.set_row_count(rcount + changes.len() as i32);
+                    pinchanges_ptr.set_row_count(changes_row_count + changes.len() as i32);
                     for change in changes {
                         let id = cache.next_fake_row_id();
 
                         if let Change::AddDistribution {
-                            distribution,
-                            level,
-                            role,
-                            platform,
-                            site,
+                            ref distribution,
+                            ref level,
+                            ref role,
+                            ref platform,
+                            ref site,
                         } = change
                         {
+                            let version = distribution.split("-").skip(1).next().unwrap();
                             let versionpin_row = VersionPinRow::<CppBox<QString>>::new(
                                 id,
                                 id,
@@ -79,11 +84,26 @@ pub fn match_vpin_dialog<'a>(
                                 site.to_qstring(),
                                 0,
                             );
-                            versionpin_row.set_table_row(&mut vpin_tablewidget_ptr, cnt);
+                            versionpin_row.set_table_row(&mut versionpin_table, rcount + cnt);
+                            let vpc_row = VersionPinChangesRow::<CppBox<QString>>::new(
+                                ChangeType::AddDistribution,
+                                versionpin_row.pkgcoord(),
+                                qs(""),
+                                qs(version),
+                            );
+
+                            vpc_row.set_table_row(&mut pinchanges_ptr, changes_row_count + cnt);
+                            println!("changes row count: {}", changes_row_count + cnt);
+                            let idx = cache.row_count();
+                            // cache the index of the change (idx) by the pkgcoord's db id.
+                            cache.cache_dist(id, idx);
+                            // cache the change
+                            cache.cache_change(change);
+
                             cnt += 1;
                         };
                     }
-                    vpin_tablewidget_ptr.set_sorting_enabled(true);
+                    versionpin_table.set_sorting_enabled(true);
                 }
 
             // get

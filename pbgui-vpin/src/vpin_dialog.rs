@@ -252,7 +252,7 @@ impl<'a> VpinDialog<'a> {
         self.dialog.borrow().set_distribution(distribution);
     }
     /// Retrieve the package name as a QString
-    pub unsafe fn package_qs(&self) -> Ref<QString> {
+    pub unsafe fn package_qs(&self) -> CppBox<QString> {
         self.dialog.borrow().package_qs()
     }
     /// Retrieve the package name as a String

@@ -195,10 +195,12 @@ impl<'a> InnerVpinDialog<'a> {
         self.package_qs().to_std_string()
     }
     ///retrieve the package name as a qstring
-    pub unsafe fn package_qs(&self) -> Ref<QString> {
+    pub unsafe fn package_qs(&self) -> CppBox<QString> {
         let dash = QChar::from_char(45); // 45 is ascii code for dash
         let part = self.distribution.text().split_q_char(dash.as_ref());
-        part.first()
+        let mut qstr = QString::new();
+        qstr.append_q_string(part.first());
+        qstr
     }
     /// Return the accepted signal from the button. This is provided as a convenience
     /// for hooking up a slot from this struct.
