@@ -6,9 +6,19 @@ pub mod utility;
 pub mod components;
 pub use components::left_toolbar::LeftToolBarActions;
 pub(crate) use components::{
-    bottom_stacked_widget, center_widget, left_toolbar, package_withs_list, packages_tree,
-    revisions_table, table_headers, versionpin_changes_row, versionpin_changes_table,
-    versionpin_row, versionpin_table, versionpin_table_splitter, withs_splitter,
+    bottom_stacked_widget,
+    center_widget,
+    left_toolbar,
+    package_withs_list,
+    packages_tree,
+    // revisions_table,
+    table_headers,
+    versionpin_changes_row,
+    //versionpin_changes_table,
+    versionpin_row,
+    versionpin_table,
+    versionpin_table_splitter,
+    withs_splitter,
 };
 pub(crate) use slot_functions::{
     choose_distribution, save_packages_xml, save_versionpin_changes, select_history,
