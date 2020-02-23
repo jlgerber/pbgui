@@ -39,7 +39,6 @@ pub fn match_vpin_dialog<'a>(
         }
         VpinDialog::SetShow => {
             if let Ok(IMsg::VpinDialog(IVpinDialog::SetShow(show))) = receiver.recv() {
-                println!("setting show to {} in event handler", &show);
                 dialog.set_show_name(show);
             } else {
                 log::error!("IMsg does not have Show");
@@ -47,11 +46,6 @@ pub fn match_vpin_dialog<'a>(
         }
         VpinDialog::SetVpin => {
             if let Ok(IMsg::VpinDialog(IVpinDialog::SetVpin(changes))) = receiver.recv() {
-                // TODO
-                println!(
-                    "from vpin dialog event handler back in ui thread, changes:  {:#?}",
-                    changes
-                );
                 // get cache
                 let cache = main_win.cache();
                 unsafe {
@@ -65,7 +59,6 @@ pub fn match_vpin_dialog<'a>(
                     versionpin_table.set_sorting_enabled(false);
                     let rcount = versionpin_table.row_count();
                     let changes_row_count = pinchanges_ptr.row_count();
-                    println!("initial row count: {}", changes_row_count);
                     let mut cnt = 0;
                     versionpin_table.set_row_count(rcount + changes.len() as i32);
                     pinchanges_ptr.set_row_count(changes_row_count + changes.len() as i32);
@@ -106,7 +99,6 @@ pub fn match_vpin_dialog<'a>(
                             );
 
                             vpc_row.set_table_row(&mut pinchanges_ptr, changes_row_count + cnt);
-                            println!("changes row count: {}", changes_row_count + cnt);
                             let idx = cache.row_count();
                             // cache the index of the change (idx) by the pkgcoord's db id.
                             cache.cache_dist(id, idx);

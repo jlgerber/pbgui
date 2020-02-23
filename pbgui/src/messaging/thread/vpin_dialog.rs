@@ -68,7 +68,6 @@ pub(crate) fn match_vpin_dialog(
                 }
             };
             let mut level_map = LevelMap::new();
-            println!("setting show from thread");
             sender
                 .send(IVpinDialog::SetShow(show.clone()).to_imsg())
                 .expect("Unable to send show");
@@ -134,10 +133,6 @@ pub(crate) fn match_vpin_dialog(
             site,
             platform,
         } => {
-            println!(
-                "from secondary thread. setting {} @ roles:{:?} level:{} site:{} platform:{}",
-                dist, roles, level, site, platform
-            );
             // now we create the change
             let changes = roles.into_iter().fold(Vec::new(), |mut acc, role| {
                 acc.push(Change::AddDistribution {

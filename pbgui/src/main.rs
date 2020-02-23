@@ -142,7 +142,6 @@ fn main() -> Result<(), MainError> {
                 // choices or (b) whether the query button has yet to be pressed. In either case we log and return
                 let vpin_table = inner_main_win.vpin_table();
                 let cnt = vpin_table.row_count();
-                println!("row count: {}", cnt);
                 // this doesnt work as the table could be empty after the query. We will need to keep track of
                 // whether the query button has been pressed.
                 // if cnt == 0 {
@@ -157,54 +156,42 @@ fn main() -> Result<(), MainError> {
                 if roles_map.is_empty() {
                     log::error!("roles_map is empty but should not be");
                 }
-                println!("going to query info from dialog");
                 let platform_qs = platform.to_qstring();
                 let site_qs = site.to_qstring();
                 let package_qs = dialog.package_qs();
-                println!("dialog reports package as {}", dialog.package().as_str());
                 let dash = QChar::from_int(45); // 45 is ascii code for dash
                 // check to see if we match the package and coords
                 for row in 0..cnt {
                     let level_ = vpin_table.item(row,COL_LEVEL);
                      if level_qs.compare_q_string(level_.text().as_ref()) != 0 {
-                        println!("level not the same. skipping");
                          continue;
                         }
 
                     let platform_ = vpin_table.item(row, COL_PLATFORM);
                     if platform_qs.compare_q_string(platform_.text().as_ref()) != 0 {
-                       println!("platform not the same. skipping");
                         continue;}
 
                     let site_ =  vpin_table.item(row, COL_SITE);
                     if site_qs.compare_q_string(site_.text().as_ref()) != 0 {
-                        println!("site not the same. skipping");
                         continue;}
 
                     let distribution = vpin_table.item(row, COL_DISTRIBUTION).text();
-                    //let package_ = distribution.section_q_char_int(dash.as_ref(), 0);
                     // doenst work unless the following is split in two
                     let package_ = distribution.split_q_char(dash.as_ref());
                     let package_ = package_.first();
                     if package_qs.compare_q_string(package_) != 0 {
-                       println!("package not the same. skipping: {}!={}", package_.to_std_string().as_str(), package_qs.to_std_string().as_str());
                         continue;
-                    } else {println!("package matches{} =={}",package_.to_std_string().as_str(), package_qs.to_std_string().as_str())};
+                    } ;
 
                     //now we tackle roles. we remove any roles from the map that match, as roles is the
                     let role_ =  vpin_table.item(row, COL_ROLE).text();
                     let mut remove = Vec::new();
                     {
                         for (role_str,role_qs) in roles_map.iter() {
-                            //println!("checking roles");
                             if role_.compare_q_string(role_qs) == 0 {
-                                //println!("compared {} and it is the same", role_str.as_str());
                                 // have to clone this as it relates to the map borrow
                                 remove.push(role_str.clone());
                             }
-                            // else {
-                            //     println!("roles are different: {} {}", role_str.as_str(), &role_.to_std_string().as_str());
-                            // }
                         }
                     }
                     for role_str in remove {
@@ -291,8 +278,8 @@ unsafe fn create_dialog<'a, I: Into<String>>(
     dialog
 }
 
-///  updagte the  dialog to  pin a distribution with data. This consists
-/// Of requesting that we get roles, sites, and levels
+/// Update the dialog to pin a distribution with data. This consists
+/// of requesting that we get roles, sites, and levels
 ///
 /// # Arguments
 /// * `to_thread_sender` - A reference to a Sender instance for OMsg's.

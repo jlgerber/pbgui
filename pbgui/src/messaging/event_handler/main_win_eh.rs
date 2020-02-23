@@ -274,7 +274,6 @@ pub unsafe fn match_main_win<'a>(
                                 return;
                             }
                         };
-                        println!("row: {}", row);
                         let mut item = pinchanges_ptr.item(row, COL_PC_NEW_VALUE);
                         if item.is_null() {
                             log::error!("problem retreiving row from pinchanges_ptr using cached row number. item is null");
