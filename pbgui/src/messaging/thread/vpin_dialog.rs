@@ -1,4 +1,5 @@
 use super::*;
+use crate::change_type::Change;
 
 /// perform a submatch against the OVpinDialog msg
 pub(crate) fn match_vpin_dialog(
@@ -128,16 +129,25 @@ pub(crate) fn match_vpin_dialog(
             site,
             platform,
         } => {
-            // TODO: implement
-            let roles = if roles.len() > 0 {
-                roles
-            } else {
-                vec!["any".to_string()]
-            };
             println!(
                 "from secondary thread. setting {} @ roles:{:?} level:{} site:{} platform:{}",
                 dist, roles, level, site, platform
             );
+            // now we create the change
+            let changes = roles.into_iter().fold(Vec::new(), |mut acc, role| {
+                acc.push(Change::AddDistribution {
+                    distribution: dist.clone(),
+                    level: level.clone(),
+                    role,
+                    platform: platform.clone(),
+                    site: site.clone(),
+                });
+                acc
+            });
+            sender
+                .send(IVpinDialog::SetVpin(changes).to_imsg())
+                .expect("Unable to send Changes via SetVpin");
+            conductor.signal(VpinDialog::SetVpin.to_event());
         }
     }
 }

@@ -24,7 +24,7 @@ qt_gui = "~0.4.1"
 qt_thread_conductor = {git= "https://github.com/jlgerber/rust-qt-conductor", tag="v0.3.1"}
 qt_ui_tools = "~0.4.1"
 qt_widgets = "~0.4.1"
-rustqt-utils = {git = "https://github.com/jlgerber/rustqt-utils", tag="v0.6.0"}
+rustqt-utils = {git = "https://github.com/jlgerber/rustqt-utils", tag="v0.7.0"}
 serde = {version ="1.0.104", features = ["derive"]}
 simple_xml_serialize =  "0.2.3"
 simple_xml_serialize_macro = { version = "0.2.1", features = ["process_options"] }

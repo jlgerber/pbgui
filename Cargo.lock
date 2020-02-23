@@ -1017,7 +1017,7 @@ dependencies = [
  "qt_thread_conductor",
  "qt_ui_tools",
  "qt_widgets",
- "rustqt-utils",
+ "rustqt-utils 0.7.0",
  "serde 1.0.104",
  "simple_xml_serialize",
  "simple_xml_serialize_macro",
@@ -1038,7 +1038,7 @@ dependencies = [
  "qt_gui",
  "qt_ui_tools",
  "qt_widgets",
- "rustqt-utils",
+ "rustqt-utils 0.6.0",
  "serde 1.0.104",
  "serde_json",
 ]
@@ -1053,7 +1053,7 @@ dependencies = [
  "qt_thread_conductor",
  "qt_ui_tools",
  "qt_widgets",
- "rustqt-utils",
+ "rustqt-utils 0.6.0",
 ]
 
 [[package]]
@@ -1066,7 +1066,7 @@ dependencies = [
  "qt_gui",
  "qt_ui_tools",
  "qt_widgets",
- "rustqt-utils",
+ "rustqt-utils 0.6.0",
 ]
 
 [[package]]
@@ -1077,7 +1077,7 @@ dependencies = [
  "qt_gui",
  "qt_ui_tools",
  "qt_widgets",
- "rustqt-utils",
+ "rustqt-utils 0.6.0",
 ]
 
 [[package]]
@@ -1089,7 +1089,7 @@ dependencies = [
  "qt_gui",
  "qt_ui_tools",
  "qt_widgets",
- "rustqt-utils",
+ "rustqt-utils 0.6.0",
 ]
 
 [[package]]
@@ -1547,6 +1547,19 @@ dependencies = [
 name = "rustqt-utils"
 version = "0.6.0"
 source = "git+https://github.com/jlgerber/rustqt-utils?tag=v0.6.0#c27fb1cf218634f6a3df27a0f6cbbb496a63c449"
+dependencies = [
+ "log",
+ "qt_core",
+ "qt_gui",
+ "qt_ui_tools",
+ "qt_widgets",
+ "rust-hsluv",
+]
+
+[[package]]
+name = "rustqt-utils"
+version = "0.7.0"
+source = "git+https://github.com/jlgerber/rustqt-utils?tag=v0.7.0#4a4fd769291e3994040a536853b4dfc827f3b8a5"
 dependencies = [
  "log",
  "qt_core",

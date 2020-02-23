@@ -32,9 +32,12 @@ pub fn match_vpin_dialog<'a>(
             }
         }
         VpinDialog::SetVpin => {
-            if let Ok(IMsg::VpinDialog(IVpinDialog::SetVpin(bool))) = receiver.recv() {
+            if let Ok(IMsg::VpinDialog(IVpinDialog::SetVpin(changes))) = receiver.recv() {
                 // TODO
-                println!("bool {}", bool);
+                println!(
+                    "from vpin dialog event handler back in ui thread, changes:  {:#?}",
+                    changes
+                );
             } else {
                 log::error!("IMsg does not have Vpin");
             }

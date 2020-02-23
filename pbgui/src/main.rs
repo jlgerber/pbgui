@@ -1,6 +1,7 @@
 #![windows_subsystem = "windows"]
 use crossbeam_channel::{unbounded as channel, Receiver, Sender};
 use main_error::MainError;
+use pbgui::constants::{COL_DISTRIBUTION, COL_LEVEL, COL_PLATFORM, COL_ROLE, COL_SITE};
 use pbgui::main_window;
 use pbgui::messaging::init;
 use pbgui::messaging::{
@@ -9,18 +10,23 @@ use pbgui::messaging::{
 use pbgui::prefs::*;
 use pbgui::utility::{distribution_from_idx, qs};
 use pbgui_vpin::vpin_dialog;
+use std::collections::HashMap;
+
 use qt_core::{
-    ApplicationAttribute, QCoreApplication, QModelIndex, QResource, Slot, SlotOfQModelIndex,
+    ApplicationAttribute, QChar, QCoreApplication, QModelIndex, QResource, QString, Slot,
+    SlotOfQModelIndex,
 };
 use qt_thread_conductor::conductor::Conductor;
 use qt_widgets::{
-    cpp_core::{MutPtr, Ref},
+    cpp_core::{CppBox, MutPtr, Ref},
     QApplication, QMainWindow,
 };
-use rustqt_utils::enclose;
+use rustqt_utils::{enclose, ToQString};
 use std::rc::Rc;
 use structopt::StructOpt;
 
+/// Map used to
+type RoleMap = HashMap<String, CppBox<QString>>;
 #[derive(StructOpt, Debug, PartialEq)]
 pub struct PbGui {
     /// Set the log level. This may target one or more
@@ -90,10 +96,6 @@ fn main() -> Result<(), MainError> {
         let _result = QResource::register_resource_q_string(&qs(
             "/Users/jgerber/bin/pbgui-resources/pbgui.rcc",
         ));
-        // moved into current package
-        // let _result = QResource::register_resource_q_string(&qs(
-        //     "/Users/jgerber/bin/pbgui-resources/pbgui_tree.rcc",
-        // ));
         let _result = QResource::register_resource_q_string(&qs(
             "/Users/jgerber/bin/pbgui-resources/pbgui_withlist.rcc",
         ));
@@ -110,46 +112,110 @@ fn main() -> Result<(), MainError> {
 
         // we create a slot that is triggered when OK is pressed to act only in the event
         // that the user has requested action.
-        let accepted_slot = Slot::new(enclose! { (dialog, to_thread_sender) move || {
-            let roles = if let Some(roles) = dialog.selected_roles() {
-                roles
-            } else {
-                Vec::new()
-            };
+        let inner_main_win = pbgui_root.main_win();
+        let accepted_slot = Slot::new(
+            // TODO: move implementation to slot_functions
+            enclose! { (dialog, inner_main_win, to_thread_sender) move || {
+                let roles = if let Some(roles) = dialog.selected_roles() {
+                    roles
+                } else {
+                    vec!["any".to_string()]
+                };
 
-            let level = if let Some(selected_level) = dialog.selected_level() {
-                 selected_level
-            } else {
-                "facility".to_string()
-            };
+                let level = if let Some(selected_level) = dialog.selected_level() {
+                     selected_level
+                } else {
+                    "facility".to_string()
+                };
 
-            let site = match dialog.selected_site(){
-                Some(site) => site,
-                None =>"any".to_string()
-            };
+                let site = match dialog.selected_site(){
+                    Some(site) => site,
+                    None =>"any".to_string()
+                };
 
-            let dist = dialog.distribution();
+                let dist = dialog.distribution();
 
-            // TODO: pass in platform
-            let platform = "any".to_string();
+                // TODO: pass in platform
+                let platform = "any".to_string();
 
-            to_thread_sender
-            .send(OMsg::VpinDialog(
-                OVpinDialog::SetVpin {
-                    dist,
-                    // and one or more roles
-                    roles,
-                    // at the supplied level
-                    level,
-                    // and site
-                    site,
-                    // and platform
-                    platform,
-                },
-            ))
-            .expect("unable to get vpins");
-            dialog.accept();
-        }});
+                // Identify whether the vpin table either (a) already has a pkgcoord that matches our
+                // choices or (b) whether the query button has yet to be pressed. In either case we log and return
+                let vpin_table = inner_main_win.vpin_table();
+                let cnt = vpin_table.row_count();
+                // this doesnt work as the table could be empty after the query. We will need to keep track of
+                // whether the query button has been pressed.
+                // if cnt == 0 {
+                //     log::warn!("versionpin table has no items. skipping adding new versionpin");
+                //     dialog.accept();
+                //     return;
+                // }
+                let level_qs = &level.to_qstring();
+                let mut roles_map = roles.into_iter().fold( RoleMap::new(), |mut acc, rol| {
+                    acc.insert(rol.clone(), rol.to_qstring()); acc}
+                );
+                if roles_map.is_empty() {
+                    log::error!("roles_map is empty but should not be");
+                }
+                let platform_qs = platform.to_qstring();
+                let site_qs = site.to_qstring();
+                let package_qs = dialog.package_qs();
+                let dash = QChar::from_char(45); // 45 is ascii code for dash
+                // check to see if we match the package and coords
+                for row in 0..cnt {
+                    let level_ = vpin_table.item(row,COL_LEVEL);
+                     if level_qs.compare_q_string(level_.text().as_ref()) != 0 {continue;}
+
+                    let platform_ = vpin_table.item(row, COL_PLATFORM);
+                    if platform_qs.compare_q_string(platform_.text().as_ref()) != 0 {continue;}
+
+                    let site_ =  vpin_table.item(row, COL_SITE);
+                    if site_qs.compare_q_string(site_.text().as_ref()) != 0 {continue;}
+
+                    let distribution = vpin_table.item(row, COL_DISTRIBUTION).text();
+                    let package_ = distribution.section_q_char_int(dash.as_ref(), 0);
+                    if package_qs.compare_q_string(package_.as_ref()) != 0 {continue;}
+
+                    //now we tackle roles. we remove any roles from the map that match, as roles is the
+                    let role_ =  vpin_table.item(row, COL_ROLE).text();
+                    let mut remove = Vec::new();
+                    {
+                        for (role_str,role_qs) in roles_map.iter() {
+                            if role_.compare_q_string(role_qs) == 0 {
+                                // have to clone this as it relates to the map borrow
+                                remove.push(role_str.clone());
+                            }
+                        }
+                    }
+                    for role_str in remove {
+                        roles_map.remove(&role_str);
+                    }
+                }
+                if roles_map.is_empty() {
+                    log::warn!("requested package and pkgcoordinates match existing items in versionpin table. skipping");
+                    dialog.accept();
+                    return;
+                }
+
+                // now we create roles from the remaining keys in roles_map.
+                let roles = roles_map.drain().fold(Vec::new(), |mut acc, (k,_v)| {acc.push(k); acc});
+                to_thread_sender
+                .send(OMsg::VpinDialog(
+                    OVpinDialog::SetVpin {
+                        dist,
+                        // and one or more roles
+                        roles,
+                        // at the supplied level
+                        level,
+                        // and site
+                        site,
+                        // and platform
+                        platform,
+                    },
+                ))
+                .expect("unable to get vpins");
+                dialog.accept();
+            }},
+        );
 
         // Connect the accepted signal to the accepted slot
         dialog.accepted().connect(&accepted_slot);

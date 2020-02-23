@@ -3,7 +3,7 @@ pub use crate::inner_vpin_dialog::LevelMap;
 use crate::inner_vpin_dialog::DEFAULT_SITE;
 use qt_core::{QString, Signal, SlotOfQString};
 use qt_widgets::{
-    cpp_core::{CastInto, MutPtr, Ptr, Ref},
+    cpp_core::{CastInto, CppBox, MutPtr, Ptr, Ref},
     QComboBox, QDialog, QWidget,
 };
 use std::cell::RefCell;
@@ -251,7 +251,14 @@ impl<'a> VpinDialog<'a> {
     pub unsafe fn set_distribution(&self, distribution: &str) {
         self.dialog.borrow().set_distribution(distribution);
     }
-
+    /// Retrieve the package name as a QString
+    pub unsafe fn package_qs(&self) -> CppBox<QString> {
+        self.dialog.borrow().package_qs()
+    }
+    /// Retrieve the package name as a String
+    pub unsafe fn package(&self) -> String {
+        self.dialog.borrow().package()
+    }
     /// Load the default stylesheet
     ///
     /// # Arguments
