@@ -10,6 +10,7 @@
 //! save_versionpin_changes slot_function ).
 use crate::change_type::{Change, ChangeType};
 use packybara::types::IdType;
+use std::cell::Cell;
 use std::cell::RefCell;
 use std::collections::HashMap;
 type ChangeIdx = usize;
@@ -20,9 +21,12 @@ type ChangeIdx = usize;
 pub struct PinChangesCache {
     /// A mapping of pkgcoord_id to row number in the pinchanges table
     pkgcoord_index: RefCell<HashMap<IdType, i32>>,
-    /// A mapping of versionpin_id to version (string)
+    /// A mapping of versionpin_id to version (string) which stores the original version of the distribution
+    /// that we are tracking in the versionpin_changes table. We use this value to identify, for example,
+    /// if a suggested change ultimately matches the original value (we don't have to change the db in this case)
     original_version: RefCell<HashMap<IdType, String>>,
-    /// A vector of Change instances
+    /// A vector of Change instances - These are the core change requests, with enough information to
+    /// construct a change db request.
     change_vec: RefCell<Vec<Change>>,
     /// A mapping of vpinchanges_table row number to index of Change
     /// in the  change_vec field. We can use this to apply changes in order
@@ -36,6 +40,9 @@ pub struct PinChangesCache {
     /// row in which the change appears. The ChangeIdx is the index in the change_vec
     /// for the change.
     changes_row: RefCell<HashMap<ChangeIdx, i32>>,
+    /// stores fake ids for new rows. We use negative values to indicate that a row does not
+    /// have a database analog. We keep a counter so that we hand out a uniqe one
+    fake_row_id: Cell<i32>,
 }
 
 impl PinChangesCache {
@@ -55,6 +62,7 @@ impl PinChangesCache {
             change_vec: RefCell::new(Vec::new()),
             changes: RefCell::new(HashMap::new()),
             changes_row: RefCell::new(HashMap::new()),
+            fake_row_id: Cell::new(-1),
         }
     }
 
@@ -65,9 +73,17 @@ impl PinChangesCache {
         self.change_vec.borrow_mut().clear();
         self.changes.borrow_mut().clear();
         self.changes_row.borrow_mut().clear();
+        self.fake_row_id.set(-1);
+    }
+    /// Retrieve the next fake id. Fake ids are used to store new rows that have not yet been
+    /// added to the database. Unlike a real entry in the database, fake rows have negative ids.
+    pub fn next_fake_row_id(&self) -> i32 {
+        let next_id = self.fake_row_id.get();
+        self.fake_row_id.set(next_id - 1);
+        next_id
     }
 
-    /// Return the number of rows in the vpinchanges_table
+    /// Return the number of rows in the versionpin_changes_table
     ///
     /// # Arguments
     ///
@@ -75,12 +91,12 @@ impl PinChangesCache {
     ///
     /// # Returns
     ///
-    /// * The number of rows in the vpinchanges table
+    /// * The number of rows in the versionpin_changes table
     pub fn row_count(&self) -> i32 {
         self.changes.borrow().len() as i32
     }
 
-    /// look up the index of the row in the vpinchange table for the
+    /// look up the index of the row in the versionpin_changes   table for the
     /// provided source pkgcoord_id
     ///
     /// # Arguments
@@ -181,7 +197,7 @@ impl PinChangesCache {
         v.sort();
         v
     }
-    /// Retrieve an Option wrapping the last change index if it exsits
+    /// Retrieve an Option wrapping the last change index if it exists
     ///
     /// # Arguments
     ///
@@ -370,5 +386,18 @@ mod tests {
             0,
         );
         assert_eq!(cache.row_count(), 1);
+    }
+    #[test]
+    fn fake_row_works() {
+        let cache = PinChangesCache::new();
+        let row = cache.next_fake_row_id();
+        assert_eq!(row, -1);
+        let row = cache.next_fake_row_id();
+        assert_eq!(row, -2);
+        let row = cache.next_fake_row_id();
+        assert_eq!(row, -3);
+        cache.reset();
+        let row = cache.next_fake_row_id();
+        assert_eq!(row, -1);
     }
 }
