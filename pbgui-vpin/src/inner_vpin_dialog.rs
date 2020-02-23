@@ -2,7 +2,7 @@
 //! The DistributionDialog allows the user to generate one or more pins for a distribution
 use qt_core::{FocusPolicy, QChar, QString, Signal, SlotOfInt};
 use qt_widgets::{
-    cpp_core::{CastInto, CppBox, MutPtr, Ptr, Ref},
+    cpp_core::{CastInto, CppBox, MutPtr, Ptr},
     q_abstract_item_view::SelectionMode,
     q_dialog_button_box::StandardButton,
     QCheckBox, QComboBox, QDialog, QDialogButtonBox, QFrame, QGroupBox, QHBoxLayout, QLabel,
