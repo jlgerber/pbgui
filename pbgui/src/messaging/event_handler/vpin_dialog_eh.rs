@@ -34,6 +34,7 @@ pub fn match_vpin_dialog<'a>(
         VpinDialog::SetVpin => {
             if let Ok(IMsg::VpinDialog(IVpinDialog::SetVpin(bool))) = receiver.recv() {
                 // TODO
+                println!("bool {}", bool);
             } else {
                 log::error!("IMsg does not have Vpin");
             }
