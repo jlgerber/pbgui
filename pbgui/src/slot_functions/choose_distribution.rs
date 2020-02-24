@@ -15,7 +15,7 @@ pub fn choose_alternative_distribution(
     to_thread_sender: Sender<OMsg>,
 ) {
     unsafe {
-        if !validate_ptrs(versionpin_table, &root_widget, versionpin_changes_table) {
+        if !validate_ptrs(versionpin_table, root_widget, versionpin_changes_table) {
             return;
         }
         // all we need is the package... perhaps we should change the vtable
@@ -45,7 +45,7 @@ pub fn choose_alternative_distribution(
 // perform validation on the pointer inputs
 fn validate_ptrs(
     versionpin_table: MutPtr<QTableWidget>,
-    root_widget: &MutPtr<QWidget>,
+    root_widget: MutPtr<QWidget>,
     versionpin_changes_table: MutPtr<QTableWidget>,
 ) -> bool {
     if versionpin_table.is_null() {
