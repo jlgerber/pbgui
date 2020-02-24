@@ -1,4 +1,4 @@
-resource_target ?= ~/bin/pbgui
+resource_target ?= ~/bin/pbgui-resources
 
 build:
 	cargo build --release
