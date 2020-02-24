@@ -254,7 +254,7 @@ fn main() -> Result<(), MainError> {
 
         let my_conductor = Conductor::<Event>::new(&app_update);
 
-        let _quit_slot = pbthread::create_quit_slot(to_thread_sender_quit, app.clone());
+        let _quit_slot = pbthread::create_quit_slot(to_thread_sender_quit, app);
 
         pbthread::create(
             preference.as_connectparams(),
