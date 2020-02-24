@@ -16,7 +16,7 @@ impl ToEvent for UiLogger {
 impl ToQString for UiLogger {
     fn to_qstring(&self) -> CppBox<QString> {
         match &self {
-            &UiLogger::SendLog => QString::from_std_str("UiLogger::SendLog"),
+            UiLogger::SendLog => QString::from_std_str("UiLogger::SendLog"),
         }
     }
 }

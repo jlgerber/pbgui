@@ -13,10 +13,7 @@ use std::rc::Rc;
 /// # Returns
 /// * A pointer to the WithsList
 pub fn create<'c>(splitter: MutPtr<QSplitter>) -> Rc<RefCell<WithsList<'c>>> {
-    unsafe {
-        let withs_list = create_package_withs_list(splitter);
-        withs_list
-    }
+    unsafe { create_package_withs_list(splitter) }
 }
 
 unsafe fn create_package_withs_list<'z>(

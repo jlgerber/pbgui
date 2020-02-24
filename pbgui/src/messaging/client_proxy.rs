@@ -30,10 +30,10 @@ impl<'a> ConnectParams<'a> {
         port: u64,
     ) -> Self {
         Self {
-            host: host,
-            user: user,
-            password: password,
-            dbname: dbname,
+            host,
+            user,
+            password,
+            dbname,
             port,
         }
     }

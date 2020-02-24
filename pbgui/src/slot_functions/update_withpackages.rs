@@ -26,7 +26,7 @@ pub fn update_withpackages(
         .ok_or(false)
         .expect("unable to unwrap from_table_at_row");
     let vpin_id = table_row.id;
-    if let Some(row) = cache.change_row_from_id(vpin_id as u64, &ChangeType::ChangeWiths) {
+    if let Some(row) = cache.change_row_from_id(vpin_id as u64, ChangeType::ChangeWiths) {
         if let Some(Change::ChangeWiths { withs, .. }) = cache.change_at(row) {
             {
                 item_list.borrow_mut().clear();
@@ -38,7 +38,6 @@ pub fn update_withpackages(
                 row,
                 vpin_id
             );
-            return;
         }
     } else {
         // clear item list

@@ -50,14 +50,14 @@ pub enum Event {
 impl ToQString for Event {
     fn to_qstring(&self) -> CppBox<QString> {
         match &self {
-            &Event::VpinDialog(vpin_dialog) => vpin_dialog.to_qstring(),
-            &Event::PackagesTree(packages_tree) => packages_tree.to_qstring(),
-            &Event::PackageWiths(package_withs) => package_withs.to_qstring(),
-            &Event::MainToolbar(main_toolbar) => main_toolbar.to_qstring(),
-            &Event::MainWin(main_win) => main_win.to_qstring(),
-            &Event::UiLogger(ui_logger) => ui_logger.to_qstring(),
-            &Event::Noop => QString::from_std_str(RESET),
-            &Event::Error => QString::from_std_str("Error"),
+            Event::VpinDialog(vpin_dialog) => vpin_dialog.to_qstring(),
+            Event::PackagesTree(packages_tree) => packages_tree.to_qstring(),
+            Event::PackageWiths(package_withs) => package_withs.to_qstring(),
+            Event::MainToolbar(main_toolbar) => main_toolbar.to_qstring(),
+            Event::MainWin(main_win) => main_win.to_qstring(),
+            Event::UiLogger(ui_logger) => ui_logger.to_qstring(),
+            Event::Noop => QString::from_std_str(RESET),
+            Event::Error => QString::from_std_str("Error"),
         }
     }
 }

@@ -91,13 +91,13 @@ impl Change {
     /// # Returns
     ///
     /// * bool, indicating whether the Change instance is of the provided ChangeType instance
-    pub fn is_a(&self, ctype: &ChangeType) -> bool {
+    pub fn is_a(&self, ctype: ChangeType) -> bool {
         match self {
-            Change::ChangeDistribution { .. } => ctype == &ChangeType::ChangeDistribution,
-            Change::AddDistribution { .. } => ctype == &ChangeType::AddDistribution,
-            Change::ChangePkgCoord { .. } => ctype == &ChangeType::ChangePkgCoord,
-            Change::ChangeWiths { .. } => ctype == &ChangeType::ChangeWiths,
-            Change::Unknown => ctype == &ChangeType::Unknown,
+            Change::ChangeDistribution { .. } => ctype == ChangeType::ChangeDistribution,
+            Change::AddDistribution { .. } => ctype == ChangeType::AddDistribution,
+            Change::ChangePkgCoord { .. } => ctype == ChangeType::ChangePkgCoord,
+            Change::ChangeWiths { .. } => ctype == ChangeType::ChangeWiths,
+            Change::Unknown => ctype == ChangeType::Unknown,
         }
     }
 }

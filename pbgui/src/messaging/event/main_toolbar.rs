@@ -18,10 +18,10 @@ impl ToEvent for MainToolbar {
 impl ToQString for MainToolbar {
     fn to_qstring(&self) -> CppBox<QString> {
         match &self {
-            &MainToolbar::GetShows => QString::from_std_str("MainToolbar::GetShows"),
-            &MainToolbar::GetRoles => QString::from_std_str("MainToolbar::GetRoles"),
-            &MainToolbar::GetPlatforms => QString::from_std_str("MainToolbar::GetPlatforms"),
-            &MainToolbar::GetSites => QString::from_std_str("MainToolbar::GetSites"),
+            MainToolbar::GetShows => QString::from_std_str("MainToolbar::GetShows"),
+            MainToolbar::GetRoles => QString::from_std_str("MainToolbar::GetRoles"),
+            MainToolbar::GetPlatforms => QString::from_std_str("MainToolbar::GetPlatforms"),
+            MainToolbar::GetSites => QString::from_std_str("MainToolbar::GetSites"),
         }
     }
 }

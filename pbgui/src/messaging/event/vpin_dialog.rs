@@ -19,11 +19,11 @@ impl ToEvent for VpinDialog {
 impl ToQString for VpinDialog {
     fn to_qstring(&self) -> CppBox<QString> {
         match &self {
-            &VpinDialog::UpdateRoles => QString::from_std_str("VpinDialog::UpdateRoles"),
-            &VpinDialog::UpdateSites => QString::from_std_str("VpinDialog::UpdateSites"),
-            &VpinDialog::UpdateLevels => QString::from_std_str("VpinDialog::UpdateLevels"),
-            &VpinDialog::SetShow => QString::from_std_str("VpinDialog::SetShow"),
-            &VpinDialog::SetVpin => QString::from_std_str("VpinDialog::SetVpin"),
+            VpinDialog::UpdateRoles => QString::from_std_str("VpinDialog::UpdateRoles"),
+            VpinDialog::UpdateSites => QString::from_std_str("VpinDialog::UpdateSites"),
+            VpinDialog::UpdateLevels => QString::from_std_str("VpinDialog::UpdateLevels"),
+            VpinDialog::SetShow => QString::from_std_str("VpinDialog::SetShow"),
+            VpinDialog::SetVpin => QString::from_std_str("VpinDialog::SetVpin"),
         }
     }
 }

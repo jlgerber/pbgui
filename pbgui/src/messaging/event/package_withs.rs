@@ -15,7 +15,7 @@ impl ToEvent for PackageWiths {
 impl ToQString for PackageWiths {
     fn to_qstring(&self) -> CppBox<QString> {
         match &self {
-            &PackageWiths::GetPackages => QString::from_std_str("PackageWiths::GetPackages"),
+            PackageWiths::GetPackages => QString::from_std_str("PackageWiths::GetPackages"),
         }
     }
 }

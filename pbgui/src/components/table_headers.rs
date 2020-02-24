@@ -15,7 +15,7 @@ use qt_widgets::{cpp_core::MutPtr, QTableWidget, QTableWidgetItem};
 /// * None
 pub fn setup(tablewidget_ptr: &mut MutPtr<QTableWidget>, headers: &[(i32, &'static str, bool)]) {
     unsafe {
-        for (idx, val, hidden) in headers.into_iter() {
+        for (idx, val, hidden) in headers.iter() {
             if !hidden {
                 let vpin_table_widget_item =
                     QTableWidgetItem::from_q_string(&QString::from_std_str(val));

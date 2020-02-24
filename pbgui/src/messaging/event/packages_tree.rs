@@ -18,12 +18,12 @@ impl ToEvent for PackagesTree {
 impl ToQString for PackagesTree {
     fn to_qstring(&self) -> CppBox<QString> {
         match &self {
-            &PackagesTree::GetPackages => QString::from_std_str("PackagesTree::GetPackages"),
-            &PackagesTree::GetSites => QString::from_std_str("PackagesTree::GetSites"),
-            &PackagesTree::GetDistsForPackage => {
+            PackagesTree::GetPackages => QString::from_std_str("PackagesTree::GetPackages"),
+            PackagesTree::GetSites => QString::from_std_str("PackagesTree::GetSites"),
+            PackagesTree::GetDistsForPackage => {
                 QString::from_std_str("PackagesTree::GetDistsForPackage")
             }
-            &PackagesTree::GetPlatformsForDist => {
+            PackagesTree::GetPlatformsForDist => {
                 QString::from_std_str("PackagesTree::GetPlatformsForDist")
             }
         }

@@ -22,7 +22,7 @@ pub fn save_versionpin_changes(
         //
         // present comments dialog
         //
-        let comments = match comments_dialog(root_widget_ptr.clone(), ok_ptr) {
+        let comments = match comments_dialog(root_widget_ptr, ok_ptr) {
             Ok(c) => c,
             Err(_) => {
                 return;
@@ -75,7 +75,7 @@ fn comments_dialog(root_widget_ptr: MutPtr<QWidget>, ok_ptr: MutPtr<bool>) -> Re
             mb.set_text(&qs("QT Problem Detected - null ok_ptr"));
             mb.exec();
             return Err(());
-        } else if *ok_ptr == false {
+        } else if !(*ok_ptr) {
             let mut mb = QMessageBox::new();
             mb.set_text(&qs("Cancelled"));
             mb.exec();

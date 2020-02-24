@@ -23,15 +23,15 @@ impl ToEvent for MainWin {
 impl ToQString for MainWin {
     fn to_qstring(&self) -> CppBox<QString> {
         match &self {
-            &MainWin::GetVpins => QString::from_std_str("MainWin::GetVpins"),
-            &MainWin::GetWithsForVpin => QString::from_std_str("MainWin::GetWithsForVpin"),
-            &MainWin::GetTransactionChanges => {
+            MainWin::GetVpins => QString::from_std_str("MainWin::GetVpins"),
+            MainWin::GetWithsForVpin => QString::from_std_str("MainWin::GetWithsForVpin"),
+            MainWin::GetTransactionChanges => {
                 QString::from_std_str("MainWin::GetTransactionChanges")
             }
-            &MainWin::GetHistoryRevisions => QString::from_std_str("MainWin::GetHistoryRevisions"),
-            &MainWin::SaveVpinChanges => QString::from_std_str("MainWin::SaveVpinChanges"),
-            &MainWin::ChooseDistribution => QString::from_std_str("MainWin::ChooseDistribution"),
-            &MainWin::SavePackagesXml => QString::from_std_str("MainWin::SavePackagesXml"),
+            MainWin::GetHistoryRevisions => QString::from_std_str("MainWin::GetHistoryRevisions"),
+            MainWin::SaveVpinChanges => QString::from_std_str("MainWin::SaveVpinChanges"),
+            MainWin::ChooseDistribution => QString::from_std_str("MainWin::ChooseDistribution"),
+            MainWin::SavePackagesXml => QString::from_std_str("MainWin::SavePackagesXml"),
         }
     }
 }

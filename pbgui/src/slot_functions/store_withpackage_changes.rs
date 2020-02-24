@@ -50,7 +50,7 @@ pub fn store_withpackage_changes(
                 qs(""),
                 qs(new_withs),
             );
-            if let Some(row) = cache.change_row_from_id(change.id(), &ctype) {
+            if let Some(row) = cache.change_row_from_id(change.id(), ctype) {
                 // we found a row, we will insert in that row
                 cache.cache_change_at(change, row);
                 change_row.set_table_row(changes_table, row);

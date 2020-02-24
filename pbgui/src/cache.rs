@@ -193,7 +193,9 @@ impl PinChangesCache {
     ///
     /// * Vector of change indexes
     pub fn change_indexes(&self) -> Vec<i32> {
-        let mut v: Vec<i32> = self.changes.borrow().keys().map(|x| x.clone()).collect();
+        //let mut v: Vec<i32> = self.changes.borrow().keys().map(|x| x.clone()).collect();
+        let mut v: Vec<i32> = self.changes.borrow().keys().copied().collect();
+
         v.sort();
         v
     }
@@ -209,7 +211,7 @@ impl PinChangesCache {
     /// * None otherwise
     pub fn last_change_idx(&self) -> Option<i32> {
         match self.change_indexes().last() {
-            Some(v) => Some(v.clone()),
+            Some(v) => Some(*v),
             None => None,
         }
     }
@@ -247,15 +249,13 @@ impl PinChangesCache {
     ///
     /// * Some row number if the id represents a Change that is in the table
     /// * None otherwise
-    pub fn change_row_from_id(&self, id: u64, ctype: &ChangeType) -> Option<i32> {
+    pub fn change_row_from_id(&self, id: u64, ctype: ChangeType) -> Option<i32> {
         for (idx, value) in self.change_vec.borrow().iter().enumerate() {
-            if value.is_a(&ctype) {
-                if value.id() == id {
-                    return match self.changes_row.borrow().get(&idx) {
-                        Some(v) => Some(*v),
-                        _ => None,
-                    };
-                }
+            if value.is_a(ctype) && value.id() == id {
+                return match self.changes_row.borrow().get(&idx) {
+                    Some(v) => Some(*v),
+                    _ => None,
+                };
             }
         }
         None

@@ -74,9 +74,10 @@ pub fn match_vpin_dialog<'a>(
                         } = change
                         {
                             let version = distribution
-                                .split("-")
-                                .skip(1)
-                                .next()
+                                .split('-')
+                                //.skip(1)
+                                //.next()
+                                .nth(1)
                                 .ok_or(false)
                                 .expect("Unable to split version from dist");
                             let versionpin_row = VersionPinRow::<CppBox<QString>>::new(

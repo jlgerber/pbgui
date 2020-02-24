@@ -10,7 +10,7 @@ use qt_widgets::{
 };
 use rustqt_utils::{create_hlayout, create_vlayout, qs, set_stylesheet_from_str, ToQStringOwned};
 
-const STYLE_STR: &'static str = include_str!("../../../resources/tree.qss");
+const STYLE_STR: &str = include_str!("../../../resources/tree.qss");
 
 /// A struct holding the QTreeView and providing a simple Api, mirrored
 /// by the parent.
@@ -72,16 +72,14 @@ impl InnerTreeView {
                 .header()
                 .set_section_resize_mode_2a(0, ResizeMode::Stretch);
 
-            let itv = InnerTreeView {
+            InnerTreeView {
                 parent_frame: qframe_ptr,
                 cbox: cbox_p,
                 filter_cb: filter_btn,
                 filter_frame: filter_frame_ptr,
                 filter,
-                view: treeview_ptr.clone(),
-            };
-
-            itv
+                view: treeview_ptr,
+            }
         }
     }
 
@@ -241,20 +239,20 @@ impl InnerTreeView {
     ///
     /// # Returns
     /// * None
-    pub(crate) fn set_sites<'c, I>(&self, items: Vec<I>, current: I)
+    pub(crate) fn set_sites<I>(&self, items: Vec<I>, current: I)
     where
         I: AsRef<str>,
     {
         unsafe {
             self.remove_sites();
             let mut idx = 0;
-            let mut cnt = 0;
-            for item in items {
+            //let mut cnt = 0;
+            for (cnt, item) in items.into_iter().enumerate() {
                 if current.as_ref() == item.as_ref() {
-                    idx = cnt;
+                    idx = cnt as i32;
                 }
                 self.combobox().add_item_q_string(&qs(item.as_ref()));
-                cnt += 1;
+                //cnt += 1;
             }
             self.combobox().set_current_index(idx);
         }
@@ -281,15 +279,15 @@ impl InnerTreeView {
         I: ToQStringOwned,
     {
         unsafe {
-            let mut cnt = 0;
+            //let mut cnt = 0;
             let mut parent = parent;
-            for child in children {
+            for (cnt, child) in children.into_iter().enumerate() {
                 let mut item = QStandardItem::new();
                 let txt = child.to_qstring();
                 item.set_text(&txt);
                 item.set_editable(false);
                 // now we set a single child
-                if add_empty_gchild == true {
+                if add_empty_gchild {
                     let mut child_item = QStandardItem::new();
                     child_item.set_text(&qs(""));
                     child_item.set_editable(false);
@@ -298,8 +296,8 @@ impl InnerTreeView {
                 let mut icon_item = QStandardItem::new();
                 icon_item.set_editable(false);
                 parent.append_row_q_standard_item(item.into_ptr());
-                parent.set_child_3a(cnt, 1, icon_item.into_ptr());
-                cnt += 1;
+                parent.set_child_3a(cnt as i32, 1, icon_item.into_ptr());
+                //cnt += 1;
             }
         }
     }

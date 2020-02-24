@@ -35,7 +35,7 @@ pub fn match_packages_tree<'a>(
             {
                 let dists_ref = dists.iter().map(|x| x.as_str()).collect::<Vec<_>>();
                 //tree.borrow().set_sites(sites_ref, "portland"); // TODO: pass current site in IPackagesTree::Sites IMsg
-                if dists.len() > 0 {
+                if !dists.is_empty() {
                     unsafe {
                         let model = tree.model();
                         let idx = model.index_2a(row, 0);
@@ -58,7 +58,7 @@ pub fn match_packages_tree<'a>(
             })) = receiver.recv()
             {
                 let platforms_ref = platforms.iter().map(|x| x.as_str()).collect::<Vec<_>>();
-                if platforms.len() > 0 {
+                if !platforms.is_empty() {
                     unsafe {
                         let model = tree.model();
                         let parent_idx = model.index_2a(package_row, 0);

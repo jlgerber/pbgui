@@ -103,7 +103,7 @@ impl<'a> InnerMainWindow<'a> {
             let (mut main_window, main_widget_ptr, mut main_layout_ptr, main_menubar) =
                 create_main_window();
             let mut main_window_ptr = main_window.as_mut_ptr();
-            let main_toolbar = Rc::new(create_top_toolbar(main_window_ptr.clone()));
+            let main_toolbar = Rc::new(create_top_toolbar(main_window_ptr));
 
             // create left toolbar
             let left_toolbar_actions =
@@ -137,7 +137,7 @@ impl<'a> InnerMainWindow<'a> {
                 toggle_log_ctrls_button,
                 controls_ptr,
                 mode_icon,
-            ) = create_bottom_stacked_widget(vpin_table_splitter.clone(), main_menubar.inner());
+            ) = create_bottom_stacked_widget(vpin_table_splitter, main_menubar.inner());
 
             // setup popup menu for versionpin table
             let mut dist_popup_menu = QMenu::new();
@@ -164,11 +164,11 @@ impl<'a> InnerMainWindow<'a> {
             let pinchanges_cache = Rc::new(PinChangesCache::new());
             // final housekeeping before showing main window
 
-            versionpin_table_splitter::set_sizes(vpin_table_splitter.clone());
+            versionpin_table_splitter::set_sizes(vpin_table_splitter);
             withs_splitter::set_sizes(&mut with_splitter_ptr);
 
             resize_window_to_screen(&mut main_window_ptr, 0.8);
-            load_stylesheet("/Users/jgerber/bin/pbgui.qss", main_window_ptr.clone());
+            load_stylesheet("/Users/jgerber/bin/pbgui.qss", main_window_ptr);
 
             main_window_ptr.show();
 
@@ -178,13 +178,13 @@ impl<'a> InnerMainWindow<'a> {
                 main: main_window_ptr,
                 main_widget: main_widget_ptr,
                 main_menubar,
-                main_toolbar: main_toolbar,
+                main_toolbar,
                 withs_splitter: with_splitter_ptr,
                 packages_tree: packages_ptr,
                 package_withs_list: item_list_ptr.clone(),
                 vpin_table: vpin_tablewidget_ptr,
                 vpin_table_splitter,
-                save_button: save_button,
+                save_button,
                 vpin_requested_changes_table: pinchanges_ptr,
                 pinchanges_cache,
                 bottom_stacked_widget: stacked_ptr,
@@ -198,7 +198,7 @@ impl<'a> InnerMainWindow<'a> {
                 log_win: Rc::new(log_win),
                 log_button,
                 toggle_log_ctrls_button,
-                left_toolbar_actions: left_toolbar_actions,
+                left_toolbar_actions,
                 search_shortcut: search_shortcut.into_ptr(),
             };
 
@@ -214,7 +214,7 @@ impl<'a> InnerMainWindow<'a> {
     }
 
     /// Get a cloen fo the LogWin
-    pub unsafe fn logger(&self) -> Rc<LogWin> {
+    pub fn logger(&self) -> Rc<LogWin> {
         self.log_win.clone()
     }
 
@@ -225,7 +225,7 @@ impl<'a> InnerMainWindow<'a> {
     ///
     /// # Returns
     /// * MutPtr<QMainWindow>
-    pub unsafe fn main(&self) -> MutPtr<QMainWindow> {
+    pub fn main(&self) -> MutPtr<QMainWindow> {
         self.main
     }
 
@@ -236,11 +236,11 @@ impl<'a> InnerMainWindow<'a> {
     ///
     /// # Returns
     /// * MutPtr to the main widget, which is the main widget of the QMainWindow
-    pub unsafe fn main_widget(&self) -> MutPtr<QWidget> {
+    pub fn main_widget(&self) -> MutPtr<QWidget> {
         self.main_widget
     }
 
-    pub unsafe fn main_menubar(&self) -> &MenuBar {
+    pub fn main_menubar(&self) -> &MenuBar {
         &self.main_menubar
     }
     /// Returns a reference counted pointer to the PinChangedCache. This is not
@@ -263,7 +263,7 @@ impl<'a> InnerMainWindow<'a> {
     ///
     /// # Returns
     /// * MutPtr<QStackedWidget>
-    pub unsafe fn bottom_stacked_widget(&self) -> MutPtr<QStackedWidget> {
+    pub fn bottom_stacked_widget(&self) -> MutPtr<QStackedWidget> {
         self.bottom_stacked_widget
     }
 
@@ -278,7 +278,7 @@ impl<'a> InnerMainWindow<'a> {
     ///
     /// # Returns
     /// * MutPtr<QStackedWidget>
-    pub unsafe fn bottom_ctrls_stacked_widget(&self) -> MutPtr<QStackedWidget> {
+    pub fn bottom_ctrls_stacked_widget(&self) -> MutPtr<QStackedWidget> {
         self.bottom_ctrls_stacked_widget
     }
 
@@ -303,7 +303,7 @@ impl<'a> InnerMainWindow<'a> {
     // pub unsafe fn tree(&self) -> Rc<RefCell<tree::DistributionTreeView<'a>>> {
     //     self.packages_tree.clone()
     // }
-    pub unsafe fn tree(&self) -> Rc<tree::DistributionTreeView<'a>> {
+    pub fn tree(&self) -> Rc<tree::DistributionTreeView<'a>> {
         self.packages_tree.clone()
     }
     /// Returns an reference counted pointer to a RefCell wrapped WIthsList
@@ -313,7 +313,7 @@ impl<'a> InnerMainWindow<'a> {
     ///
     /// # Returns
     /// * Rc<RefCell<WithsList>>>
-    pub unsafe fn package_withs_list(&self) -> Rc<RefCell<WithsList<'a>>> {
+    pub fn package_withs_list(&self) -> Rc<RefCell<WithsList<'a>>> {
         self.package_withs_list.clone()
     }
 
@@ -335,7 +335,7 @@ impl<'a> InnerMainWindow<'a> {
     ///
     /// # Returns
     /// * MutPtr<QTableWidget>
-    pub unsafe fn vpin_table(&self) -> MutPtr<QTableWidget> {
+    pub fn vpin_table(&self) -> MutPtr<QTableWidget> {
         self.vpin_table
     }
 
@@ -346,7 +346,7 @@ impl<'a> InnerMainWindow<'a> {
     ///
     /// # Returns
     /// * MutPtr<QSplitter>
-    pub unsafe fn vpin_table_splitter(&self) -> MutPtr<QSplitter> {
+    pub fn vpin_table_splitter(&self) -> MutPtr<QSplitter> {
         self.vpin_table_splitter
     }
 
@@ -358,7 +358,7 @@ impl<'a> InnerMainWindow<'a> {
     ///
     /// # Returns
     /// * MutPtr<QTableWidget>
-    pub unsafe fn vpin_requested_changes_table(&self) -> MutPtr<QTableWidget> {
+    pub fn vpin_requested_changes_table(&self) -> MutPtr<QTableWidget> {
         self.vpin_requested_changes_table
     }
 
@@ -369,7 +369,7 @@ impl<'a> InnerMainWindow<'a> {
     ///
     /// # Returns
     /// * MutPtr<QToolButton>
-    pub unsafe fn pinchanges_button(&self) -> MutPtr<QToolButton> {
+    pub fn pinchanges_button(&self) -> MutPtr<QToolButton> {
         self.pin_changes_button
     }
 
@@ -380,7 +380,7 @@ impl<'a> InnerMainWindow<'a> {
     ///
     /// # Returns
     /// * Rc<MainToolbar>
-    pub unsafe fn main_toolbar(&self) -> Rc<toolbar::MainToolbar> {
+    pub fn main_toolbar(&self) -> Rc<toolbar::MainToolbar> {
         self.main_toolbar.clone()
     }
 
@@ -392,7 +392,7 @@ impl<'a> InnerMainWindow<'a> {
     ///
     /// # Returns
     /// * MutPtr<QSplitter>
-    pub unsafe fn withs_splitter(&self) -> MutPtr<QSplitter> {
+    pub fn withs_splitter(&self) -> MutPtr<QSplitter> {
         self.withs_splitter
     }
 
@@ -413,7 +413,7 @@ impl<'a> InnerMainWindow<'a> {
     ///
     /// # Returns
     /// * MutPtr<QPushButton>
-    pub unsafe fn save_button(&self) -> MutPtr<QPushButton> {
+    pub fn save_button(&self) -> MutPtr<QPushButton> {
         self.save_button
     }
 
@@ -424,7 +424,7 @@ impl<'a> InnerMainWindow<'a> {
     ///
     /// # Returns
     /// * MutPtr<QToolButton>
-    pub unsafe fn history_button(&self) -> MutPtr<QToolButton> {
+    pub fn history_button(&self) -> MutPtr<QToolButton> {
         self.history_button
     }
     /// Returns a mutable pointer to the log button
@@ -434,7 +434,7 @@ impl<'a> InnerMainWindow<'a> {
     ///
     /// # Returns
     /// * MutPtr<QToolButton>
-    pub unsafe fn log_button(&self) -> MutPtr<QToolButton> {
+    pub fn log_button(&self) -> MutPtr<QToolButton> {
         self.log_button
     }
 
@@ -445,7 +445,7 @@ impl<'a> InnerMainWindow<'a> {
     ///
     /// # Returns
     /// * MutPtr<QPushButton>
-    pub unsafe fn toggle_log_ctrls_button(&self) -> MutPtr<QPushButton> {
+    pub fn toggle_log_ctrls_button(&self) -> MutPtr<QPushButton> {
         self.toggle_log_ctrls_button
     }
     /// Returns a mutable pointer to the revisions table
@@ -455,7 +455,7 @@ impl<'a> InnerMainWindow<'a> {
     ///
     /// # Returns
     /// * MutPtr<QTableWidget>
-    pub unsafe fn revisions_table(&self) -> MutPtr<QTableWidget> {
+    pub fn revisions_table(&self) -> MutPtr<QTableWidget> {
         self.revisions_table
     }
 
@@ -479,7 +479,7 @@ impl<'a> InnerMainWindow<'a> {
     ///
     /// # Returns
     /// * MutPtr<QTableWidget>
-    pub unsafe fn revision_changes_table(&self) -> MutPtr<QTableWidget> {
+    pub fn revision_changes_table(&self) -> MutPtr<QTableWidget> {
         self.revision_changes_table
     }
 
@@ -490,7 +490,7 @@ impl<'a> InnerMainWindow<'a> {
     ///
     /// # Returns
     /// * MutPtr<QMenu>
-    pub unsafe fn dist_popup_menu(&self) -> MutPtr<QMenu> {
+    pub fn dist_popup_menu(&self) -> MutPtr<QMenu> {
         self.dist_popup_menu
     }
 
@@ -501,7 +501,7 @@ impl<'a> InnerMainWindow<'a> {
     ///
     /// # Returns
     /// * MutPtr<QAction>
-    pub unsafe fn dist_popup_action(&self) -> MutPtr<QAction> {
+    pub fn dist_popup_action(&self) -> MutPtr<QAction> {
         self.dist_popup_action
     }
 }
@@ -582,241 +582,245 @@ impl<'a> MainWindow<'a> {
     ///
     /// # Returns
     /// * MainWindow instance
-    pub unsafe fn new(to_thread_sender: Sender<OMsg>) -> MainWindow<'a> {
-        let (pbgui_root, pbgui_main_cppbox, dist_popup_menu_box, logger_icon) =
-            InnerMainWindow::new(to_thread_sender.clone());
-        let main = Rc::new(pbgui_root);
-        let main_win = MainWindow {
-            main: main.clone(),
-            _main_box: pbgui_main_cppbox,
-            _dist_popup_menu_box: dist_popup_menu_box,
-            _logger_icon: logger_icon,
-            //
-            // slots
-            //
-            query_button_clicked: Slot::new(enclose! {(main, to_thread_sender) move || {
-                update_vpin_table(
-                    main.clone(),
-                    to_thread_sender.clone(),
-                );
-            }}),
+    pub fn new(to_thread_sender: Sender<OMsg>) -> MainWindow<'a> {
+        unsafe {
+            let (pbgui_root, pbgui_main_cppbox, dist_popup_menu_box, logger_icon) =
+                InnerMainWindow::new(to_thread_sender.clone());
+            let main = Rc::new(pbgui_root);
+            let main_win = MainWindow {
+                main: main.clone(),
+                _main_box: pbgui_main_cppbox,
+                _dist_popup_menu_box: dist_popup_menu_box,
+                _logger_icon: logger_icon,
+                //
+                // slots
+                //
+                query_button_clicked: Slot::new(enclose! {(main, to_thread_sender) move || {
+                    update_vpin_table(
+                        main.clone(),
+                        to_thread_sender.clone(),
+                    );
+                }}),
 
-            save_clicked: Slot::new(enclose! { (main, to_thread_sender) move || {
-                save_versionpin_changes(
-                    main.main_widget(),
-                    main.cache(),
-                    to_thread_sender.clone()
-                );
-            } }),
+                save_clicked: Slot::new(enclose! { (main, to_thread_sender) move || {
+                    save_versionpin_changes(
+                        main.main_widget(),
+                        main.cache(),
+                        to_thread_sender.clone()
+                    );
+                } }),
 
-            choose_distribution_triggered: Slot::new(enclose! { (main, to_thread_sender) move || {
-                let vpin_tablewidget_ptr = main.vpin_table();
-                if vpin_tablewidget_ptr.is_null() {
-                    log::error!("Error: attempted to access null pointer in choose_distribution_tribbered");
-                    return;
-                }
-                if vpin_tablewidget_ptr.row_count() == 0 {
-                    return;
-                }
-                let current_row = vpin_tablewidget_ptr.current_row();
-                choose_alternative_distribution(
-                    current_row,
-                    vpin_tablewidget_ptr,
-                    main.main_widget(),
-                    main.vpin_requested_changes_table(),
-                    to_thread_sender.clone()
-                );
-            }}),
-
-            show_dist_menu: SlotOfQPoint::new(enclose! { (main) move |pos: QRef<QPoint>| {
-
-                if main.vpin_table().is_null() {
-                    log::error!("vpin_tablewidget_ptr is null");
-                    return;
-                }
-                if main.dist_popup_menu().is_null() {
-                    log::error!("dist_popup_menu_ptr is null");
-                    return;
-                }
-                let _action = main.dist_popup_menu()
-                    .exec_1a_mut(main.vpin_table().map_to_global(pos).as_ref());
-            }}),
-
-            select_pin_changes: Slot::new(enclose! { (main) move || {
-                main.bottom_stacked_widget().set_current_index(0);
-                main.bottom_ctrls_stacked_widget().set_current_index(0);
-            }}),
-
-            select_history: Slot::new(enclose! { (main, to_thread_sender) move || {
-                let mut revisions_ptr = main.revisions_table();
-                let mut stacked_ptr = main.bottom_stacked_widget();
-                let mut controls_ptr = main.bottom_ctrls_stacked_widget();
-                select_history(&mut revisions_ptr, &mut stacked_ptr, to_thread_sender.clone());
-                controls_ptr.set_current_index(1);
-            }}),
-
-            select_log: Slot::new(enclose! { (main) move || {
-                main.bottom_stacked_widget().set_current_index(2);
-                main.bottom_ctrls_stacked_widget().set_current_index(2);
-            }}),
-
-            toggle_log_ctrls: SlotOfBool::new(enclose! { (main) move |state: bool| {
-                main.logger().inner().set_ctrls_visible(state);
-            }}),
-
-            toggle_packages_tree: SlotOfBool::new(enclose! { (main) move |state: bool| {
-                let mut frame = main.withs_splitter().widget(0);
-                frame.set_visible(state);
-            }}),
-
-            toggle_withs: SlotOfBool::new(enclose! { (main) move |state: bool| {
-                let mut frame = main.withs_splitter().widget(2);
-                frame.set_visible(state);
-            }}),
-
-            toggle_vpin_changes: SlotOfBool::new(enclose! { (main) move |state: bool| {
-                let mut frame = main.vpin_table_splitter().widget(1);
-                frame.set_visible(state);
-            }}),
-
-            revision_changed: SlotOfQItemSelectionQItemSelection::new(
-                enclose! { (main, to_thread_sender)
-                move |selected: QRef<QItemSelection>, _deselected: QRef<QItemSelection>| {
-                    let ind = selected.indexes();
-                    if ind.count_0a() > 0 {
-                        let txid = ind.at(COL_REV_TXID);
-                        update_changes_table(
-                            txid.row(),
-                            main.revisions_table(),
-                            main.revision_changes_table(),
-                            to_thread_sender.clone())
-                        ;
-                    } else {
-                        main.revision_changes_table().clear_contents();
-                        main.revision_changes_table().set_row_count(0);
-                    }
-                }},
-            ),
-
-            distribution_changed: SlotOfQItemSelectionQItemSelection::new(
-                enclose! { (main, to_thread_sender)
-                move |selected: QRef<QItemSelection>, _deselected: QRef<QItemSelection>| {
-                    let ind = selected.indexes();
-                    if ind.count_0a() > 0 {
-                        let mut vpin_tablewidget_ptr = main.vpin_table();
-                        let txid = ind.at(COL_REV_TXID);
-                        update_withpackages(
-                            txid.row(),
-                            &mut vpin_tablewidget_ptr,
-                            main.package_withs_list(),
-                            main.cache(),
+                choose_distribution_triggered: Slot::new(
+                    enclose! { (main, to_thread_sender) move || {
+                        let vpin_tablewidget_ptr = main.vpin_table();
+                        if vpin_tablewidget_ptr.is_null() {
+                            log::error!("Error: attempted to access null pointer in choose_distribution_tribbered");
+                            return;
+                        }
+                        if vpin_tablewidget_ptr.row_count() == 0 {
+                            return;
+                        }
+                        let current_row = vpin_tablewidget_ptr.current_row();
+                        choose_alternative_distribution(
+                            current_row,
+                            vpin_tablewidget_ptr,
+                            main.main_widget(),
+                            main.vpin_requested_changes_table(),
                             to_thread_sender.clone()
                         );
-                    } else {
-                        main.package_withs_list().borrow().clear()
+                    }},
+                ),
+
+                show_dist_menu: SlotOfQPoint::new(enclose! { (main) move |pos: QRef<QPoint>| {
+
+                    if main.vpin_table().is_null() {
+                        log::error!("vpin_tablewidget_ptr is null");
+                        return;
                     }
-                }},
-            ),
-            save_withpackages: Slot::new(enclose! { (main) move || {
-                let mut pinchanges_ptr = main.vpin_requested_changes_table();
-                store_withpackage_changes::store_withpackage_changes(
-                    main.package_withs_list(),
-                    main.vpin_table(),
-                    &mut pinchanges_ptr,
-                    main.cache(),
-                );
-            }}),
-            save_packages_xml: Slot::new(enclose! { (main, to_thread_sender) move || {
-                let toolbar = main.main_toolbar();
-                let level_cb = toolbar.level();
-                save_packages_xml(main.main(), level_cb, to_thread_sender.clone());
-            }}),
-        };
+                    if main.dist_popup_menu().is_null() {
+                        log::error!("dist_popup_menu_ptr is null");
+                        return;
+                    }
+                    let _action = main.dist_popup_menu()
+                        .exec_1a_mut(main.vpin_table().map_to_global(pos).as_ref());
+                }}),
 
-        //
-        // Wire up signals and slots
-        //
-        main.main_toolbar()
-            .query_btn()
-            .clicked()
-            .connect(&main_win.query_button_clicked);
+                select_pin_changes: Slot::new(enclose! { (main) move || {
+                    main.bottom_stacked_widget().set_current_index(0);
+                    main.bottom_ctrls_stacked_widget().set_current_index(0);
+                }}),
 
-        main.search_shortcut
-            .activated()
-            .connect(&main_win.query_button_clicked);
+                select_history: Slot::new(enclose! { (main, to_thread_sender) move || {
+                    let mut revisions_ptr = main.revisions_table();
+                    let mut stacked_ptr = main.bottom_stacked_widget();
+                    let mut controls_ptr = main.bottom_ctrls_stacked_widget();
+                    select_history(&mut revisions_ptr, &mut stacked_ptr, to_thread_sender.clone());
+                    controls_ptr.set_current_index(1);
+                }}),
 
-        main.save_button().clicked().connect(&main_win.save_clicked);
+                select_log: Slot::new(enclose! { (main) move || {
+                    main.bottom_stacked_widget().set_current_index(2);
+                    main.bottom_ctrls_stacked_widget().set_current_index(2);
+                }}),
 
-        main.dist_popup_action()
-            .triggered()
-            .connect(&main_win.choose_distribution_triggered);
+                toggle_log_ctrls: SlotOfBool::new(enclose! { (main) move |state: bool| {
+                    main.logger().inner().set_ctrls_visible(state);
+                }}),
 
-        main.vpin_table()
-            .custom_context_menu_requested()
-            .connect(&main_win.show_dist_menu);
+                toggle_packages_tree: SlotOfBool::new(enclose! { (main) move |state: bool| {
+                    let mut frame = main.withs_splitter().widget(0);
+                    frame.set_visible(state);
+                }}),
 
-        main.pinchanges_button()
-            .default_action()
-            .toggled()
-            .connect(&main_win.select_pin_changes);
+                toggle_withs: SlotOfBool::new(enclose! { (main) move |state: bool| {
+                    let mut frame = main.withs_splitter().widget(2);
+                    frame.set_visible(state);
+                }}),
 
-        main.history_button()
-            .default_action()
-            .toggled()
-            .connect(&main_win.select_history);
+                toggle_vpin_changes: SlotOfBool::new(enclose! { (main) move |state: bool| {
+                    let mut frame = main.vpin_table_splitter().widget(1);
+                    frame.set_visible(state);
+                }}),
 
-        main.log_button()
-            .default_action()
-            .toggled()
-            .connect(&main_win.select_log);
+                revision_changed: SlotOfQItemSelectionQItemSelection::new(
+                    enclose! { (main, to_thread_sender)
+                    move |selected: QRef<QItemSelection>, _deselected: QRef<QItemSelection>| {
+                        let ind = selected.indexes();
+                        if ind.count_0a() > 0 {
+                            let txid = ind.at(COL_REV_TXID);
+                            update_changes_table(
+                                txid.row(),
+                                main.revisions_table(),
+                                main.revision_changes_table(),
+                                to_thread_sender.clone())
+                            ;
+                        } else {
+                            main.revision_changes_table().clear_contents();
+                            main.revision_changes_table().set_row_count(0);
+                        }
+                    }},
+                ),
 
-        main.toggle_log_ctrls_button()
-            .clicked()
-            .connect(&main_win.toggle_log_ctrls);
+                distribution_changed: SlotOfQItemSelectionQItemSelection::new(
+                    enclose! { (main, to_thread_sender)
+                    move |selected: QRef<QItemSelection>, _deselected: QRef<QItemSelection>| {
+                        let ind = selected.indexes();
+                        if ind.count_0a() > 0 {
+                            let mut vpin_tablewidget_ptr = main.vpin_table();
+                            let txid = ind.at(COL_REV_TXID);
+                            update_withpackages(
+                                txid.row(),
+                                &mut vpin_tablewidget_ptr,
+                                main.package_withs_list(),
+                                main.cache(),
+                                to_thread_sender.clone()
+                            );
+                        } else {
+                            main.package_withs_list().borrow().clear()
+                        }
+                    }},
+                ),
+                save_withpackages: Slot::new(enclose! { (main) move || {
+                    let mut pinchanges_ptr = main.vpin_requested_changes_table();
+                    store_withpackage_changes::store_withpackage_changes(
+                        main.package_withs_list(),
+                        main.vpin_table(),
+                        &mut pinchanges_ptr,
+                        main.cache(),
+                    );
+                }}),
+                save_packages_xml: Slot::new(enclose! { (main, to_thread_sender) move || {
+                    let toolbar = main.main_toolbar();
+                    let level_cb = toolbar.level();
+                    save_packages_xml(main.main(), level_cb, to_thread_sender.clone());
+                }}),
+            };
 
-        main.left_toolbar_actions()
-            .view_packages
-            .toggled()
-            .connect(&main_win.toggle_packages_tree);
+            //
+            // Wire up signals and slots
+            //
+            main.main_toolbar()
+                .query_btn()
+                .clicked()
+                .connect(&main_win.query_button_clicked);
 
-        main.left_toolbar_actions()
-            .view_withs
-            .toggled()
-            .connect(&main_win.toggle_withs);
+            main.search_shortcut
+                .activated()
+                .connect(&main_win.query_button_clicked);
 
-        main.left_toolbar_actions()
-            .view_vpin_changes
-            .toggled()
-            .connect(&main_win.toggle_vpin_changes);
+            main.save_button().clicked().connect(&main_win.save_clicked);
 
-        main.revisions_table()
-            .selection_model()
-            .selection_changed()
-            .connect(&main_win.revision_changed);
+            main.dist_popup_action()
+                .triggered()
+                .connect(&main_win.choose_distribution_triggered);
 
-        main.vpin_table()
-            .selection_model()
-            .selection_changed()
-            .connect(&main_win.distribution_changed);
+            main.vpin_table()
+                .custom_context_menu_requested()
+                .connect(&main_win.show_dist_menu);
 
-        main.package_withs_list()
-            .borrow()
-            .save_button()
-            .clone()
-            .clicked()
-            .connect(&main_win.save_withpackages);
+            main.pinchanges_button()
+                .default_action()
+                .toggled()
+                .connect(&main_win.select_pin_changes);
 
-        // set initial state of with button to on
-        let mut button = main.left_toolbar_actions().view_withs;
-        button.toggle();
+            main.history_button()
+                .default_action()
+                .toggled()
+                .connect(&main_win.select_history);
 
-        main.main_menubar()
-            .inner()
-            .save_packages_action()
-            .triggered()
-            .connect(&main_win.save_packages_xml);
+            main.log_button()
+                .default_action()
+                .toggled()
+                .connect(&main_win.select_log);
 
-        main_win
+            main.toggle_log_ctrls_button()
+                .clicked()
+                .connect(&main_win.toggle_log_ctrls);
+
+            main.left_toolbar_actions()
+                .view_packages
+                .toggled()
+                .connect(&main_win.toggle_packages_tree);
+
+            main.left_toolbar_actions()
+                .view_withs
+                .toggled()
+                .connect(&main_win.toggle_withs);
+
+            main.left_toolbar_actions()
+                .view_vpin_changes
+                .toggled()
+                .connect(&main_win.toggle_vpin_changes);
+
+            main.revisions_table()
+                .selection_model()
+                .selection_changed()
+                .connect(&main_win.revision_changed);
+
+            main.vpin_table()
+                .selection_model()
+                .selection_changed()
+                .connect(&main_win.distribution_changed);
+
+            main.package_withs_list()
+                .borrow()
+                .save_button()
+                .clone()
+                .clicked()
+                .connect(&main_win.save_withpackages);
+
+            // set initial state of with button to on
+            let mut button = main.left_toolbar_actions().view_withs;
+            button.toggle();
+
+            main.main_menubar()
+                .inner()
+                .save_packages_action()
+                .triggered()
+                .connect(&main_win.save_packages_xml);
+
+            main_win
+        }
     }
 
     /// Returns a reference counted ponter to the InnerMainWindow instance
@@ -837,7 +841,7 @@ impl<'a> MainWindow<'a> {
     ///
     /// # Returns
     /// * MutPtr<QMainWindow>
-    pub unsafe fn main(&self) -> MutPtr<QMainWindow> {
+    pub fn main(&self) -> MutPtr<QMainWindow> {
         let main = self.main_win();
         main.main()
     }

@@ -51,7 +51,7 @@ pub fn new_event_handler<'a>(
     main: Rc<InnerMainWindow<'a>>,
     receiver: Receiver<IMsg>,
 ) -> SlotOfQString<'a> {
-    SlotOfQString::new(move |name: Ref<QString>| unsafe {
+    SlotOfQString::new(move |name: Ref<QString>| {
         let tree = main.tree();
         let withs = main.package_withs_list();
         let main_toolbar = main.main_toolbar();

@@ -180,42 +180,44 @@ pub fn create_hlayout() -> CppBox<QHBoxLayout> {
 /// # Returns
 ///
 /// * Option wrapped distribution name String
-pub unsafe fn distribution_from_idx(idx: Ref<QModelIndex>) -> Option<String> {
-    if !idx.is_valid() {
-        log::warn!("distribution_from_idx supplied QModelIndex not valid.");
-        return None;
-    }
-    let parent = idx.parent();
-    if !parent.is_valid() {
-        //we clicked on the distribution. Our parent is the root
-        return None;
-    }
-    let gp = parent.parent();
-    if gp.is_valid() {
-        // we are too deep. Our grandparent should have been None
-        return None;
-    }
-    // get package name
-    let package = if parent.column() == 0 {
-        parent.data_0a().to_string().to_std_string()
-    } else {
-        parent
-            .sibling_at_column(0)
-            .data_0a()
-            .to_string()
-            .to_std_string()
-    };
+pub fn distribution_from_idx(idx: Ref<QModelIndex>) -> Option<String> {
+    unsafe {
+        if !idx.is_valid() {
+            log::warn!("distribution_from_idx supplied QModelIndex not valid.");
+            return None;
+        }
+        let parent = idx.parent();
+        if !parent.is_valid() {
+            //we clicked on the distribution. Our parent is the root
+            return None;
+        }
+        let gp = parent.parent();
+        if gp.is_valid() {
+            // we are too deep. Our grandparent should have been None
+            return None;
+        }
+        // get package name
+        let package = if parent.column() == 0 {
+            parent.data_0a().to_string().to_std_string()
+        } else {
+            parent
+                .sibling_at_column(0)
+                .data_0a()
+                .to_string()
+                .to_std_string()
+        };
 
-    let version = if idx.column() == 0 {
-        idx.data_0a().to_string().to_std_string()
-    } else {
-        idx.sibling_at_column(0)
-            .data_0a()
-            .to_string()
-            .to_std_string()
-    };
-    let dist = format!("{}-{}", package, version);
-    log::debug!("found dist: {}", dist);
-    // only the distribution is allowed to have a dash in its name
-    Some(dist)
+        let version = if idx.column() == 0 {
+            idx.data_0a().to_string().to_std_string()
+        } else {
+            idx.sibling_at_column(0)
+                .data_0a()
+                .to_string()
+                .to_std_string()
+        };
+        let dist = format!("{}-{}", package, version);
+        log::debug!("found dist: {}", dist);
+        // only the distribution is allowed to have a dash in its name
+        Some(dist)
+    }
 }

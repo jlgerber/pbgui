@@ -15,7 +15,7 @@ pub fn choose_alternative_distribution(
     to_thread_sender: Sender<OMsg>,
 ) {
     unsafe {
-        if !validate_ptrs(&versionpin_table, &root_widget, &versionpin_changes_table) {
+        if !validate_ptrs(versionpin_table, &root_widget, versionpin_changes_table) {
             return;
         }
         // all we need is the package... perhaps we should change the vtable
@@ -24,8 +24,8 @@ pub fn choose_alternative_distribution(
         let orig_vpin_table_distribution = distribution.text().to_std_string();
         // split up the distribution into the package name
         // and the version
-        let (package, version) = if let &[package, version] =
-            &*orig_vpin_table_distribution.split("-").collect::<Vec<_>>()
+        let (package, version) = if let [package, version] =
+            *orig_vpin_table_distribution.split('-').collect::<Vec<_>>()
         {
             (package, version)
         } else {
@@ -44,9 +44,9 @@ pub fn choose_alternative_distribution(
 
 // perform validation on the pointer inputs
 fn validate_ptrs(
-    versionpin_table: &MutPtr<QTableWidget>,
+    versionpin_table: MutPtr<QTableWidget>,
     root_widget: &MutPtr<QWidget>,
-    versionpin_changes_table: &MutPtr<QTableWidget>,
+    versionpin_changes_table: MutPtr<QTableWidget>,
 ) -> bool {
     if versionpin_table.is_null() {
         log::error!("versionpin_table is null");

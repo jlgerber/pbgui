@@ -70,7 +70,7 @@ fn main() -> Result<(), MainError> {
         PbguiPrefs::load_file(prefs)?
     } else {
         let finder = DDPreferenceFinder::from_env(PreferenceName::Main("pbgui".to_string()));
-        let ctx = if test_mode == true {
+        let ctx = if test_mode {
             DDContext::TestEqUser
         } else {
             DDContext::Normal

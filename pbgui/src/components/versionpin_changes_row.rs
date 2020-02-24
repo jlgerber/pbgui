@@ -130,9 +130,9 @@ impl VersionPinChangesRow<CppBox<QString>> {
     ) -> Self {
         Self {
             change_type,
-            context: context,
-            old_value: old_value,
-            new_value: new_value,
+            context,
+            old_value,
+            new_value,
         }
     }
 }

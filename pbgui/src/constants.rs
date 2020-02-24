@@ -20,7 +20,7 @@ pub const COL_DISTRIBUTION_ID: i32 = 7;
 pub const COL_PKGCOORD_ID: i32 = 8;
 /// versionpin headers as an array of tuples where the tuple
 /// consists of (column index, name, visibility boolean)
-pub const HEADERS: &[(i32, &'static str, bool)] = &[
+pub const HEADERS: &[(i32, &str, bool)] = &[
     (COL_ID, "Id", false),
     (COL_DISTRIBUTION, "Distribution", false),
     (COL_LEVEL, "Level", false),
@@ -44,7 +44,7 @@ pub const COL_PC_BECOMES: i32 = 3;
 pub const COL_PC_NEW_VALUE: i32 = 4;
 /// versionpin changes table headers as an array of tuples where the tuple
 /// consists of (column index, name, visibility boolean)
-pub const PC_HEADERS: &[(i32, &'static str, bool)] = &[
+pub const PC_HEADERS: &[(i32, &str, bool)] = &[
     (COL_PC_CHANGETYPE, "ChangeType", false),
     (COL_PC_CONTEXT, "context", false),
     (COL_PC_OLD_VALUE, "old_value", false),
@@ -62,7 +62,7 @@ pub const COL_REV_DATETIME: i32 = 2;
 pub const COL_REV_COMMENT: i32 = 3;
 /// change revision table headers as an array of tuples where the tuple
 /// consists of (column index, name, visibility boolean)
-pub const REV_HEADERS: &[(i32, &'static str, bool)] = &[
+pub const REV_HEADERS: &[(i32, &str, bool)] = &[
     (COL_REV_TXID, "Tx ID", false),
     (COL_REV_AUTHOR, "Author", false),
     (COL_REV_DATETIME, "Datetime", false),
@@ -91,7 +91,7 @@ pub const COL_CHNG_OLD: i32 = 8;
 pub const COL_CHNG_NEW: i32 = 9;
 /// change table headers as an array of tuples where the tuple
 /// consists of (column index, name, visibility boolean)
-pub const CHNG_HEADERS: &[(i32, &'static str, bool)] = &[
+pub const CHNG_HEADERS: &[(i32, &str, bool)] = &[
     (COL_CHNG_ID, "Id", true),
     (COL_CHNG_TXID, "TX Id", true),
     (COL_CHNG_ACTION, "Action", false),

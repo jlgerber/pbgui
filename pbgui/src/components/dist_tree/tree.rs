@@ -85,7 +85,7 @@ impl<'a> DistributionTreeView<'a> {
 
                         // we are a child of the root. Our parent is not "valid"
                         let parent = idx.parent();
-                        if parent.is_valid() == false {
+                        if !parent.is_valid()  {
                             to_thread_sender
                                 .send(OMsg::PackagesTree(OPackagesTree::GetPackageDists {
                                     site: treeview.site(),
@@ -244,7 +244,7 @@ impl<'a> DistributionTreeView<'a> {
     ///
     /// # Returns
     /// * None
-    pub fn set_sites<'c, I>(&self, items: Vec<I>, current: I)
+    pub fn set_sites<I>(&self, items: Vec<I>, current: I)
     where
         I: AsRef<str>,
     {
