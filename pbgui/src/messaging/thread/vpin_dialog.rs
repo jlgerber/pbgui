@@ -88,7 +88,7 @@ pub(crate) fn match_vpin_dialog(
             // and an empty vec for shots
             let mut shots: Vec<String> = Vec::new();
             for level in levels {
-                let pieces = level.level.split(".").collect::<Vec<_>>();
+                let pieces = level.level.split('.').collect::<Vec<_>>();
                 let pieces_len = pieces.len();
                 // if we have two pieces, they are show and sequence.
                 if pieces_len == 2 {

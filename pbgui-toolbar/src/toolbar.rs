@@ -284,11 +284,11 @@ impl MainToolbar {
         self.menu.as_ptr()
     }
     /// Retrieve a MutPtr to the QMenu
-    pub unsafe fn menu_mut(&mut self) -> MutPtr<QMenu> {
-        self.menu.as_mut_ptr()
+    pub fn menu_mut(&mut self) -> MutPtr<QMenu> {
+        unsafe { self.menu.as_mut_ptr() }
     }
     /// Retrieve a MutPTr to the clear_line_edit_action
-    pub unsafe fn clear_line_edit_action(&self) -> MutPtr<QAction> {
+    pub fn clear_line_edit_action(&self) -> MutPtr<QAction> {
         self.clear_line_edit_action
     }
 

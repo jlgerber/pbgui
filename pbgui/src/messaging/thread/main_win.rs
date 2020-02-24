@@ -158,7 +158,7 @@ pub(crate) fn match_main_win(
                         platform,
                         site,
                     } => {
-                        let pieces = distribution.split("-").collect::<Vec<_>>();
+                        let pieces = distribution.split('-').collect::<Vec<_>>();
 
                         let mut add_versionpins = PackratDb::add_versionpins(
                             tx,

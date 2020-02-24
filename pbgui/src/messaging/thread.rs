@@ -115,7 +115,7 @@ pub fn create(
             }
             result = QApplication::exec();
         }
-        let _res = handle.join().expect("problem joining scoped thread handle");
+        handle.join().expect("problem joining scoped thread handle");
     })
     .expect("problem with scoped channel");
     result

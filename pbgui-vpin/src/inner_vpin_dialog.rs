@@ -118,7 +118,7 @@ impl<'a> InnerVpinDialog<'a> {
                 show: RefCell::new(show.into()),
                 distribution: distribution_label,
                 roles_checkbox,
-                roles_filter: roles_filter,
+                roles_filter,
                 roles_list,
                 seq_shot_checkbox,
                 seqs_cbox,

@@ -82,30 +82,32 @@ impl<'a> VpinDialog<'a> {
     ///
     /// #  Returns
     /// * VpinDialog instance
-    pub unsafe fn create<I: Into<String>>(
+    pub fn create<I: Into<String>>(
         show: I,
         distribution: &str,
         parent: impl CastInto<MutPtr<QWidget>>,
     ) -> VpinDialog {
-        let inner_vpin_dialog = Rc::new(RefCell::new(InnerVpinDialog::create(
-            show,
-            distribution,
-            parent,
-        )));
-        let ivd = inner_vpin_dialog.clone();
-        let seq_changed = SlotOfQString::new(move |idx: Ref<QString>| {
-            let sequence = idx.to_std_string();
-            ivd.borrow().set_shots_for_seq(sequence.as_str());
-        });
-        let dialog = VpinDialog {
-            dialog: inner_vpin_dialog,
-            seq_changed,
-        };
-        dialog
-            .seqs_cb()
-            .current_index_changed2()
-            .connect(&dialog.seq_changed);
-        dialog
+        unsafe {
+            let inner_vpin_dialog = Rc::new(RefCell::new(InnerVpinDialog::create(
+                show,
+                distribution,
+                parent,
+            )));
+            let ivd = inner_vpin_dialog.clone();
+            let seq_changed = SlotOfQString::new(move |idx: Ref<QString>| {
+                let sequence = idx.to_std_string();
+                ivd.borrow().set_shots_for_seq(sequence.as_str());
+            });
+            let dialog = VpinDialog {
+                dialog: inner_vpin_dialog,
+                seq_changed,
+            };
+            dialog
+                .seqs_cb()
+                .current_index_changed2()
+                .connect(&dialog.seq_changed);
+            dialog
+        }
     }
 
     /// Return the accepted signal from the button. This is provided as a convenience
@@ -116,8 +118,8 @@ impl<'a> VpinDialog<'a> {
     ///
     /// # Returns
     /// * Signal that sends `()`
-    pub unsafe fn accepted(&self) -> Signal<()> {
-        self.dialog.borrow().accepted()
+    pub fn accepted(&self) -> Signal<()> {
+        unsafe { self.dialog.borrow().accepted() }
     }
 
     /// Dismiss the dialog using accept. This is a convenience for consumrs
@@ -128,8 +130,8 @@ impl<'a> VpinDialog<'a> {
     ///
     /// # Returns
     /// * None
-    pub unsafe fn accept(&self) {
-        self.dialog.borrow_mut().accept()
+    pub fn accept(&self) {
+        unsafe { self.dialog.borrow_mut().accept() }
     }
 
     /// Return the `finished` Signal so that connections to slots may be made.
@@ -140,7 +142,7 @@ impl<'a> VpinDialog<'a> {
     ///
     /// # Returns
     /// * Signal that sends a `c_int`
-    pub unsafe fn finished(&self) -> Signal<(c_int,)> {
+    pub fn finished(&self) -> Signal<(c_int,)> {
         self.dialog.borrow().finished()
     }
 
@@ -173,8 +175,8 @@ impl<'a> VpinDialog<'a> {
     ///
     /// # Returns
     /// * Signal instance of type `()`
-    pub unsafe fn rejected(&self) -> Signal<()> {
-        self.dialog.borrow().rejected()
+    pub fn rejected(&self) -> Signal<()> {
+        unsafe { self.dialog.borrow().rejected() }
     }
 
     /// Return a Some wrapped vector of specific role names, if any are selected. Otherwise,
@@ -186,8 +188,8 @@ impl<'a> VpinDialog<'a> {
     /// # Returns
     /// * Some Vec of String if roles are selected
     /// * None otherwise
-    pub unsafe fn selected_roles(&self) -> Option<Vec<String>> {
-        self.dialog.borrow().selected_roles()
+    pub fn selected_roles(&self) -> Option<Vec<String>> {
+        unsafe { self.dialog.borrow().selected_roles() }
     }
 
     /// Retrieve an Option wrapped current site, if specified
@@ -198,12 +200,14 @@ impl<'a> VpinDialog<'a> {
     /// # Returns
     /// * Some wrapped site name, if specified
     /// * None, if `any` site specified
-    pub unsafe fn selected_site(&self) -> Option<String> {
-        let sel_site = self.dialog.borrow().selected_site();
-        if sel_site == DEFAULT_SITE {
-            return None;
+    pub fn selected_site(&self) -> Option<String> {
+        unsafe {
+            let sel_site = self.dialog.borrow().selected_site();
+            if sel_site == DEFAULT_SITE {
+                return None;
+            }
+            Some(sel_site)
         }
-        Some(sel_site)
     }
     /// Return the show's name. Unfortunately, we have to disambiguate between
     /// the `show` widget name, and the model
@@ -233,8 +237,8 @@ impl<'a> VpinDialog<'a> {
     ///
     /// # Returns
     /// * Option<String>
-    pub unsafe fn selected_level(&self) -> Option<String> {
-        self.dialog.borrow().selected_level()
+    pub fn selected_level(&self) -> Option<String> {
+        unsafe { self.dialog.borrow().selected_level() }
     }
 
     /// Return the distribution as a String
@@ -248,16 +252,18 @@ impl<'a> VpinDialog<'a> {
     ///
     /// # Returns
     /// * None
-    pub unsafe fn set_distribution(&self, distribution: &str) {
-        self.dialog.borrow().set_distribution(distribution);
+    pub fn set_distribution(&self, distribution: &str) {
+        unsafe {
+            self.dialog.borrow().set_distribution(distribution);
+        }
     }
     /// Retrieve the package name as a QString
-    pub unsafe fn package_qs(&self) -> CppBox<QString> {
-        self.dialog.borrow().package_qs()
+    pub fn package_qs(&self) -> CppBox<QString> {
+        unsafe { self.dialog.borrow().package_qs() }
     }
     /// Retrieve the package name as a String
-    pub unsafe fn package(&self) -> String {
-        self.dialog.borrow().package()
+    pub fn package(&self) -> String {
+        unsafe { self.dialog.borrow().package() }
     }
     /// Load the default stylesheet
     ///
@@ -266,8 +272,10 @@ impl<'a> VpinDialog<'a> {
     ///
     /// # Returns
     /// * None
-    pub unsafe fn set_default_stylesheet(&self) {
-        self.dialog.borrow_mut().set_default_stylesheet();
+    pub fn set_default_stylesheet(&self) {
+        unsafe {
+            self.dialog.borrow_mut().set_default_stylesheet();
+        }
     }
 
     /// Set the sites. This should be done before calling exec on
