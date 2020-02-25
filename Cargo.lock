@@ -692,6 +692,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "levelspec"
+version = "0.9.0"
+source = "git+https://github.com/jlgerber/rust-lspec.git?tag=v0.9.0#9ae3a732b2c7cf33d9af2645723cb940a611c603"
+dependencies = [
+ "clap",
+ "failure",
+ "nom 3.2.1",
+ "serde 1.0.104",
+]
+
+[[package]]
 name = "lexical-core"
 version = "0.4.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -949,10 +960,35 @@ dependencies = [
  "env_logger",
  "failure",
  "itertools",
- "levelspec",
+ "levelspec 0.8.0",
  "log",
  "postgres",
  "prettytable-rs",
+ "simple_xml_serialize",
+ "simple_xml_serialize_macro",
+ "snafu",
+ "structopt",
+ "strum",
+ "strum_macros",
+ "tokio",
+ "tokio-postgres",
+ "whoami",
+]
+
+[[package]]
+name = "packybara"
+version = "0.41.1"
+source = "git+https://github.com/jlgerber/packybara?tag=v0.41.1#b590f03167a6a402c92d7f9503406842d5e9bc33"
+dependencies = [
+ "chrono",
+ "env_logger",
+ "failure",
+ "itertools",
+ "levelspec 0.9.0",
+ "log",
+ "postgres",
+ "prettytable-rs",
+ "serde 1.0.104",
  "simple_xml_serialize",
  "simple_xml_serialize_macro",
  "snafu",
@@ -996,7 +1032,7 @@ checksum = "a3bf70094d203e07844da868b634207e71bfab254fe713171fae9a6e751ccf31"
 
 [[package]]
 name = "pbgui"
-version = "0.64.0"
+version = "0.65.0"
 dependencies = [
  "crossbeam",
  "crossbeam-channel",
@@ -1005,7 +1041,7 @@ dependencies = [
  "log",
  "main_error",
  "num_enum",
- "packybara",
+ "packybara 0.41.1",
  "pbgui-logger",
  "pbgui-menubar",
  "pbgui-toolbar",
@@ -1061,7 +1097,7 @@ name = "pbgui-toolbar"
 version = "0.9.0"
 dependencies = [
  "log",
- "packybara",
+ "packybara 0.38.8",
  "qt_core",
  "qt_gui",
  "qt_ui_tools",

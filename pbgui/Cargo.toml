@@ -1,6 +1,6 @@
 [package]
 name = "pbgui"
-version = "0.64.0"
+version = "0.65.0"
 authors = ["jgerber <jlgerber@gmail.com>"]
 edition = "2018"
 
@@ -12,7 +12,7 @@ env_logger = "~0.7.1"
 log = "~0.4.8"
 main_error = "0.1.0"
 num_enum = "~0.4.2"
-packybara = {git= "https://github.com/jlgerber/packybara", tag="v0.38.8"}
+packybara = {git= "https://github.com/jlgerber/packybara", tag="v0.41.1"}
 pbgui-logger = {path="../pbgui-logger"}
 pbgui-menubar = {path="../pbgui-menubar"}
 pbgui-toolbar = {path="../pbgui-toolbar"}
