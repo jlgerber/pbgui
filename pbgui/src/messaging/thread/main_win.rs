@@ -67,7 +67,7 @@ pub(crate) fn match_main_win(
                 Err(err) => {
                     sender
                         .send(IMsg::Error(format!(
-                            "Unable to get with packages from db: {}",
+                            "Unable to execute find_all_versionpin_withs: {}",
                             err
                         )))
                         .expect("unable to send error msg");
@@ -87,7 +87,7 @@ pub(crate) fn match_main_win(
                 Err(err) => {
                     sender
                         .send(IMsg::Error(format!(
-                            "Unable to get with packages from db: {}",
+                            "Unable to execute find_all_changes: {}",
                             err
                         )))
                         .expect("unable to send error msg");
