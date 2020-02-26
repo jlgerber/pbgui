@@ -9,15 +9,15 @@ use log::{Level, Log, Metadata, Record};
 /// Stores state for Rust Log implementation which communicates with the UI
 /// Log component
 pub struct UiLogger {
+    /// Minimum logging level supported
     min_level: Level,
+    /// sender handles communication with ui via messaging
     to_thread_sender: Sender<OMsg>,
 }
 
+// Convert from Option<&str> to Option<String>
 fn cs(input: Option<&str>) -> Option<String> {
-    match input {
-        Some(s) => Some(s.to_string()),
-        None => None,
-    }
+    input.and_then(|s| Some(s.to_string()))
 }
 
 impl Log for UiLogger {
